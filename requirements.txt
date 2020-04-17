@@ -8,7 +8,8 @@
  math
  random
  traceback
- sys, os
+ sys
+ os
  datetime
  xml.etree.ElementTree as etree
  pyfiglet

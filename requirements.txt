@@ -11,7 +11,7 @@
  sys
  os
  datetime
- xml.etree.ElementTree as etree
+ xml.etree.ElementTree
  pyfiglet
  passlib
  urllib.parse

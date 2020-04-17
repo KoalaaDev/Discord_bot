@@ -1,0 +1,20 @@
+ discord
+ asyncio
+ time
+ logging
+ youtube_dl
+ functools
+ itertools
+ math
+ random
+ traceback
+ sys, os
+ datetime
+ xml.etree.ElementTree as etree
+ pyfiglet
+ passlib
+ urllib.parse
+ urbandict
+ requests
+ newsapi
+passlib.hash

@@ -1,1 +1,255 @@
+import time
+from datetime import datetime
+
 import discord
+from discord.ext import commands
+from rich.traceback import install
+
+install()
+
+
+class Spying(commands.Cog, name="Spying logic"):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_message(self, message: str):
+        spying = self.bot.get_channel(697347420123561995)
+        if message.author.bot:
+            if message.author != self.bot.user:
+                bot_channel = self.bot.get_channel(698536354468069427)
+                botEmbed = discord.Embed(
+                    title=f"BOT {message.author}",
+                    description=f"```{message.content}```",
+                )
+                await bot_channel.send(embed=botEmbed)
+                print(
+                    f"BOT {message.author} detected, Sent to appropriate channel"
+                )
+            else:
+                pass
+        elif message.channel == spying or message.content.startswith("-"):
+            print(f"Did not log {message.content} from {message.author}")
+        else:
+            channel = self.bot.get_channel(697347420123561995)
+            ts = time.time()
+            st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+            with open("logs.txt", "a") as text_file:
+                if message.attachments:
+                    for guild in self.bot.guilds:
+                        if guild == message.author.guild:
+                            for channels in guild.channels:
+                                img = message.attachments[0].url
+                                print(message.attachments[0].name)
+                                log = " {}".format(img)
+                                PictureEmbed = discord.Embed(
+                                    title=
+                                    f"Text Channel: {message.channel}\n Guild: {message.guild}",
+                                    description=f"{message.author}:",
+                                    colour=discord.Color.red(),
+                                )
+                                PictureEmbed.set_footer(text=f"<{st}>")
+                                PictureEmbed.set_image(url=log)
+                                await channel.send(embed=PictureEmbed)
+                                print(
+                                    f"<{st}> in text channel {message.channel} at {message.guild} | {message.author}:{log}",
+                                    file=text_file,
+                                )
+                else:
+                    Embedded = discord.Embed(
+                        title=
+                        f"""In text channel {message.channel} at {message.guild}""",
+                        description=
+                        f"{message.author}: ```{discord.utils.escape_mentions(message.content)}```",
+                        colour=discord.Colour.red(),
+                    )
+                    Embedded.set_footer(text=f"<{st}>")
+                    await channel.send(embed=Embedded)
+                    print(
+                        f"<{st}> in text channel {message.channel} at {message.guild} | {message.author}: {message.content}",
+                        file=text_file,
+                    )
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        channel = self.bot.get_channel(666142878485053440)
+        ts = time.time()
+        st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+        if before.bot or after.bot:
+            print(
+                f"Did not record bot account status: {after}\nStatus:{after.status}\n"
+            )
+        else:
+            if before.roles != after.roles:
+                shorter, longer = sorted([after.roles, before.roles], key=len)
+                new_role = next(role for role in longer if role not in shorter)
+                Embedded = discord.Embed(
+                    title="Role Update Detector Service",
+                    description=
+                    f"{before.name}'s role has been changed from {before.role.name} to {after.role.name} in {before.guild}",
+                )
+                await channel.send(embed=Embedded)
+            elif before.status != after.status:
+                if after.status == discord.Status.dnd:
+                    dndEmbedded = discord.Embed(
+                        title="Status indicator: :red_circle: ",
+                        description=
+                        f"{before.name} from {before.guild} has been set to Do Not Disturb ",
+                        colour=discord.Colour(0xFCEC00),
+                    )
+                    dndEmbedded.set_footer(
+                        text=f"Status Update Detector Service <{st}>")
+                    await channel.send(embed=dndEmbedded)
+                if after.status == discord.Status.online:
+                    Embedded = discord.Embed(
+                        title="Status indicator: :green_circle:  ",
+                        description=
+                        f"{before.name} from {before.guild} is now Online ",
+                        colour=discord.Colour(0xFCEC00),
+                    )
+                    Embedded.set_footer(
+                        text=f"Status Update Detector Service <{st}>")
+                    await channel.send(embed=Embedded)
+                if after.status == discord.Status.idle:
+                    Embedded = discord.Embed(
+                        title="Status indicator: :orange_circle:  ",
+                        description=
+                        f"{before.name} from {before.guild} went Away/AFK ",
+                        colour=discord.Colour(0xFCEC00),
+                    )
+                    Embedded.set_footer(
+                        text=f"Status Update Detector Service <{st}>")
+                    await channel.send(embed=Embedded)
+                if after.status == discord.Status.offline:
+                    Embedded = discord.Embed(
+                        title="Status indicator: :black_circle:",
+                        description=
+                        f"{before.name} from {before.guild} has gone Offline ",
+                        colour=discord.Colour(0xFCEC00),
+                    )
+                    Embedded.set_footer(
+                        text=f"Status Update Detector Service <{st}>")
+                    await channel.send(embed=Embedded)
+            elif before.activity != after.activity:
+                if after.activity.type == discord.ActivityType.playing:
+                    playEmbedded = discord.Embed(
+                        title=
+                        ":video_game: Game Detector Service :video_game: ",
+                        description=
+                        f"{before.name} from {before.guild}  is now playing {after.activity.name}",
+                        colour=discord.Colour.orange(),
+                    )
+                    playEmbedded.add_field(name="Match:",
+                                           value=after.activity.details)
+                    playEmbedded.set_image(url=after.activity.large_image_url)
+                    playEmbedded.set_footer(
+                        text=f"Activity Update Detector Service <{st}>")
+                    await channel.send(embed=playEmbedded)
+                elif after.activity.type == discord.ActivityType.streaming:
+                    streamingEmbedded = discord.Embed(
+                        title="Streamer Detector Service",
+                        description=
+                        f"{before.name} from {before.guild} is now streaming {after.activity.name}",
+                        colour=discord.Colour.orange(),
+                    )
+                    streamingEmbedded.add_field(name="Details:",
+                                                value=after.activity.details)
+                    streamingEmbedded.add_field(name="Url",
+                                                value=after.activity.url,
+                                                inline=False)
+                    streamingEmbedded.set_footer(
+                        text=f"Activity Update Detector Service <{st}>")
+                    await channel.send(embed=streamingEmbedded)
+                elif after.activity.type == discord.ActivityType.listening:
+                    listeningEmbedded = discord.Embed(
+                        title="Music Detector Service :musical_note:",
+                        description=
+                        f"{before.name} from {before.guild} is now listening to {after.activity.title}",
+                        colour=discord.Colour.green(),
+                    )
+                    listeningEmbedded.add_field(name="Started:",
+                                                value=after.activity.start)
+                    listeningEmbedded.add_field(name="duration",
+                                                value=after.activity.duration)
+                    listeningEmbedded.add_field(
+                        name="Artist:", value=after.activity.artist.title())
+                    listeningEmbedded.add_field(name="Album",
+                                                value=after.activity.album)
+                    listeningEmbedded.set_footer(
+                        text=f"Activity Update Detector Service <{st}>")
+                    listeningEmbedded.set_image(
+                        url=after.activity.album_cover_url)
+                    await channel.send(embed=listeningEmbedded)
+                elif after.activity.type == discord.ActivityType.watching:
+                    watchingEmbedded = discord.Embed(
+                        title="Activity Update Detector Service",
+                        description=
+                        f"{before.name} from {before.guild} is now watching {after.activity.name}",
+                        colour=discord.Colour.orange(),
+                    )
+                    watchingEmbedded.add_field(name="Details:",
+                                               value=after.activity.details)
+                    watchingEmbedded.set_footer(
+                        text=f"Activity Update Detector Service <{st}>")
+                    await channel.send(embed=watchingEmbedded)
+                elif after.activity.type == discord.ActivityType.custom:
+                    customEmbedded = discord.Embed(
+                        title="Custom Status Update Detector Service",
+                        description=
+                        f"{before.name} from {before.guild} changed/added custom status to {after.activity.name}",
+                        colour=discord.Colour.blue(),
+                    )
+                    customEmbedded.set_footer(text=f"{st}")
+                    await channel.send(embed=customEmbedded)
+                elif after.activity.type is None:
+                    pass
+            elif before.display_name != after.display_name:
+                Embedded = discord.Embed(
+                    title="Name Update Detector Service",
+                    description=
+                    f"{before.name} was renamed from {before.display_name} to {after.display_name} at {before.guild} ",
+                    colour=discord.Colour.green(),
+                )
+                Embedded.set_footer(text=st)
+                await channel.send(embed=Embedded)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, before, after):
+        channel = self.bot.get_channel(697398841699336192)
+        if before.name != after.name:
+            embed = discord.Embed(
+                title=f"At {before.name}",
+                description=
+                f"Guild name changed from {before.name} to {after.name}",
+                colour=discord.Colour(0x5032A8),
+            )
+            embed.set_footer(text="Guild update service")
+            await channel.send(embed=embed)
+        elif before.emojis != after.emojis:
+            embed = discord.Embed(
+                title=f"At {before.name}",
+                description=
+                f"Added/removed {discord.Emoji.name} in {before.name} to {after.name}",
+            )
+            embed.set_footer(text="Guild update service")
+            await channel.send(embed=embed)
+        elif before.bans != after.bans:
+            embed = discord.Embed(
+                title=f"At {before.name}",
+                description=
+                f"Banned/Unbanned {before.user} in {before.name} to {after.name}",
+            )
+            embed.set_footer(text="Guild update service")
+            await channel.send(embed=embed)
+        elif before.region != after.region:
+            embed = discord.Embed(
+                title=f"At {before.name}",
+                description=
+                f"Changed region from {before.region} to {after.region} in {after.name}",
+            )
+            embed.set_footer(text="Guild update service")
+            await channel.send(embed=embed)
+
+
+def setup(bot):
+    bot.add_cog(Spying(bot))

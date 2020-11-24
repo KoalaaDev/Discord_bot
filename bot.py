@@ -6,14 +6,15 @@ from datetime import datetime
 
 import discord
 import urbandict
-from discord import Spotify
 from discord.ext import commands
 from discord.utils import get
 from passlib.hash import sha512_crypt as sha512
 from pyfiglet import Figlet
 from rich.traceback import install
-
-config = input("Use Koala account?").lower()
+intents = discord.Intents.all()
+intents.members = True
+intents.guilds = True
+config = input("Use Koala account?(For admin purposes) ").lower()
 install()
 fonts = [
     "1943____",
@@ -38,7 +39,7 @@ print(custom_fig.renderText(random.choice(sponsor)))
 client = commands.Bot(
     command_prefix=commands.when_mentioned_or("-"),
     description="A HS bot just for you!",
-    case_insensitive=True,
+    case_insensitive=True,intents=intents
 )
 
 client.remove_command("help")
@@ -49,7 +50,7 @@ Cogs_to_load = [
     "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
     if "py" in cog and "pycache" not in cog
 ]
-print("Detected Cogs: ", Cogs_to_load)
+print("Detected Cogs: ", *Cogs_to_load)
 
 
 # Events
@@ -493,5 +494,5 @@ if "y" in config:
     client.run("NjU0NTc4Njg5MDczMzQ4NjE5.XfHl6A.gz3y_oEp6lA8ZVcA2c0xob019uU"
                )  # Koalaa Account
 else:
-    client.run("NjU0NTgxMjczMDI4ODUzNzcw.XuCiRQ.Q-qp9Dh-kK2LfYRqayVK4wr8XwY"
+    client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k"
                )  # Popekanga account

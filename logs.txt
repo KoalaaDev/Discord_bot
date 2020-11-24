@@ -3005,3 +3005,34 @@ https://media.discordapp.net/attachments/623876425379741696/627816400114679808/R
 <2020-09-10 01:04:29> in text channel bot-command at Howard Union | Koalaa#6001: 9**9
 <2020-09-10 01:04:52> in text channel bot-command at Howard Union | Koalaa#6001: hs
 <2020-09-10 01:39:43> in text channel bot-command at Howard Union | Koalaa#6001: 9*9
+<2020-09-10 14:46:09> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: 8+sin(10)
+<2020-09-10 14:46:09> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: ]
+<2020-09-10 14:46:46> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: 9*acos(10)
+<2020-09-10 14:48:54> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: 8cos(8)
+<2020-10-22 20:54:54> in text channel anime-crap at Banana Fraction | -XAlX-#4308: is that good or bad
+<2020-10-22 20:55:32> in text channel anime-crap at Banana Fraction | !Myonoiuji#8916: Siege is the only bad part kinda cause I got Bagpipe
+<2020-10-22 20:55:40> in text channel anime-crap at Banana Fraction | !Myonoiuji#8916: And I wanted a healer
+<2020-10-22 20:56:14> in text channel questionable-lewds at Banana Fraction | -XAlX-#4308: I don't know what I think of that
+<2020-10-22 20:56:29> in text channel questionable-lewds at Banana Fraction | -XAlX-#4308: wait I know one of them but who is the other
+<2020-10-22 20:56:30> in text channel questionable-lewds at Banana Fraction | !Myonoiuji#8916: Yes but no
+<2020-10-22 20:56:41> in text channel questionable-lewds at Banana Fraction | !Myonoiuji#8916: Poi is her name
+<2020-10-22 20:56:48> in text channel questionable-lewds at Banana Fraction | -XAlX-#4308: actually tell me both of them
+<2020-10-22 20:58:05> in text channel questionable-lewds at Banana Fraction | !Myonoiuji#8916: Perrault is white poi is black
+<2020-10-22 20:58:52> in text channel questionable-lewds at Banana Fraction | -XAlX-#4308: poi seem like a alter version but more on the lewd side
+<2020-10-22 20:59:30> in text channel questionable-lewds at Banana Fraction | !Myonoiuji#8916: Poi is the newest character
+<2020-10-22 20:59:48> in text channel questionable-lewds at Banana Fraction | -XAlX-#4308: neat
+<2020-10-30 17:34:28> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: hi
+<2020-10-30 17:39:38> in text channel bot-command at Howard Union | Koalaa#6001: 1+1
+<2020-10-30 17:41:04> in text channel spam at Banana Fraction | Koalaa#6001: sin(90)
+<2020-10-30 17:41:15> in text channel spam at Banana Fraction | Koalaa#6001: 1+sin(90)
+<2020-10-30 17:43:42> in text channel bot-command at Howard Union | Koalaa#6001: 1+1
+<2020-10-30 17:45:22> in text channel bot-command at Howard Union | Koalaa#6001: 9*9
+<2020-11-20 20:15:08> in text channel bot-command at Howard Union | SufferedM8#4674: !hs
+<2020-11-20 20:15:17> in text channel bot-command at Howard Union | SufferedM8#4674: !hsadd\
+<2020-11-20 20:15:19> in text channel bot-command at Howard Union | SufferedM8#4674: !hsadd
+<2020-11-20 20:16:41> in text channel bot-command at Howard Union | Koalaa#6001: 1+1
+<2020-11-20 20:16:47> in text channel bot-command at Howard Union | Koalaa#6001: sin(90)
+<2020-11-20 20:17:06> in text channel bot-command at Howard Union | Koalaa#6001: 90+sin(90)
+<2020-11-25 02:01:16> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: sin(90)
+<2020-11-25 02:02:30> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: no
+<2020-11-25 02:04:42> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: calculate 1+1

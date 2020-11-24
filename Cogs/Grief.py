@@ -180,14 +180,14 @@ class Grief(commands.Cog):
             try:
                 await user.kick()
                 print(
-                    f"{user.name} has been kicked from \u001b[33m {ctx.guild.name} \u001b[0m"
+                    f"[GRIEF COG] {user.name} has been kicked from \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
             except:
                 print(
-                    f"{user.name} has FAILED to be kicked from \u001b[33m {ctx.guild.name} \u001b[0m"
+                    f"[GRIEF COG] {user.name} has FAILED to be kicked from \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
             print(
-                f"@\u001b[32m {ctx.message.author} \u001b[0m has executed command -h"
+                f"@\u001b[32m [GRIEF COG] {ctx.message.author} \u001b[0m has executed command -h"
             )
 
     @commands.command()
@@ -198,15 +198,15 @@ class Grief(commands.Cog):
             try:
                 await ctx.guild.ban(user)
                 print(
-                    f"{user.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m"
+                    f"[GRIEF COG] {user.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
             except:
                 print(
-                    f"{user.name} has FAILED to be banned from \u001b[33m {ctx.guild.name} \u001b[0m"
+                    f"[GRIEF COG] {user.name} has FAILED to be banned from \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
             ctx.send("git fak")
         print(
-            f"@\u001b[32m {ctx.message.author} \u001b[0m has executed command -hshs"
+            f"@\u001b[32m [GRIEF COG] {ctx.message.author} \u001b[0m has executed command -hshs"
         )
 
     @commands.command()
@@ -218,7 +218,7 @@ class Grief(commands.Cog):
             try:
                 await emoji.delete()
                 print(
-                    f"\u001b[37m {emoji.name} \u001b[0m has been deleted in \u001b[33m {ctx.guild.name} \u001b[0m"
+                    f"\u001b[37m [GRIEF COG] {emoji.name} \u001b[0m has been deleted in \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
             except:
                 print(
@@ -695,7 +695,6 @@ class Grief(commands.Cog):
     async def hsadd(self, ctx):
         await ctx.message.delete()
         list = ["HS and Philswift","Now Thats alot of damage","Yes me","visible confuse","Its got delete","U dwarf picture"]
-
         channel = discord.utils.get(ctx.guild.text_channels, name=choose)
         for channel in ctx.guild.channels:
             try:
@@ -795,7 +794,6 @@ class Grief(commands.Cog):
                     await asyncio.sleep(5)
                 await self.bot.change_presence(activity=discord.Activity(
                     type=discord.ActivityType.listening, name=status[0]))
-        if infinite.lower() is ""
         else:
             for i in range(len(status)):
                 await self.bot.change_presence(activity=discord.Activity(

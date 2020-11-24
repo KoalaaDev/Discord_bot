@@ -24,12 +24,12 @@ class Spying(commands.Cog, name="Spying logic"):
                 )
                 await bot_channel.send(embed=botEmbed)
                 print(
-                    f"BOT {message.author} detected, Sent to appropriate channel"
+                    f"[SPY COG] BOT {message.author} detected, Sent to appropriate channel"
                 )
             else:
                 pass
         elif message.channel == spying or message.content.startswith("-"):
-            print(f"Did not log {message.content} from {message.author}")
+            print(f"[SPY COG] Did not log {message.content} from {message.author}")
         else:
             channel = self.bot.get_channel(697347420123561995)
             ts = time.time()
@@ -64,6 +64,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         colour=discord.Colour.red(),
                     )
                     Embedded.set_footer(text=f"<{st}>")
+                    Embedded.set_image(url=message.author.avatar_url)
                     await channel.send(embed=Embedded)
                     print(
                         f"<{st}> in text channel {message.channel} at {message.guild} | {message.author}: {message.content}",
@@ -77,17 +78,17 @@ class Spying(commands.Cog, name="Spying logic"):
         st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
         if before.bot or after.bot:
             print(
-                f"Did not record bot account status: {after}\nStatus:{after.status}\n"
+                f"[SPY COG] Did not record bot account status: {after}\nStatus:{after.status}\n"
             )
         else:
             if before.roles != after.roles:
                 shorter, longer = sorted([after.roles, before.roles], key=len)
-                new_role = next(role for role in longer if role not in shorter)
                 Embedded = discord.Embed(
-                    title="Role Update Detector Service",
-                    description=
-                    f"{before.name}'s role has been changed from {before.role.name} to {after.role.name} in {before.guild}",
+                    title="{after.guild.name}",
+                    description=f"{before.name}'s role has been changed from {before.role.name} to {after.role.name}",
                 )
+                Embedded.set_image(url=after.avatar_url)
+                Embedded.set_footer(text=f"Role Update Detector Service <{st}>")
                 await channel.send(embed=Embedded)
             elif before.status != after.status:
                 if after.status == discord.Status.dnd:
@@ -97,46 +98,44 @@ class Spying(commands.Cog, name="Spying logic"):
                         f"{before.name} from {before.guild} has been set to Do Not Disturb ",
                         colour=discord.Colour(0xFCEC00),
                     )
-                    dndEmbedded.set_footer(
-                        text=f"Status Update Detector Service <{st}>")
+                    dndEmbedded.set_footer(text=f"Status Update Detector Service <{st}>")
+                    dndEmbedded.set_image(url=after.avatar_url)
                     await channel.send(embed=dndEmbedded)
                 if after.status == discord.Status.online:
                     Embedded = discord.Embed(
                         title="Status indicator: :green_circle:  ",
-                        description=
-                        f"{before.name} from {before.guild} is now Online ",
+                        description=f"{before.name} from {before.guild} is now Online ",
                         colour=discord.Colour(0xFCEC00),
                     )
                     Embedded.set_footer(
                         text=f"Status Update Detector Service <{st}>")
+                    Embedded.set_image(url=after.avatar_url)
                     await channel.send(embed=Embedded)
                 if after.status == discord.Status.idle:
                     Embedded = discord.Embed(
                         title="Status indicator: :orange_circle:  ",
-                        description=
-                        f"{before.name} from {before.guild} went Away/AFK ",
+                        description=f"{before.name} from {before.guild} went Away/AFK ",
                         colour=discord.Colour(0xFCEC00),
                     )
                     Embedded.set_footer(
                         text=f"Status Update Detector Service <{st}>")
+                    Embedded.set_image(url=after.avatar_url)
                     await channel.send(embed=Embedded)
                 if after.status == discord.Status.offline:
                     Embedded = discord.Embed(
                         title="Status indicator: :black_circle:",
-                        description=
-                        f"{before.name} from {before.guild} has gone Offline ",
+                        description=f"{before.name} from {before.guild} has gone Offline ",
                         colour=discord.Colour(0xFCEC00),
                     )
                     Embedded.set_footer(
                         text=f"Status Update Detector Service <{st}>")
+                    Embedded.set_image(url=after.avatar_url)
                     await channel.send(embed=Embedded)
             elif before.activity != after.activity:
                 if after.activity.type == discord.ActivityType.playing:
                     playEmbedded = discord.Embed(
-                        title=
-                        ":video_game: Game Detector Service :video_game: ",
-                        description=
-                        f"{before.name} from {before.guild}  is now playing {after.activity.name}",
+                        title=":video_game: Game Detector Service :video_game: ",
+                        description=f"{before.name} from {before.guild}  is now playing {after.activity.name}",
                         colour=discord.Colour.orange(),
                     )
                     playEmbedded.add_field(name="Match:",
@@ -148,8 +147,7 @@ class Spying(commands.Cog, name="Spying logic"):
                 elif after.activity.type == discord.ActivityType.streaming:
                     streamingEmbedded = discord.Embed(
                         title="Streamer Detector Service",
-                        description=
-                        f"{before.name} from {before.guild} is now streaming {after.activity.name}",
+                        description=f"{before.name} from {before.guild} is now streaming {after.activity.name}",
                         colour=discord.Colour.orange(),
                     )
                     streamingEmbedded.add_field(name="Details:",
@@ -163,13 +161,12 @@ class Spying(commands.Cog, name="Spying logic"):
                 elif after.activity.type == discord.ActivityType.listening:
                     listeningEmbedded = discord.Embed(
                         title="Music Detector Service :musical_note:",
-                        description=
-                        f"{before.name} from {before.guild} is now listening to {after.activity.title}",
+                        description=f"{before.name} from {before.guild} is now listening to {after.activity.title}",
                         colour=discord.Colour.green(),
                     )
                     listeningEmbedded.add_field(name="Started:",
                                                 value=after.activity.start)
-                    listeningEmbedded.add_field(name="duration",
+                    listeningEmbedded.add_field(name="Duration",
                                                 value=after.activity.duration)
                     listeningEmbedded.add_field(
                         name="Artist:", value=after.activity.artist.title())
@@ -183,8 +180,7 @@ class Spying(commands.Cog, name="Spying logic"):
                 elif after.activity.type == discord.ActivityType.watching:
                     watchingEmbedded = discord.Embed(
                         title="Activity Update Detector Service",
-                        description=
-                        f"{before.name} from {before.guild} is now watching {after.activity.name}",
+                        description=f"{before.name} from {before.guild} is now watching {after.activity.name}",
                         colour=discord.Colour.orange(),
                     )
                     watchingEmbedded.add_field(name="Details:",
@@ -195,8 +191,7 @@ class Spying(commands.Cog, name="Spying logic"):
                 elif after.activity.type == discord.ActivityType.custom:
                     customEmbedded = discord.Embed(
                         title="Custom Status Update Detector Service",
-                        description=
-                        f"{before.name} from {before.guild} changed/added custom status to {after.activity.name}",
+                        description=f"{before.name} from {before.guild} changed/added custom status to ```{after.activity.name}```",
                         colour=discord.Colour.blue(),
                     )
                     customEmbedded.set_footer(text=f"{st}")
@@ -206,8 +201,7 @@ class Spying(commands.Cog, name="Spying logic"):
             elif before.display_name != after.display_name:
                 Embedded = discord.Embed(
                     title="Name Update Detector Service",
-                    description=
-                    f"{before.name} was renamed from {before.display_name} to {after.display_name} at {before.guild} ",
+                    description=f"{before.name} was renamed from {before.display_name} to {after.display_name} at {before.guild} ",
                     colour=discord.Colour.green(),
                 )
                 Embedded.set_footer(text=st)
@@ -219,8 +213,7 @@ class Spying(commands.Cog, name="Spying logic"):
         if before.name != after.name:
             embed = discord.Embed(
                 title=f"At {before.name}",
-                description=
-                f"Guild name changed from {before.name} to {after.name}",
+                description=f"Guild name changed from {before.name} to {after.name}",
                 colour=discord.Colour(0x5032A8),
             )
             embed.set_footer(text="Guild update service")
@@ -228,24 +221,21 @@ class Spying(commands.Cog, name="Spying logic"):
         elif before.emojis != after.emojis:
             embed = discord.Embed(
                 title=f"At {before.name}",
-                description=
-                f"Added/removed {discord.Emoji.name} in {before.name} to {after.name}",
+                description=f"Added/removed {discord.Emoji.name} in {before.name} to {after.name}",
             )
             embed.set_footer(text="Guild update service")
             await channel.send(embed=embed)
         elif before.bans != after.bans:
             embed = discord.Embed(
                 title=f"At {before.name}",
-                description=
-                f"Banned/Unbanned {before.user} in {before.name} to {after.name}",
+                description=f"Banned/Unbanned {before.user} in {before.name} to {after.name}",
             )
             embed.set_footer(text="Guild update service")
             await channel.send(embed=embed)
         elif before.region != after.region:
             embed = discord.Embed(
                 title=f"At {before.name}",
-                description=
-                f"Changed region from {before.region} to {after.region} in {after.name}",
+                description=f"Changed region from {before.region} to {after.region} in {after.name}",
             )
             embed.set_footer(text="Guild update service")
             await channel.send(embed=embed)

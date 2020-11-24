@@ -3036,3 +3036,8 @@ https://media.discordapp.net/attachments/623876425379741696/627816400114679808/R
 <2020-11-25 02:01:16> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: sin(90)
 <2020-11-25 02:02:30> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: no
 <2020-11-25 02:04:42> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: calculate 1+1
+<2020-11-25 02:14:34> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: calculate 1+1
+<2020-11-25 02:15:40> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: calculate sin(90)
+<2020-11-25 02:15:44> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: calculate pi
+<2020-11-25 02:16:26> in text channel general at Forcuz.pw | Koalaa#6001: calculate cos(60)
+<2020-11-25 02:17:43> in text channel Direct Message with Koalaa#6001 at None | Koalaa#6001: no

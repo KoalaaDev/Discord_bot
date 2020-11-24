@@ -32,12 +32,14 @@ class Math(commands.Cog):
                 try:
                     x = cexprtk.evaluate_expression(message.content.strip('calculate'),
                                                     {"pi": pi})
-                    await message.channel.send(x)
                     await message.add_reaction('\N{White Heavy Check Mark}')
+                    await message.channel.send(x)
                 except Exception:
                     await message.add_reaction('\N{Cross Mark}')
+                    print(f'[MATH COG] Encountered exception with {message.content}: {Exception}')
             else:
                 print(f'[MATH COG] not a math problem: {message.content}')
+
     @commands.command()
     async def solve(self, ctx, *, equation):
         eqn = solve(parse(equation))

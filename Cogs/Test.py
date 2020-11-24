@@ -28,7 +28,7 @@ https://discordapp.com/terms, https://discordapp.com/guidelines""",
                         value="Speaking in languages other than English are only allowed in language subject channels.",
                         inline=False)
         embed.add_field(name="**Rule 5**",
-                        value="Read the channel topics and descriptions before sending anything: Post content in the correct channels and don’t go offtopic. IGCSE, AS, A2 and IB subjects all have their own respective channels.",
+                        value="Read the channel topics and descriptions before sending anything: Post content in the correct channels and don’t go offtopic.",
                         inline=False)
         embed.add_field(name="**Rule 6**",
                         value="NSFW content/discussion and excessive usage of inappropriate language are prohibited. Any moderator decisions will be made purely out of context, on a case by case basis, and as such there is no blacklist of words. If there is you have any problem with the moderator's discretion, notify admins",

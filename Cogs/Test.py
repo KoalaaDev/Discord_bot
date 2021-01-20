@@ -4,10 +4,17 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
+WHITELIST = [line.strip() for line in open('Whitelist.txt','r+', buffering=1)]
+
 
 class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    def whitelist(self, ctx, user=None):
+        with open('Whitelist.txt','a+') as r:
+            r.write(user)
 
     @commands.command()
     async def embed(self, ctx):
@@ -64,10 +71,12 @@ https://discordapp.com/terms, https://discordapp.com/guidelines""",
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def emoji_list(self,ctx):
+    async def testing(self,ctx):
         await ctx.message.delete()
-        for x in ctx.guild.emojis:
-            print(x)
-
+        for x in ctx.guild.members:
+            if x in WHITELIST:
+                print('found member')
+            else:
+                print("no")
 def setup(bot):
     bot.add_cog(Test(bot))

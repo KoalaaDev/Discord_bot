@@ -1,37 +1,10 @@
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Music.py: 8
 async_timeout == 3.0.1
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Math.py: 5
 cexprtk == 0.3.4
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Grief.py: 5,6,7
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Math.py: 6
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Music.py: 7,9
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Spying.py: 4,5
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Test.py: 4,5
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Wikipedia.py: 1,3
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\bot.py: 7,9,10
 discord.py == 1.5.1
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\bot.py: 11
 passlib == 1.7.2
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\bot.py: 12
 pyfiglet == 0.8.post1
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Spying.py: 6
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\bot.py: 13
 rich == 6.0.0
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Math.py: 7
 sympy == 1.6.2
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\bot.py: 8
 urbandict == 0.6.1
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Wikipedia.py: 2
 wikipedia == 1.4.0
-
-# C:\Users\Microsoft\Desktop\python scripts\Discord_bot\Cogs\Music.py: 10
 youtube_dl == 2020.11.1.1

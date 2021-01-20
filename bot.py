@@ -10,12 +10,10 @@ from discord.ext import commands
 from discord.utils import get
 from passlib.hash import sha512_crypt as sha512
 from pyfiglet import Figlet
-from rich.traceback import install
+
 intents = discord.Intents.all()
 intents.members = True
 intents.guilds = True
-config = input("Use Koala account?(For admin purposes) ").lower()
-install()
 fonts = [
     "1943____",
     "starwars",
@@ -37,8 +35,8 @@ print(custom2_fig.renderText("Message of the day:"))
 print(custom_fig.renderText(random.choice(sponsor)))
 
 client = commands.Bot(
-    command_prefix=commands.when_mentioned_or("-"),
-    description="A HS bot just for you!",
+    command_prefix=commands.when_mentioned_or("~"),
+    description="A Totally normal bot!",
     case_insensitive=True,intents=intents
 )
 
@@ -50,7 +48,7 @@ Cogs_to_load = [
     "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
     if "py" in cog and "pycache" not in cog
 ]
-print("Detected Cogs: ", *Cogs_to_load)
+print("Detected Cogs: ", ", ".join([*Cogs_to_load]))
 
 
 # Events
@@ -79,7 +77,6 @@ async def on_ready():
     print(
         "\u001b[37m ------------------------------------------------------------------------------------- \u001b[0m"
     )
-
 
 @client.event
 async def on_member_join(member):
@@ -481,18 +478,40 @@ async def load_jsk(ctx):
 
 
 @client.command()
+async def offline(ctx):
+    await client.change_presence(status=discord.Status.invisible)
+    print("[bot going offline] Going under!")
+
+
+@client.command()
+async def idle(ctx):
+    await client.change_presence(status=discord.Status.idle)
+    print("[bot going away] Going AFK!")
+
+@client.command()
 async def invitelink(ctx, id):
     server = client.get_guild(id)
-    link = discord.TextChannel.create_invite(destination=server,
+    link = server.channels.create_invite(destination=server,
                                              xkcd=True,
                                              max_age=0,
                                              max_uses=0)
     await ctx.send(link)
+@client.command()
+async def pepeflip(ctx):
+    emoji1 = get(client.emojis, name='pepelaugh')
+    emoji2 = get(client.emojis, name='icri')
+    lmao = random.choice([emoji1,emoji2])
+    bruh = await ctx.send("Good Luck!")
+    await bruh.add_reaction(lmao)
 
+@client.command()
+async def woohoo(ctx):
+  gay = random.choice(["Koalaa","Skot","Alvin"])
+  message = await ctx.send(f'Woohoo {gay} is confirmed gay!')
+  emoji = get(client.emojis, name='pepelaugh')
+  await message.add_reaction(emoji)
 
-if "y" in config:
-    client.run("NjU0NTc4Njg5MDczMzQ4NjE5.XfHl6A.gz3y_oEp6lA8ZVcA2c0xob019uU"
-               )  # Koalaa Account
+if not input("Use jojo account?"):
+    client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k")  # Popekanga account
 else:
-    client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k"
-               )  # Popekanga account
+    client.run("Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww")

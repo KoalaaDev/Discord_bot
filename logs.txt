@@ -4254,3 +4254,29 @@ hahaha
 <2021-01-20 11:31:12> in text channel bot-commands at QUARANTINED | ex6tzz#6307: ~p start a riot
 <2021-01-20 12:00:52> in text channel bot-commands at QUARANTINED | ex6tzz#6307: ~p start a riot
 <2021-01-20 12:00:58> in text channel bot-commands at QUARANTINED | ex6tzz#6307: ~p this is roddy rich
+<2021-01-21 12:40:40> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 12:41:10> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 12:41:54> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 12:42:02> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 12:51:23> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-21 12:51:26> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-21 12:51:52> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-21 12:52:30> in text channel dsa at HS HS | Koalaa#6001: ~skip
+<2021-01-21 12:52:34> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-21 13:07:41> in text channel dsa at HS HS | Koalaa#6001: ~fox
+<2021-01-21 13:08:00> in text channel dsa at HS HS | Koalaa#6001: ~dog
+<2021-01-21 13:08:06> in text channel dsa at HS HS | Koalaa#6001: ~dog
+<2021-01-21 13:08:13> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 13:10:14> in text channel dsa at HS HS | Koalaa#6001: ~cat
+<2021-01-21 13:28:18> in text channel dsa at HS HS | Koalaa#6001: ~insult
+<2021-01-21 13:32:04> in text channel dsa at HS HS | Koalaa#6001: ~insult
+<2021-01-21 13:33:15> in text channel dsa at HS HS | Koalaa#6001: ~insult
+<2021-01-21 13:34:25> in text channel dsa at HS HS | Koalaa#6001: ~insult ru
+<2021-01-21 13:48:33> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:50:35> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:51:04> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:52:23> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:53:04> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:54:23> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:55:36> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-21 13:56:21> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6

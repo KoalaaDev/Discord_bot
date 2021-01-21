@@ -1,7 +1,7 @@
 from __future__ import division
 
 from math import *
-
+import discord
 import cexprtk
 from discord.ext import commands
 from sympy import *
@@ -67,6 +67,19 @@ class Math(commands.Cog):
     async def expand(self, ctx, *, equation):
         eqn = expand(parse(equation))
         await ctx.send(eqn)
-
+    @commands.command()
+    async def poisson(self, ctx, lamd, times,iterate=False,greater_than=False):
+        try:
+            r = int(times)
+            lam = float(cexprtk.evaluate_expression(lamd,{"pi": pi}))
+        except ValueError:
+            ctx.send("input a correct average or number")
+        answer = (exp(-lam)*lam**r)/factorial(r)
+        embed = discord.Embed(title="Poisson distribution calculator",colour=discord.Color.random(),description=f"Answer is: ```{answer}```")
+        embed.add_field(name="Lambda", value=f"```{lam}```",inline=False)
+        embed.add_field(name="r", value=f"```{r}```",inline=False)
+        embed.add_field(name="Iterate", value=f"```{iterate}```",inline=False)
+        embed.add_field(name="Greater than", value=f"```{greater_than}```",inline=False)
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Math(bot))

@@ -308,16 +308,16 @@ async def hotcalc(ctx, *, user: discord.Member = None):
 @client.command()
 async def slot(ctx):
     """ Roll the slot machine """
-    emojis = "🍎🍊🍐🍋🍉🍇🍓🍒"
+    emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
     a = random.choice(emojis)
     b = random.choice(emojis)
     c = random.choice(emojis)
-
-    slotmachine = f"**[ {a} {b} {c} ]\n{ctx.author.name}**,"
+    d = random.choice(emojis)
+    slotmachine = f"**[ {a} {b} {c} {d} ]\n{ctx.author.name}**,"
 
     if a == b == c:
         await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")
-    elif (a == b) or (a == c) or (b == c):
+    elif (a == b and b==d) or (a == c and c==d) or (b == c):
         await ctx.send(f"{slotmachine} 2 in a row, you won! 🎉")
     else:
         await ctx.send(f"{slotmachine} No match, you lost 😢")

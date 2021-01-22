@@ -313,9 +313,11 @@ async def slot(ctx):
     b = random.choice(emojis)
     c = random.choice(emojis)
     d = random.choice(emojis)
+    e = random.choice(emojis)
+    f = random.choice(emojis)
     slotmachine = f"**[ {a} {b} {c} {d} ]\n{ctx.author.name}**,"
 
-    if a == b == c:
+    if a == b == c == d == e == f:
         await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")
     elif (a == b and b==d) or (a == c and c==d) or (b == c):
         await ctx.send(f"{slotmachine} 2 in a row, you won! 🎉")

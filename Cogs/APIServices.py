@@ -46,7 +46,7 @@ class API(commands.Cog):
         await ctx.send(embed=embed)
     @commands.command(aliases=['bunny'])
     async def rabbit(self, ctx):
-        pic = requests.get("https://api.bunnies.io/v2/loop/random/?media=gif,png").json()['gif']
+        pic = requests.get("https://api.bunnies.io/v2/loop/random/?media=gif,png").json()['media']['gif']
         embed = discord.Embed(title="Random Rabbit",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
@@ -57,5 +57,6 @@ class API(commands.Cog):
         embed = discord.Embed(title="Random duck",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(API(bot))

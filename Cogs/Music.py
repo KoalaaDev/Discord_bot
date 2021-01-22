@@ -18,10 +18,10 @@ class MusicController:
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
-
+        self.now_playing_uri = None
         self.next = asyncio.Event()
         self.queue = asyncio.Queue()
-
+        self.user = None
         self.volume = 50
         self.now_playing = None
         self.loop = False
@@ -41,7 +41,7 @@ class MusicController:
                 song = await self.queue.get()
 
             await player.play(song)
-            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"{song}")
+            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
             if self.loop:
@@ -150,6 +150,8 @@ class Music(commands.Cog):
         track = tracks[0]
 
         controller = self.get_controller(ctx)
+        controller.now_playing_uri = track.uri
+        controller.user = ctx.author.mention
         await controller.queue.put(track)
         await ctx.send(f'Added {str(track)} to the queue.', delete_after=15)
 

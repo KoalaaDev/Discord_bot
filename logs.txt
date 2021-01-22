@@ -4280,3 +4280,57 @@ hahaha
 <2021-01-21 13:54:23> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
 <2021-01-21 13:55:36> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
 <2021-01-21 13:56:21> in text channel dsa at HS HS | Koalaa#6001: ~poisson 5 6
+<2021-01-22 12:53:21> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:53:27> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 12:54:00> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:55:01> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 12:55:06> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 12:55:11> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:55:18> in text channel dsa at HS HS | Koalaa#6001: ~q
+<2021-01-22 12:56:24> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:56:27> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 12:56:56> in text channel dsa at HS HS | Koalaa#6001: ~q
+<2021-01-22 12:57:01> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:57:21> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:57:25> in text channel dsa at HS HS | Koalaa#6001: ~q
+<2021-01-22 12:59:27> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 12:59:29> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:00:03> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:01:24> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:01:24> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:01:26> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:01:26> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:01:52> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:01:54> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:03:24> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song\
+<2021-01-22 13:07:15> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:07:18> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:07:51> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:13:17> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:13:22> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:14:50> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:14:55> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:15:35> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:16:44> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill song
+<2021-01-22 13:16:52> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:17:59> in text channel dsa at HS HS | Koalaa#6001: ~q
+<2021-01-22 13:18:09> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:18:17> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:22:37> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:22:49> in text channel dsa at HS HS | Koalaa#6001: ~q
+<2021-01-22 13:23:07> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:24:02> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:25:21> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:26:26> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:26:46> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:26:55> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:26:57> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:27:46> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:29:52> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:30:00> in text channel dsa at HS HS | Koalaa#6001: ~skip
+<2021-01-22 13:30:08> in text channel dsa at HS HS | Koalaa#6001: ~p 10 second chill
+<2021-01-22 13:30:13> in text channel dsa at HS HS | Koalaa#6001: ~loop
+<2021-01-22 13:30:54> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:30:59> in text channel dsa at HS HS | Koalaa#6001: ~p ussr
+<2021-01-22 13:31:04> in text channel dsa at HS HS | Koalaa#6001: ~skip
+<2021-01-22 13:31:11> in text channel dsa at HS HS | Koalaa#6001: ~skip

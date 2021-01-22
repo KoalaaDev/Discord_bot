@@ -37,20 +37,18 @@ class MusicController:
             if self.now_playing and not self.loop:
                 await self.now_playing.delete()
             self.next.clear()
-            song = await self.queue.get()
-            song_looped = song #stores original song
+            if not self.loop:
+                song = await self.queue.get()
+
+            await player.play(song)
+            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"{song}")
+            self.now_playing = await self.channel.send(embed=MusicEmbed)
+            await self.next.wait()
             if self.loop:
-                while self.loop == True:
+                while self.loop:
                     self.next.clear()
-                    await player.play(song_looped)
-                    MusicEmbedLoop = discord.Embed(title="Now playing(looped)",colour=discord.Colour.random(),description=f"{song}")
-                    self.now_playing = await self.channel.send(embed=MusicEmbedLoop)
+                    await player.play(song)
                     await self.next.wait()
-            else:
-                await player.play(song)
-                MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"{song}")
-                self.now_playing = await self.channel.send(embed=MusicEmbed)
-                await self.next.wait()
 class Music(commands.Cog):
 
     def __init__(self, bot):

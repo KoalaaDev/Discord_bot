@@ -32,7 +32,7 @@ class MusicController:
         self.bot.loop.create_task(self.controller_loop())
     def YoutubeSuggestion(self):
         Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key=AIzaSyCxWtM0W-C-f8erujaPMQiBqK4TuELE-NA").json()
-        return ["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]
+        return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
 
     async def controller_loop(self):
@@ -121,10 +121,11 @@ class Music(commands.Cog):
                 print(controller.auto_play_queue._queue)
                 try:
                     track = tracks[0]
+                    controller.now_playing_id = track.ytid
+                    await controller.auto_play_queue.put(track)
                 except TypeError:
                     print(video)
-                controller.now_playing_id = track.ytid
-                await controller.auto_play_queue.put(track)
+
 
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""

@@ -171,11 +171,7 @@ class Music(commands.Cog):
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
         if not tracks:
-            return await ctx.send('Could not find any songs on youtube with that query. Searching soundcloud')
-            query = f'scsearch:{song}'
-            tracks = await self.bot.wavelink.get_tracks(f'{query}')
-            if not tracks:
-                return await ctx.send('Could not find any songs with that query.')
+            return await ctx.send('Could not find any songs on Youtube with that query.')
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
@@ -187,8 +183,9 @@ class Music(commands.Cog):
         controller.now_playing_uri = track.uri
         controller.user = ctx.author.mention
         await controller.queue.put(track)
-        if not controller.queue.empty():
-            await ctx.send(f'Added {str(track)} to the queue.', delete_after=15)
+        if not controller.queue.empty() and player.is_playing:
+            MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+            await ctx.send(embed=MusicEmbed)
 
     @commands.command()
     async def pause(self, ctx):
@@ -197,7 +194,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             return await ctx.send('I am not currently playing anything!', delete_after=15)
 
-        await ctx.send('Pausing the song!', delete_after=15)
+        await ctx.message.add_reaction("\N{Double Vertical Bar}")
         await player.set_pause(True)
 
     @commands.command()
@@ -207,7 +204,7 @@ class Music(commands.Cog):
         if not player.paused:
             return await ctx.send('I am not currently paused!', delete_after=15)
 
-        await ctx.send('Resuming the player!', delete_after=15)
+        await ctx.message.add_reaction("\N{Black Right-Pointing Triangle}")
         await player.set_pause(False)
 
     @commands.command()
@@ -290,7 +287,7 @@ class Music(commands.Cog):
             return await ctx.send('There was no controller to stop.')
         await player.disconnect()
         self.check_autoplay_queue.cancel()
-        await ctx.send('Disconnected player and killed controller.', delete_after=20)
+        await ctx.message.add_reaction("\N{Octagonal Sign}")
 
     @commands.command(aliases=['eq'])
     async def equalizer(self, ctx, equalizer: str,amount=1.0):
@@ -316,7 +313,7 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.loop = next(self.Toggle)
         if controller.loop == True:
-            await ctx.send("Loop enabled!")
+            await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
         else:
             await ctx.send("Loop disabled!")
 

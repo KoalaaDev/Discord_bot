@@ -7,10 +7,11 @@ import re
 import sys
 import traceback
 import wavelink
-from discord.ext import commands
+from discord.ext import commands, tasks
 from typing import Union
 import itertools
 import random
+import requests
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 class MusicController:
 
@@ -19,13 +20,20 @@ class MusicController:
         self.guild_id = guild_id
         self.channel = None
         self.now_playing_uri = None
+        self.now_playing_id = None
         self.next = asyncio.Event()
         self.queue = asyncio.Queue()
+        self.auto_play_queue = asyncio.Queue()
+        self.auto_play = False
         self.user = None
         self.volume = 50
         self.now_playing = None
         self.loop = False
         self.bot.loop.create_task(self.controller_loop())
+    def YoutubeSuggestion(self):
+        Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key=AIzaSyCxWtM0W-C-f8erujaPMQiBqK4TuELE-NA").json()
+        return ["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]
+
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -34,11 +42,10 @@ class MusicController:
         await player.set_volume(self.volume)
         print(self.loop)
         while True:
-            if self.now_playing and not self.loop:
+            if self.now_playing:
                 await self.now_playing.delete()
             self.next.clear()
-            if not self.loop:
-                song = await self.queue.get()
+            song = await self.queue.get()
 
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
@@ -49,12 +56,21 @@ class MusicController:
                     self.next.clear()
                     await player.play(song)
                     await self.next.wait()
+            if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
+                while self.auto_play and self.queue.empty():
+                    self.next.clear()
+                    song = await self.auto_play_queue.get()
+                    MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")
+                    self.now_playing = await self.channel.send(embed=MusicEmbed)
+                    await player.play(song)
+                    await self.next.wait()
 class Music(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.controllers = {}
         self.Toggle = itertools.cycle([True,False])
+        self.autoplay = itertools.cycle([True,False])
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
 
@@ -65,17 +81,13 @@ class Music(commands.Cog):
 
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
-        try:
-            node = await self.bot.wavelink.initiate_node(host='127.0.0.1',
-                                                         port=8080,
-                                                         rest_uri='http://127.0.0.1:8080',
-                                                         password='youshallnotpass',
-                                                         identifier='TEST',
-                                                         region='singapore')
-        except ConnectionRefusedError:
-            print("You forgot to start the server!")
-        except wavelink.errors.AuthorizationFailure:
-            print("Invalid login details")
+
+        node = await self.bot.wavelink.initiate_node(host='127.0.0.1',
+                                                     port=8080,
+                                                     rest_uri='http://127.0.0.1:8080',
+                                                     password='youshallnotpass',
+                                                     identifier='TEST',
+                                                     region='singapore')
         # Set our node hook callback
         node.set_hook(self.on_event_hook)
 
@@ -98,6 +110,21 @@ class Music(commands.Cog):
             self.controllers[gid] = controller
 
         return controller
+    @tasks.loop(seconds=2.0)
+    async def check_autoplay_queue(self, ctx):
+        controller = self.get_controller(ctx)
+        if controller.auto_play_queue.empty() and controller.now_playing_id:
+            videolist = controller.YoutubeSuggestion()
+
+            for video in videolist:
+                tracks = await self.bot.wavelink.get_tracks(video)
+                print(controller.auto_play_queue._queue)
+                try:
+                    track = tracks[0]
+                except TypeError:
+                    print(video)
+                controller.now_playing_id = track.ytid
+                await controller.auto_play_queue.put(track)
 
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
@@ -135,14 +162,18 @@ class Music(commands.Cog):
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
         """Search for and add a song to the Queue."""
+        song = query
         if not RURL.match(query):
             query = f'ytsearch:{query}'
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
         if not tracks:
-            return await ctx.send('Could not find any songs with that query.')
-
+            return await ctx.send('Could not find any songs on youtube with that query. Searching soundcloud')
+            query = f'scsearch:{song}'
+            tracks = await self.bot.wavelink.get_tracks(f'{query}')
+            if not tracks:
+                return await ctx.send('Could not find any songs with that query.')
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
@@ -150,6 +181,7 @@ class Music(commands.Cog):
         track = tracks[0]
 
         controller = self.get_controller(ctx)
+        controller.now_playing_id = track.ytid
         controller.now_playing_uri = track.uri
         controller.user = ctx.author.mention
         await controller.queue.put(track)
@@ -185,10 +217,17 @@ class Music(commands.Cog):
 
         await ctx.send('Skipping the song!', delete_after=15)
         controller = self.get_controller(ctx)
-        if controller.loop:
+        if controller.loop and controller.auto_play:
+            controller.loop = False
+            controller.auto_play = False
+            await player.stop()
+            await asyncio.sleep(4)
+            controller.loop = True
+            controller.auto_play = True
+        elif controller.loop:
             controller.loop = False
             await player.stop()
-            await asyncio.sleep(5)
+            await asyncio.sleep(4)
             controller.loop = True
         else:
             await player.stop()
@@ -235,6 +274,7 @@ class Music(commands.Cog):
             embed = discord.Embed(title=f'Queue', colour=discord.Colour.random())
             embed.add_field(name=f"Now playing: `{player.current}`",value=fmt)
             await ctx.send(embed=embed)
+
     @commands.command(aliases=['disconnect', 'dc'])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
@@ -248,6 +288,7 @@ class Music(commands.Cog):
 
         await player.disconnect()
         await ctx.send('Disconnected player and killed controller.', delete_after=20)
+
     @commands.command(aliases=['eq'])
     async def equalizer(self, ctx, equalizer: str,amount=1.0):
         """Equalizer for the player"""
@@ -265,6 +306,7 @@ class Music(commands.Cog):
         if equalizer == "metal":
             await player.set_eq(EqualizerPlayer.metal())
             await ctx.send("Metal equalizer")
+
     @commands.command()
     async def loop(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -274,6 +316,20 @@ class Music(commands.Cog):
             await ctx.send("Loop enabled!")
         else:
             await ctx.send("Loop disabled!")
+
+    @commands.command(aliases=['ap'])
+    async def autoplay(self, ctx):
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        controller.auto_play = next(self.autoplay)
+
+        if controller.auto_play == True:
+            self.check_autoplay_queue.start(ctx)
+            await ctx.send("Autoplay enabled!")
+        else:
+            self.check_autoplay_queue.start(ctx)
+            await ctx.send("Autoplay disabled!")
+
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):
         controller = self.get_controller(ctx)
@@ -281,7 +337,14 @@ class Music(commands.Cog):
             random.shuffle(controller.queue._queue)
             await ctx.send("Shuffled")
         else:
-            ctx.send("Nothing in queue")
+            await ctx.send("Nothing in queue")
+
+    @commands.command(aliases=['clr'])
+    async def _clr(self, ctx):
+        controller = self.get_controller(ctx)
+        controller.queue._queue.clear()
+        controller.auto_play_queue._queue.clear()
+        await ctx.send("Cleared the queue")
 
     @commands.command()
     async def information(self, ctx):

@@ -334,95 +334,63 @@ class Grief(commands.Cog):
     @commands.command()
     async def jane(self, ctx):
         await ctx.message.delete()
-        while not client.is_closed:
-            try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
-                embed.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/541880222065098762/655747250550734848/jane_xd.jpeg"
-                )
-                await ctx.send(embed=embed)
-                await asyncio.sleep(0.7)
-            except:
-                pass
-            print(
-                f"@\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
-            )
+        embed = discord.Embed(description="@everyone",
+                              colour=discord.Colour(0xFF001D))
+        embed.set_image(
+            url=
+            "https://cdn.discordapp.com/attachments/541880222065098762/655747250550734848/jane_xd.jpeg"
+        )
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def ifsexybenigcrime(self, ctx):
         await ctx.message.delete()
-        while not client.is_closed:
-            try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
-                embed.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/658559344966762497/660380817692033024/hsisindian.png"
-                )
-                await ctx.send(embed=embed)
-                await asyncio.sleep(0.7)
-            except:
-                pass
-            print(
-                f"@\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
-            )
+
+        embed = discord.Embed(description="@everyone",
+                              colour=discord.Colour(0xFF001D))
+        embed.set_image(
+            url=
+            "https://cdn.discordapp.com/attachments/658559344966762497/660380817692033024/hsisindian.png"
+        )
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def tgay(self, ctx):
         await ctx.message.delete()
-        while not client.is_closed:
-            try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
-                embed.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/660382624128303126/660384156907470848/ths.png"
-                )
-                await ctx.send(embed=embed)
-                await asyncio.sleep(0.7)
-            except:
-                pass
-            print(
-                f"@\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
-            )
+        embed = discord.Embed(description="@everyone",
+                              colour=discord.Colour(0xFF001D))
+        embed.set_image(
+            url=
+            "https://cdn.discordapp.com/attachments/660382624128303126/660384156907470848/ths.png"
+        )
+        await ctx.send(embed=embed)
+
+
+
 
     @commands.command()
     async def janexd(self, ctx):
         await ctx.message.delete()
-        while not client.is_closed:
-            try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
-                embed.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/541880222065098762/655747238374539264/jane_shoot.jpg"
-                )
-                await ctx.send(embed=embed)
-                await asyncio.sleep(0.7)
-            except:
-                print(
-                    f"@\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
-                )
+        embed = discord.Embed(description="@everyone",
+                              colour=discord.Colour(0xFF001D))
+        embed.set_image(
+            url=
+            "https://cdn.discordapp.com/attachments/541880222065098762/655747238374539264/jane_shoot.jpg"
+        )
+        await ctx.send(embed=embed)
+
+
 
     @commands.command()
     async def redhseyes(self, ctx):
         await ctx.message.delete()
-        while not client.is_closed:
-            try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
-                embed.set_image(
-                    url=
-                    "https://media.discordapp.net/attachments/647801195527798789/655781773720027142/hs2.png"
-                )
-                await ctx.send(embed=embed)
-                await asyncio.sleep(0.7)
-            except:
-                print(
-                    f"\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
-                )
+        embed = discord.Embed(description="@everyone",
+                              colour=discord.Colour(0xFF001D))
+        embed.set_image(
+            url=
+            "https://media.discordapp.net/attachments/647801195527798789/655781773720027142/hs2.png"
+        )
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def pornhub(self, ctx):

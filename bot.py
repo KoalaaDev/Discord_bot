@@ -175,7 +175,7 @@ async def dm(ctx):
 
 
 @client.command()
-async def clear(ctx, amount: int):
+async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
     print("Clearing messages")
 

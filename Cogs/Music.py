@@ -328,7 +328,7 @@ class Music(commands.Cog):
             self.check_autoplay_queue.start(ctx)
             await ctx.send("Autoplay enabled!")
         else:
-            self.check_autoplay_queue.start(ctx)
+            self.check_autoplay_queue.cancel()
             await ctx.send("Autoplay disabled!")
 
     @commands.command(aliases=["mix"])

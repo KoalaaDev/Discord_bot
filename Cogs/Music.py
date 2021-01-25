@@ -340,7 +340,7 @@ class Music(commands.Cog):
         else:
             await ctx.send("Nothing in queue")
 
-    @commands.command(aliases=['clr','clear'])
+    @commands.command(aliases=['clr'])
     async def _clr(self, ctx):
         controller = self.get_controller(ctx)
         controller.queue._queue.clear()

@@ -282,6 +282,12 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id)
 
         try:
+            controller = self.get_controller(ctx)
+            controller.loop = False
+            controller.auto_play = False
+            controller.now_playing_id = None
+            controller.now_playing_uri = None
+            controller.now_playing = None
             del self.controllers[ctx.guild.id]
         except KeyError:
             await player.disconnect()

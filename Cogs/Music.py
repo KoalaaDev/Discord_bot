@@ -214,12 +214,12 @@ class Music(commands.Cog):
     async def skip(self, ctx):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-
-        if not player.is_playing:
+        controller = self.get_controller(ctx)
+        if not player.is_playing and not controller.auto_play_queue.empty():
             return await ctx.send('I am not currently playing anything!', delete_after=15)
 
-        await ctx.send('Skipping the song!', delete_after=15)
-        controller = self.get_controller(ctx)
+        await ctx.message.add_reaction('\N{OK Hand Sign}')
+
         if controller.loop and controller.auto_play:
             controller.loop = False
             controller.auto_play = False

@@ -58,6 +58,7 @@ class MusicController:
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
                 while self.auto_play and self.queue.empty():
+                    print("AUTOPLAY ON")
                     self.next.clear()
                     song = await self.auto_play_queue.get()
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")
@@ -186,7 +187,8 @@ class Music(commands.Cog):
         controller.now_playing_uri = track.uri
         controller.user = ctx.author.mention
         await controller.queue.put(track)
-        await ctx.send(f'Added {str(track)} to the queue.', delete_after=15)
+        if not controller.queue.empty():
+            await ctx.send(f'Added {str(track)} to the queue.', delete_after=15)
 
     @commands.command()
     async def pause(self, ctx):
@@ -222,13 +224,13 @@ class Music(commands.Cog):
             controller.loop = False
             controller.auto_play = False
             await player.stop()
-            await asyncio.sleep(4)
+            await asyncio.sleep(1)
             controller.loop = True
             controller.auto_play = True
         elif controller.loop:
             controller.loop = False
             await player.stop()
-            await asyncio.sleep(4)
+            await asyncio.sleep(1)
             controller.loop = True
         else:
             await player.stop()
@@ -280,20 +282,14 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-
+        await player.stop()
         try:
-            controller = self.get_controller(ctx)
-            controller.loop = False
-            controller.auto_play = False
-            controller.now_playing_id = None
-            controller.now_playing_uri = None
-            controller.now_playing = None
             del self.controllers[ctx.guild.id]
         except KeyError:
             await player.disconnect()
             return await ctx.send('There was no controller to stop.')
-
         await player.disconnect()
+        self.check_autoplay_queue.cancel()
         await ctx.send('Disconnected player and killed controller.', delete_after=20)
 
     @commands.command(aliases=['eq'])
@@ -334,7 +330,7 @@ class Music(commands.Cog):
             self.check_autoplay_queue.start(ctx)
             await ctx.send("Autoplay enabled!")
         else:
-            self.check_autoplay_queue.cancel()
+            self.check_autoplay_queue.stop()
             await ctx.send("Autoplay disabled!")
 
     @commands.command(aliases=["mix"])
@@ -351,7 +347,9 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.queue._queue.clear()
         controller.now_playing_id = None
-        controller.auto_play_queue._queue.clear()
+        if not controller.auto_play_queue.empty():
+            await ctx.invoke(self.skip)
+            controller.auto_play_queue._queue.clear()
         await ctx.send("Cleared the queue")
 
     @commands.command()

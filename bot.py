@@ -156,24 +156,6 @@ async def help(ctx):
     embed.set_footer(text="for voice commands type -voicehelp")
     await ctx.send(embed=embed)
 
-
-@client.command()
-async def dm(ctx):
-    await ctx.message.delete()
-    user = ctx.guild.members
-    i = 0
-    message = "http://bestgore.com/ CLICK NOW!!"
-    for user in ctx.guild.members:
-        try:
-            i += 1
-            await user.send(message)
-            await asyncio.sleep(1)
-            print(f"{user.name} has recieved the message.")
-        except:
-            print(f"{user.name} has NOT recieved the message.")
-    print("Sent all messages")
-
-
 @client.command()
 async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount)

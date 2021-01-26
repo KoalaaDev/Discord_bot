@@ -46,7 +46,6 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
-
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
@@ -232,7 +231,7 @@ class Music(commands.Cog):
         else:
             await player.stop()
 
-    @commands.command()
+    @commands.command(aliases=['vol'])
     async def volume(self, ctx, *, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)

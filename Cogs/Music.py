@@ -11,6 +11,7 @@ from discord.ext import commands, tasks
 from typing import Union
 import itertools
 import random
+import os
 import requests
 import yaml
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
@@ -31,8 +32,8 @@ class MusicController:
         self.now_playing = None
         self.loop = False
         self.bot.loop.create_task(self.controller_loop())
-        with open("C:\\Users\\Microsoft\\Desktop\\python\\Discord_bot\\apiconfig.yml") as f:
-            config = yaml.load(f, Loader = yaml.FullLoader)
+        with open("/../apiconfig.yml") as f:
+            config = yaml.safe_load(f)
             self.YoutubeAPIKEY = config['music']['YoutubeAPIKEY']
     def YoutubeSuggestion(self):
         Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={self.YoutubeAPIKEY}").json()

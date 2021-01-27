@@ -4,15 +4,15 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from rich.traceback import install
-
+import os
 install()
 import yaml
 
 class Spying(commands.Cog, name="Spying logic"):
     def __init__(self, bot):
         self.bot = bot
-        with open("C:\\Users\\Microsoft\\Desktop\\python\\Discord_bot\\apiconfig.yml") as f:
-            config = yaml.load(f, Loader = yaml.FullLoader)
+        with open("/../apiconfig.ymapiconfig.yml") as f:
+            config = yaml.safe_load(f)
             self.text_message_channel = self.bot.get_channel(config['spying']['text_spying_channel'])
             self.bot_channel = self.bot.get_channel(config['spying']['bot_text_spying_channel'])
             self.member_update_channel = self.bot.get_channel(config['spying']['member_update_spying_channel'])

@@ -778,7 +778,7 @@ class Grief(commands.Cog):
         await ctx.message.delete()
         ctx.step = 7
         ctx.hue = 0
-        while not client.is_closed:
+        while 1:
             try:
                 for i in ctx.guild.roles:
                     if i.name == "hs" or i.name == "sh":

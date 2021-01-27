@@ -6,24 +6,27 @@ from discord.ext import commands
 from rich.traceback import install
 
 install()
-
+import yaml
 
 class Spying(commands.Cog, name="Spying logic"):
     def __init__(self, bot):
         self.bot = bot
-
+        with open("C:\\Users\\Microsoft\\Desktop\\python\\Discord_bot\\apiconfig.yml") as f:
+            config = yaml.load(f, Loader = yaml.FullLoader)
+            self.text_message_channel = self.bot.get_channel(config['spying']['text_spying_channel'])
+            self.bot_channel = self.bot.get_channel(config['spying']['bot_text_spying_channel'])
+            self.member_update_channel = self.bot.get_channel(config['spying']['member_update_spying_channel'])
+            self.guild_update_channel = self.bot.get_channel(config['spying']['guild_update_spying_channel'])
     @commands.Cog.listener()
     async def on_message(self, message: str):
-        spying = self.bot.get_channel(697347420123561995)
         if message.author.bot:
             if message.author != self.bot.user:
-                bot_channel = self.bot.get_channel(698536354468069427)
                 botEmbed = discord.Embed(
                     title=f"BOT {message.author}",
                     description=f"```{message.content}```",
                 )
                 try:
-                    await bot_channel.send(embed=botEmbed)
+                    await self.bot_channel.send(embed=botEmbed)
                 except AttributeError:
                     pass
                 print(
@@ -31,10 +34,9 @@ class Spying(commands.Cog, name="Spying logic"):
                 )
             else:
                 pass
-        elif message.channel == spying or message.content.startswith("-"):
+        elif message.channel == self.text_message_channel or message.content.startswith("-"):
             print(f"[SPY COG] Did not log {message.content} from {message.author}")
         else:
-            channel = self.bot.get_channel(697347420123561995)
             ts = time.time()
             st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
             with open("logs.txt", "a") as text_file:
@@ -47,7 +49,7 @@ class Spying(commands.Cog, name="Spying logic"):
                                 log = " {}".format(img)
                                 if message.attachments[0].filename.endswith(('3g2','3gp','amv','asf','avi','drc','f4a','f4b','f4p','f4v','flv','m2ts','m2v','m4p','m4v','mkv','mng','mov','mp2','mp4','mpe','mpeg','mpg','mpv','mts','mxf','nsv','ogg','ogv','qt','rm','rmvb','roq','svi','ts','vob','webm','wmv','yuv')):
                                     try:
-                                        await channel.send(f"{message.author}:{message.attachments[0].url}")
+                                        await self.text_message_channel.send(f"{message.author}:{message.attachments[0].url}")
                                     except AttributeError:
                                         pass
                                 else:
@@ -60,7 +62,7 @@ class Spying(commands.Cog, name="Spying logic"):
                                 PictureEmbed.set_footer(text=f"<{st}>")
                                 PictureEmbed.set_image(url=log)
                                 try:
-                                    await channel.send(embed=PictureEmbed)
+                                    await self.text_message_channel.send(embed=PictureEmbed)
                                 except AttributeError:
                                     pass
                                 print(
@@ -78,7 +80,7 @@ class Spying(commands.Cog, name="Spying logic"):
                     Embedded.set_footer(text=f"<{st}>")
                     Embedded.set_image(url=message.author.avatar_url)
                     try:
-                        await channel.send(embed=Embedded)
+                        await self.text_message_channel.send(embed=Embedded)
                     except AttributeError:
                         pass
                     print(
@@ -88,7 +90,6 @@ class Spying(commands.Cog, name="Spying logic"):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        channel = self.bot.get_channel(666142878485053440)
         ts = time.time()
         st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
         if before.bot or after.bot:
@@ -105,7 +106,7 @@ class Spying(commands.Cog, name="Spying logic"):
                 Embedded.set_image(url=after.avatar_url)
                 Embedded.set_footer(text=f"Role Update Detector Service <{st}>")
                 try:
-                    await channel.send(embed=Embedded)
+                    await self.member_update_channel.send(embed=Embedded)
                 except AttributeError:
                     pass
             elif before.status != after.status:
@@ -119,7 +120,7 @@ class Spying(commands.Cog, name="Spying logic"):
                     dndEmbedded.set_footer(text=f"Status Update Detector Service <{st}>")
                     dndEmbedded.set_image(url=after.avatar_url)
                     try:
-                        await channel.send(embed=dndEmbedded)
+                        await self.member_update_channel.send(embed=dndEmbedded)
                     except AttributeError:
                         pass
                 if after.status == discord.Status.online:
@@ -132,7 +133,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         text=f"Status Update Detector Service <{st}>")
                     Embedded.set_image(url=after.avatar_url)
                     try:
-                        await channel.send(embed=Embedded)
+                        await self.member_update_channel.send(embed=Embedded)
                     except AttributeError:
                         pass
                 if after.status == discord.Status.idle:
@@ -145,7 +146,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         text=f"Status Update Detector Service <{st}>")
                     Embedded.set_image(url=after.avatar_url)
                     try:
-                        await channel.send(embed=Embedded)
+                        await self.member_update_channel.send(embed=Embedded)
                     except AttributeError:
                         pass
                 if after.status == discord.Status.offline:
@@ -158,7 +159,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         text=f"Status Update Detector Service <{st}>")
                     Embedded.set_image(url=after.avatar_url)
                     try:
-                        await channel.send(embed=Embedded)
+                        await self.member_update_channel.send(embed=Embedded)
                     except AttributeError:
                         pass
             elif before.activity != after.activity:
@@ -177,7 +178,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         playEmbedded.set_footer(
                             text=f"Activity Update Detector Service <{st}>")
                         try:
-                            await channel.send(embed=playEmbedded)
+                            await self.member_update_channel.send(embed=playEmbedded)
                         except AttributeError:
                             pass
                     elif after.activity.type == discord.ActivityType.streaming:
@@ -194,7 +195,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         streamingEmbedded.set_footer(
                             text=f"Activity Update Detector Service <{st}>")
                         try:
-                            await channel.send(embed=streamingEmbedded)
+                            await self.member_update_channel.send(embed=streamingEmbedded)
                         except AttributeError:
                             pass
                     elif after.activity.type == discord.ActivityType.listening:
@@ -216,7 +217,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         listeningEmbedded.set_image(
                             url=after.activity.album_cover_url)
                         try:
-                            await channel.send(embed=listeningEmbedded)
+                            await self.member_update_channel.send(embed=listeningEmbedded)
                         except AttributeError:
                             pass
                     elif after.activity.type == discord.ActivityType.watching:
@@ -230,7 +231,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         watchingEmbedded.set_footer(
                             text=f"Activity Update Detector Service <{st}>")
                         try:
-                            await channel.send(embed=watchingEmbedded)
+                            await self.member_update_channel.send(embed=watchingEmbedded)
                         except AttributeError:
                             pass
                     elif after.activity.type == discord.ActivityType.custom:
@@ -241,7 +242,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         )
                         customEmbedded.set_footer(text=f"{st}")
                         try:
-                            await channel.send(embed=customEmbedded)
+                            await self.member_update_channel.send(embed=customEmbedded)
                         except AttributeError:
                             pass
                     elif after.activity.type is None:
@@ -254,13 +255,12 @@ class Spying(commands.Cog, name="Spying logic"):
                 )
                 Embedded.set_footer(text=st)
                 try:
-                    await channel.send(embed=Embedded)
+                    await self.member_update_channel.send(embed=Embedded)
                 except AttributeError:
                     pass
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):
-        channel = self.bot.get_channel(697398841699336192)
         if before.name != after.name:
             embed = discord.Embed(
                 title=f"At {before.name}",
@@ -269,7 +269,7 @@ class Spying(commands.Cog, name="Spying logic"):
             )
             embed.set_footer(text="Guild update service")
             try:
-                await channel.send(embed=embed)
+                await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
         elif before.emojis != after.emojis:
@@ -279,7 +279,7 @@ class Spying(commands.Cog, name="Spying logic"):
             )
             embed.set_footer(text="Guild update service")
             try:
-                await channel.send(embed=embed)
+                await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
         elif before.bans != after.bans:
@@ -289,7 +289,7 @@ class Spying(commands.Cog, name="Spying logic"):
             )
             embed.set_footer(text="Guild update service")
             try:
-                await channel.send(embed=embed)
+                await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
         elif before.region != after.region:
@@ -299,7 +299,7 @@ class Spying(commands.Cog, name="Spying logic"):
             )
             embed.set_footer(text="Guild update service")
             try:
-                await channel.send(embed=embed)
+                await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
 

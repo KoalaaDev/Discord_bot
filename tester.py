@@ -1,6 +1,20 @@
-from numpy.random import normal
-
-while True:
-    mean = float(input("Mean: "))
-    standard_dev = float((input("Variance: ")))**0.5
-    print(normal(mean,standard_dev))
+import yaml
+def SettingsOption():
+    try:
+        with open("Setting.yml","r") as f:
+            Setting = yaml.load(f, Loader = yaml.FullLoader)
+            username = Setting['ACCOUNT']['USERNAME']
+            password = Setting['ACCOUNT']['PASSWORD']
+    except FileNotFoundError:
+        username = input("Username: ")
+        password = input("Password: ")
+        settingsfile = {
+            "ACCOUNT":{
+                "USERNAME": username,
+                "PASSWORD": password
+            }
+        }
+        with open("Setting.yml","w") as f:
+            yaml.dump(settingsfile, f, default_flow_style=False)
+            print("Saved settings")
+SettingsOption()

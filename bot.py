@@ -3,7 +3,7 @@ import os
 import random
 import urllib.parse
 from datetime import datetime
-
+import yaml
 import discord
 import urbandict
 from discord.ext import commands
@@ -12,6 +12,11 @@ from passlib.hash import sha512_crypt as sha512
 from pyfiglet import Figlet
 
 intents = discord.Intents.all()
+with open("apiconfig.yml", "r") as f:
+    config = yaml.load(f)
+    API_KEY = config['bot']['API_KEY']
+    COGS_CONFIG = config['bot']['LOAD COGS']
+
 intents.members = True
 intents.guilds = True
 fonts = [
@@ -44,11 +49,18 @@ client.remove_command("help")
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
 print(f"\u001b[36m Starting HS Bot v2 at {d1} \u001b[0m")
-Cogs_to_load = [
-    "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog
-]
-print("Detected Cogs: ", ", ".join([*Cogs_to_load]))
+if COGS_CONFIG == 'all':
+    Cogs_to_load = [
+        "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
+        if "py" in cog and "pycache" not in cog
+    ]
+elif COGS_CONFIG == 'normal':
+    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
+    if "py" in cog and "pycache" not in cog and (x != "Grief" or x != "Test")]
+elif COGS_CONFIG == 'nospy':
+    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
+    if "py" in cog and "pycache" not in cog and (x != "Grief" or x != "Spying")]
+print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 
 # Events
@@ -495,7 +507,9 @@ async def woohoo(ctx):
   emoji = get(client.emojis, name='pepelaugh')
   await message.add_reaction(emoji)
 
-if not input("Use jojo account?"):
-    client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k")  # Popekanga account
-else:
-    client.run("Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww")
+
+client.run(API_KEY)
+# if not input("Use jojo account?"):
+#     client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k")  # Popekanga account
+# else:
+#     client.run("Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww")

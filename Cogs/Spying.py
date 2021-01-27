@@ -11,7 +11,8 @@ import yaml
 class Spying(commands.Cog, name="Spying logic"):
     def __init__(self, bot):
         self.bot = bot
-        with open("/../apiconfig.ymapiconfig.yml") as f:
+        config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
+        with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.text_message_channel = self.bot.get_channel(config['spying']['text_spying_channel'])
             self.bot_channel = self.bot.get_channel(config['spying']['bot_text_spying_channel'])

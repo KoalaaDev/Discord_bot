@@ -32,7 +32,8 @@ class MusicController:
         self.now_playing = None
         self.loop = False
         self.bot.loop.create_task(self.controller_loop())
-        with open("/../apiconfig.yml") as f:
+        config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
+        with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.YoutubeAPIKEY = config['music']['YoutubeAPIKEY']
     def YoutubeSuggestion(self):

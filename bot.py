@@ -15,7 +15,7 @@ intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.load(f, Loader = yaml.FullLoader)
     API_KEY = config['bot']['API_KEY']
-    COGS_CONFIG = config['bot']['LOAD COGS']
+    COGS_CONFIG = config['bot']['LOAD_COGS']
 
 intents.members = True
 intents.guilds = True
@@ -55,11 +55,10 @@ if COGS_CONFIG == 'all':
         if "py" in cog and "pycache" not in cog
     ]
 elif COGS_CONFIG == 'normal':
-    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog and (x != "Grief" or x != "Test")]
+    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Test" not in cog]
 elif COGS_CONFIG == 'disarmed':
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog and (x != "Grief" or x != "Spying" or x != "Test")]
+    if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Spying" not in cog and "Test" not in cog]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 

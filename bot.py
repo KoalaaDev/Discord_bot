@@ -13,7 +13,7 @@ from pyfiglet import Figlet
 
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
-    config = yaml.load(f)
+    config = yaml.load(f, Loader = yaml.FullLoader)
     API_KEY = config['bot']['API_KEY']
     COGS_CONFIG = config['bot']['LOAD COGS']
 

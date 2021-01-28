@@ -46,7 +46,6 @@ class MusicController:
 
         player = self.bot.wavelink.get_player(self.guild_id)
         await player.set_volume(self.volume)
-        print(self.loop)
         while True:
             if self.now_playing:
                 await self.now_playing.delete()
@@ -63,7 +62,6 @@ class MusicController:
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
                 while self.auto_play and self.queue.empty():
-                    print("AUTOPLAY ON")
                     self.next.clear()
                     song = await self.auto_play_queue.get()
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")

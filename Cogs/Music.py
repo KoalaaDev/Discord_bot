@@ -62,6 +62,7 @@ class MusicController:
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
                 while self.auto_play and self.queue.empty():
+                    await self.now_playing.delete()
                     self.next.clear()
                     song = await self.auto_play_queue.get()
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")
@@ -79,7 +80,6 @@ class Music(commands.Cog):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
 
         self.bot.loop.create_task(self.start_nodes())
-
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
@@ -128,8 +128,22 @@ class Music(commands.Cog):
                     await controller.auto_play_queue.put(track)
                 except TypeError:
                     print(video)
-
-
+    @tasks.loop(seconds=60.0)
+    async def check_listen(self, ctx):
+        controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        channel = self.bot.get_channel(player.channel_id)
+        member_list = [x.name for x in channel.members if x.bot == False]
+        if not member_list:
+            await player.stop()
+            try:
+                del self.controllers[ctx.guild.id]
+            except KeyError:
+                await player.disconnect()
+            await player.disconnect()
+            self.check_autoplay_queue.cancel()
+            controller.auto_play = False
+            controller.loop = False
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -162,7 +176,7 @@ class Music(commands.Cog):
         await msg.edit(content=f"Connected to **`{channel.name}`**", delete_after=15)
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
-
+        self.check_listen.start(ctx)
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
         """Search for and add a song to the Queue."""
@@ -179,11 +193,12 @@ class Music(commands.Cog):
             await ctx.invoke(self.connect_)
 
         track = tracks[0]
-
         controller = self.get_controller(ctx)
         controller.now_playing_id = track.ytid
         controller.now_playing_uri = track.uri
         controller.user = ctx.author.mention
+        controller.auto_play_queue._queue.clear()
+
         await controller.queue.put(track)
         if not controller.queue.empty() and player.is_playing:
             MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
@@ -281,6 +296,9 @@ class Music(commands.Cog):
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        controller.auto_play = False
+        controller.loop = False
         await player.stop()
         try:
             del self.controllers[ctx.guild.id]
@@ -289,6 +307,7 @@ class Music(commands.Cog):
             return await ctx.send('There was no controller to stop.')
         await player.disconnect()
         self.check_autoplay_queue.cancel()
+        self.check_listen.cancel()
         await ctx.message.add_reaction("\N{Octagonal Sign}")
 
     @commands.command(aliases=['eq'])
@@ -330,6 +349,7 @@ class Music(commands.Cog):
             await ctx.send("Autoplay enabled!")
         else:
             self.check_autoplay_queue.stop()
+            controller.auto_play_queue._queue.clear()
             await ctx.send("Autoplay disabled!")
 
     @commands.command(aliases=["mix"])

@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-
+import string
 import discord
 from discord.ext import commands
 from rich.traceback import install
@@ -35,7 +35,7 @@ class Spying(commands.Cog, name="Spying logic"):
                 )
             else:
                 pass
-        elif message.channel == self.text_message_channel or message.content.startswith("-"):
+        elif message.channel == self.text_message_channel or message.content.startswith(string.punctuation):
             print(f"[SPY COG] Did not log {message.content} from {message.author}")
         else:
             ts = time.time()

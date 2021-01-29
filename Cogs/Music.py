@@ -30,6 +30,7 @@ class MusicController:
         self.user = None
         self.volume = 50
         self.now_playing = None
+        self.current_track =  None
         self.loop = False
         self.bot.loop.create_task(self.controller_loop())
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
@@ -51,6 +52,7 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
+            self.current_track = song
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
@@ -286,14 +288,25 @@ class Music(commands.Cog):
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        pbar = ""
+
 
         if not player.current:
             return await ctx.send('I am not currently playing anything!')
 
         controller = self.get_controller(ctx)
         await controller.now_playing.delete()
+        track = controller.current_track
+        tlpbar = round(track.length // 15)
+        pppbar = round(player.position // tlpbar)
 
-        controller.now_playing = await ctx.send(f'Now playing: `{player.current}`')
+        for i in range(15):
+            if i == pppbar:
+               pbar += ":radio_button:"
+            else:
+               pbar += "▬"
+        embed = discord.Embed(title=f'Now playing: `{player.current}`', description=f"{pbar}")
+        controller.now_playing = await ctx.send(embed=embed)
 
     @commands.command(aliases=['q'])
     async def queue(self, ctx):

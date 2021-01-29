@@ -1,5 +1,5 @@
 from __future__ import division
-
+import string
 from math import *
 import discord
 import cexprtk
@@ -28,7 +28,7 @@ class Math(commands.Cog):
     async def on_message(self, message: str):
         if not message.author.bot:
             if message.content.startswith(
-                    "-") is False and message.content.lower().startswith("calculate"):
+                    string.punctuation) is False and message.content.lower().startswith("calculate"):
                 try:
                     x = cexprtk.evaluate_expression(message.content.strip('calculate'),
                                                     {"pi": pi})

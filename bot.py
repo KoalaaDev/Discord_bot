@@ -278,24 +278,7 @@ async def choose(ctx, *choices: str):
         await ctx.send(random.choice(choices))
 
 
-@client.command()
-async def hotcalc(ctx, *, user: discord.Member = None):
-    """ Returns a random percent for how hot is a discord user """
-    user = user or ctx.author
 
-    random.seed(user.id)
-    r = random.randint(1, 100)
-    hot = r / 1.17
-
-    emoji = "💔"
-    if hot > 25:
-        emoji = "❤"
-    if hot > 50:
-        emoji = "💖"
-    if hot > 75:
-        emoji = "💞"
-
-    await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
 
 
 @client.command()
@@ -491,20 +474,6 @@ async def invitelink(ctx, id):
                                              max_age=0,
                                              max_uses=0)
     await ctx.send(link)
-@client.command()
-async def pepeflip(ctx):
-    emoji1 = get(client.emojis, name='pepelaugh')
-    emoji2 = get(client.emojis, name='icri')
-    lmao = random.choice([emoji1,emoji2])
-    bruh = await ctx.send("Good Luck!")
-    await bruh.add_reaction(lmao)
-
-@client.command()
-async def woohoo(ctx):
-  gay = random.choice(["Koalaa","Skot","Alvin"])
-  message = await ctx.send(f'Woohoo {gay} is confirmed gay!')
-  emoji = get(client.emojis, name='pepelaugh')
-  await message.add_reaction(emoji)
 
 
 client.run(API_KEY)

@@ -257,7 +257,7 @@ class Music(commands.Cog):
 
         if controller.loop and controller.auto_play:
             controller.loop = next(self.Toggle)
-            controller.auto_play = next(self.)
+            controller.auto_play = next(self.autoplay)
             await player.stop()
             await asyncio.sleep(1)
             controller.loop = True

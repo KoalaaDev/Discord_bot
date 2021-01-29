@@ -100,6 +100,22 @@ class Music(commands.Cog):
             controller = self.get_controller(event.player)
             controller.next.set()
 
+    @commands.command()
+    async def _stopInternal(self, ctx):
+        controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        await player.stop()
+        try:
+            del self.controllers[ctx.guild.id]
+        except KeyError:
+            await player.disconnect()
+        await player.disconnect()
+        self.check_autoplay_queue.cancel()
+        if controller.auto_play:
+            controller.auto_play = next(self.autoplay)
+        if controller.loop:
+            controller.loop = next(self.Toggle)
+
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
         if isinstance(value, commands.Context):
             gid = value.guild.id
@@ -130,20 +146,14 @@ class Music(commands.Cog):
                     print(video)
     @tasks.loop(seconds=60.0)
     async def check_listen(self, ctx):
-        controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         channel = self.bot.get_channel(player.channel_id)
-        member_list = [x.name for x in channel.members if x.bot == False]
+        try:
+            member_list = [x.name for x in channel.members if x.bot == False]
+        except AttributeError:
+            pass
         if not member_list:
-            await player.stop()
-            try:
-                del self.controllers[ctx.guild.id]
-            except KeyError:
-                await player.disconnect()
-            await player.disconnect()
-            self.check_autoplay_queue.cancel()
-            controller.auto_play = False
-            controller.loop = False
+            await ctx.invoke(self._stopInternal)
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -185,24 +195,35 @@ class Music(commands.Cog):
             query = f'ytsearch:{query}'
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
-
         if not tracks:
             return await ctx.send('Could not find any songs on Youtube with that query.')
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
-
-        track = tracks[0]
-        controller = self.get_controller(ctx)
-        controller.now_playing_id = track.ytid
-        controller.now_playing_uri = track.uri
-        controller.user = ctx.author.mention
-        controller.auto_play_queue._queue.clear()
-
-        await controller.queue.put(track)
-        if not controller.queue.empty() and player.is_playing:
-            MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+        if "list=" in query and RURL.match(query):
+            playlist = tracks.tracks
+            track = playlist[0]
+            controller = self.get_controller(ctx)
+            controller.now_playing_id = track.ytid
+            controller.now_playing_uri = track.uri
+            controller.user = ctx.author.mention
+            controller.auto_play_queue._queue.clear()
+            for track in playlist:
+                await controller.queue.put(track)
+            MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
             await ctx.send(embed=MusicEmbed)
+
+        else:
+            track = tracks[0]
+            controller = self.get_controller(ctx)
+            controller.now_playing_id = track.ytid
+            controller.now_playing_uri = track.uri
+            controller.user = ctx.author.mention
+            controller.auto_play_queue._queue.clear()
+            await controller.queue.put(track)
+            if not controller.queue.empty() and player.is_playing:
+                MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+                await ctx.send(embed=MusicEmbed)
 
     @commands.command()
     async def pause(self, ctx):
@@ -235,8 +256,8 @@ class Music(commands.Cog):
         await ctx.message.add_reaction('\N{OK Hand Sign}')
 
         if controller.loop and controller.auto_play:
-            controller.loop = False
-            controller.auto_play = False
+            controller.loop = next(self.Toggle)
+            controller.auto_play = next(self.)
             await player.stop()
             await asyncio.sleep(1)
             controller.loop = True
@@ -297,8 +318,10 @@ class Music(commands.Cog):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-        controller.auto_play = False
-        controller.loop = False
+        if controller.auto_play:
+            controller.auto_play = next(self.autoplay)
+        if controller.loop:
+            controller.loop = next(self.Toggle)
         await player.stop()
         try:
             del self.controllers[ctx.guild.id]

@@ -14,6 +14,7 @@ import random
 import os
 import requests
 import yaml
+import spotipy
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 class MusicController:
 
@@ -36,9 +37,9 @@ class MusicController:
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
-            self.YoutubeAPIKEY = config['music']['YoutubeAPIKEY']
+            self.YoutubeAPIKEY = itertools.cycle([config['music']['YoutubeAPIKEY'],config['music']['YoutubeAPIKEY2']])
     def YoutubeSuggestion(self):
-        Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={self.YoutubeAPIKEY}").json()
+        Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}").json()
         return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
 
@@ -52,6 +53,8 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
+            self.now_playing_uri = song.uri
+            self.now_playing_id = song.ytid
             self.current_track = song
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
@@ -67,6 +70,8 @@ class MusicController:
                     await self.now_playing.delete()
                     self.next.clear()
                     song = await self.auto_play_queue.get()
+                    self.now_playing_uri = song.uri
+                    self.now_playing_id = song.ytid
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
                     await player.play(song)
@@ -92,7 +97,7 @@ class Music(commands.Cog):
                                                      port=8080,
                                                      rest_uri='http://127.0.0.1:8080',
                                                      password='youshallnotpass',
-                                                     identifier='TEST',
+                                                     identifier='Koalaa-server-4',
                                                      region='singapore')
         # Set our node hook callback
         node.set_hook(self.on_event_hook)
@@ -131,7 +136,7 @@ class Music(commands.Cog):
             self.controllers[gid] = controller
 
         return controller
-    @tasks.loop(seconds=2.0)
+    @tasks.loop(seconds=5.0)
     async def check_autoplay_queue(self, ctx):
         controller = self.get_controller(ctx)
         if controller.auto_play_queue.empty() and controller.now_playing_id:
@@ -156,6 +161,8 @@ class Music(commands.Cog):
             pass
         if not member_list:
             await ctx.invoke(self._stopInternal)
+            embed = discord.Embed(title="")
+            await ctx.send()
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -206,8 +213,6 @@ class Music(commands.Cog):
             playlist = tracks.tracks
             track = playlist[0]
             controller = self.get_controller(ctx)
-            controller.now_playing_id = track.ytid
-            controller.now_playing_uri = track.uri
             controller.user = ctx.author.mention
             controller.auto_play_queue._queue.clear()
             for track in playlist:
@@ -218,8 +223,6 @@ class Music(commands.Cog):
         else:
             track = tracks[0]
             controller = self.get_controller(ctx)
-            controller.now_playing_id = track.ytid
-            controller.now_playing_uri = track.uri
             controller.user = ctx.author.mention
             controller.auto_play_queue._queue.clear()
             await controller.queue.put(track)

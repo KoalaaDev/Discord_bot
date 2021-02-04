@@ -5,7 +5,7 @@ bot:
 #doorbanger acc = "Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww"
 music:
   YoutubeAPIKEY: "AIzaSyCxWtM0W-C-f8erujaPMQiBqK4TuELE-NA"
-  #YoutubeAPIKEY2:
+  YoutubeAPIKEY2: "AIzaSyC1rmupwaAB8Q-xaOiPCZCMPnYZ_mJML0Q"
 spying:
   text_spying_channel: 697347420123561995
   bot_text_spying_channel: 698536354468069427

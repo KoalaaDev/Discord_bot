@@ -36,8 +36,8 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def pepeflip(self, ctx):
-        emoji1 = get(client.emojis, name='pepelaugh')
-        emoji2 = get(client.emojis, name='icri')
+        emoji1 = self.bot.get_emoji(799506321442996235)
+        emoji2 = self.bot.get_emoji(742346196990951505)
         lmao = random.choice([emoji1,emoji2])
         bruh = await ctx.send("Good Luck!")
         await bruh.add_reaction(lmao)

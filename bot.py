@@ -291,7 +291,7 @@ async def slot(ctx):
     d = random.choice(emojis)
     e = random.choice(emojis)
     f = random.choice(emojis)
-    slotmachine = f"**[ {a} {b} {c} {d} ]\n{ctx.author.name}**,"
+    slotmachine = f"**[ {a} {b} {c} {d} {e} {f}]\n{ctx.author.name}**,"
 
     if a == b == c == d == e == f:
         await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")

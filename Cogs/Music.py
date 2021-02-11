@@ -10,25 +10,37 @@ import wavelink
 from discord.ext import commands, tasks
 from typing import Union
 import itertools
+import collections
 import random
 import os
 import requests
 import yaml
 import spotipy
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
+num_of_songs_played = 0
+class Track(wavelink.Track):
+    """Wavelink Track object with a requester attribute."""
+
+    __slots__ = ('requester', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+
+        self.requester = kwargs.get('requester')
+
 class MusicController:
 
     def __init__(self, bot, guild_id):
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
+        self.last_songs = collections.deque([])
         self.now_playing_uri = None
         self.now_playing_id = None
         self.next = asyncio.Event()
         self.queue = asyncio.Queue()
         self.auto_play_queue = asyncio.Queue()
         self.auto_play = False
-        self.user = None
         self.volume = 50
         self.now_playing = None
         self.current_track =  None
@@ -53,11 +65,12 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
+            await self.last_songs.put(song)
             self.now_playing_uri = song.uri
             self.now_playing_id = song.ytid
             self.current_track = song
             await player.play(song)
-            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{self.user}]")
+            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
             if self.loop:
@@ -72,7 +85,7 @@ class MusicController:
                     song = await self.auto_play_queue.get()
                     self.now_playing_uri = song.uri
                     self.now_playing_id = song.ytid
-                    MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{self.user}]")
+                    MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{song.requester}]")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
                     await player.play(song)
                     await self.next.wait()
@@ -118,6 +131,7 @@ class Music(commands.Cog):
             await player.disconnect()
         await player.disconnect()
         self.check_autoplay_queue.cancel()
+        await self.now_playing.delete()
         if controller.auto_play:
             controller.auto_play = next(self.autoplay)
         if controller.loop:
@@ -136,6 +150,18 @@ class Music(commands.Cog):
             self.controllers[gid] = controller
 
         return controller
+
+    # @commands.Cog.listener()
+    # async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+    #     await asyncio.sleep(2)
+    #     player = self.bot.wavelink.get_player(member.guild.id)
+    #     print(player.channel_id,player.is_connected)
+    #     if not player.channel_id or not player.is_connected:
+    #         print("[DEBUG]")
+    #         await player.stop()
+    #         await player.disconnect()
+    #     print("something changed")
+
     @tasks.loop(seconds=5.0)
     async def check_autoplay_queue(self, ctx):
         controller = self.get_controller(ctx)
@@ -151,18 +177,21 @@ class Music(commands.Cog):
                     await controller.auto_play_queue.put(track)
                 except TypeError:
                     print(video)
+
     @tasks.loop(seconds=60.0)
     async def check_listen(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         channel = self.bot.get_channel(player.channel_id)
+        global member_list
         try:
             member_list = [x.name for x in channel.members if x.bot == False]
         except AttributeError:
             pass
-        if not member_list:
+        if not member_list and player.is_connected:
             await ctx.invoke(self._stopInternal)
-            embed = discord.Embed(title="")
-            await ctx.send()
+            embed = discord.Embed(title="Everyone left me alone..Disconecting!")
+            embed.set_footer(text="I'll see you on the next doorbanging adventure!")
+            await ctx.send(embed=embed,delete_after=60)
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -196,6 +225,7 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
         self.check_listen.start(ctx)
+
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
         """Search for and add a song to the Queue."""
@@ -205,7 +235,16 @@ class Music(commands.Cog):
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
         if not tracks:
-            return await ctx.send('Could not find any songs on Youtube with that query.')
+            print("falling back to soundcloud")
+            query = f'scsearch:{query}'
+        tracks = await self.bot.wavelink.get_tracks(f'{query}')
+        if not tracks:
+            print("falling back to youtube music")
+            query = f'ytmsearch:{query}'
+        tracks = await self.bot.wavelink.get_tracks(f'{query}')
+        if not tracks:
+            embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
+            return await ctx.send(embed=embed,delete_after=5)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
@@ -213,19 +252,17 @@ class Music(commands.Cog):
             playlist = tracks.tracks
             track = playlist[0]
             controller = self.get_controller(ctx)
-            controller.user = ctx.author.mention
             controller.auto_play_queue._queue.clear()
             for track in playlist:
-                await controller.queue.put(track)
+                await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
             await ctx.send(embed=MusicEmbed)
 
         else:
             track = tracks[0]
             controller = self.get_controller(ctx)
-            controller.user = ctx.author.mention
             controller.auto_play_queue._queue.clear()
-            await controller.queue.put(track)
+            await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             if not controller.queue.empty() and player.is_playing:
                 MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
                 await ctx.send(embed=MusicEmbed)
@@ -353,19 +390,22 @@ class Music(commands.Cog):
     async def equalizer(self, ctx, equalizer: str,amount=1.0):
         """Equalizer for the player"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-        EqualizerPlayer = wavelink.eqs.Equalizer(levels=[("band",0),("gain",1.0)])
-        if equalizer == "bassboost":
-            await player.set_eq(EqualizerPlayer.boost())
-            await ctx.send(f'Bass Boosted')
-        if equalizer == "reset":
-            await player.set_eq(EqualizerPlayer.flat())
-            await ctx.send("Reset the equalizer")
-        if equalizer == "piano":
-            await player.set_eq(EqualizerPlayer.piano())
-            await ctx.send("Piano equalizer")
-        if equalizer == "metal":
-            await player.set_eq(EqualizerPlayer.metal())
-            await ctx.send("Metal equalizer")
+        if not player.is_connected:
+            return
+
+        eqs = {'flat': wavelink.Equalizer.flat(),
+               'boost': wavelink.Equalizer.boost(),
+               'metal': wavelink.Equalizer.metal(),
+               'piano': wavelink.Equalizer.piano()}
+
+        eq = eqs.get(equalizer.lower(), None)
+
+        if not eq:
+            joined = "\n".join(eqs.keys())
+            return await ctx.send(f'Invalid EQ provided. Valid EQs:\n\n{joined}')
+
+        await ctx.send(f'Successfully changed equalizer to {equalizer}', delete_after=15)
+        await player.set_eq(eq)
 
     @commands.command()
     async def loop(self, ctx):

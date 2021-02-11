@@ -17,7 +17,7 @@ import requests
 import yaml
 import spotipy
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
-num_of_songs_played = 0
+
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 

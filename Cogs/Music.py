@@ -65,7 +65,6 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
-            await self.last_songs.put(song)
             self.now_playing_uri = song.uri
             self.now_playing_id = song.ytid
             self.current_track = song

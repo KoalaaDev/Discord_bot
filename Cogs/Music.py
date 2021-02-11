@@ -173,7 +173,7 @@ class Music(commands.Cog):
                 try:
                     track = tracks[0]
                     controller.now_playing_id = track.ytid
-                    await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
+                    await controller.auto_play_queue.put(Track(track.id, track.info, requester=ctx.author.mention))
                 except TypeError:
                     print(video)
 

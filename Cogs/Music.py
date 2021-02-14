@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import discord
 import humanize
-import itertools
 import re
 import sys
 import traceback
@@ -34,7 +33,7 @@ class MusicController:
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
-        self.last_songs = collections.deque([])
+        self.last_songs = asyncio.LifoQueue()
         self.now_playing_uri = None
         self.now_playing_id = None
         self.next = asyncio.Event()
@@ -45,6 +44,7 @@ class MusicController:
         self.now_playing = None
         self.current_track =  None
         self.loop = False
+        self.loop_queue = False
         self.bot.loop.create_task(self.controller_loop())
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
@@ -74,8 +74,21 @@ class MusicController:
             await self.next.wait()
             if self.loop:
                 while self.loop:
+                    if self.loop_queue:
+                        await self.now_playing.delete()
+                        list_of_songs = list(self.queue._queue)
+                        for x in list_of_songs:
+                            await self.now_playing.delete()
+                            self.next.clear()
+                            await player.play(x)
+                            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]")
+                            self.now_playing = await self.channel.send(embed=MusicEmbed)
+                            list_of_songs = list(self.queue._queue)
+                            await self.next.wait()
                     self.next.clear()
                     await player.play(song)
+                    MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
+                    self.now_playing = await self.channel.send(embed=MusicEmbed)
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
                 while self.auto_play and self.queue.empty():
@@ -93,8 +106,6 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.controllers = {}
-        self.Toggle = itertools.cycle([True,False])
-        self.autoplay = itertools.cycle([True,False])
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
 
@@ -130,11 +141,11 @@ class Music(commands.Cog):
             await player.disconnect()
         await player.disconnect()
         self.check_autoplay_queue.cancel()
-        await self.now_playing.delete()
+        await controller.now_playing.delete()
         if controller.auto_play:
-            controller.auto_play = next(self.autoplay)
+            controller.auto_play = False
         if controller.loop:
-            controller.loop = next(self.Toggle)
+            controller.loop = False
 
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
         if isinstance(value, commands.Context):
@@ -297,17 +308,20 @@ class Music(commands.Cog):
         await ctx.message.add_reaction('\N{OK Hand Sign}')
 
         if controller.loop and controller.auto_play:
-            controller.loop = next(self.Toggle)
-            controller.auto_play = next(self.autoplay)
+            controller.loop = False
+            controller.auto_play = False
             await player.stop()
             await asyncio.sleep(1)
             controller.loop = True
             controller.auto_play = True
         elif controller.loop:
-            controller.loop = False
-            await player.stop()
-            await asyncio.sleep(1)
-            controller.loop = True
+            if controller.loop_queue:
+                await player.stop()
+            else:
+                controller.loop = False
+                await player.stop()
+                await asyncio.sleep(1)
+                controller.loop = True
         else:
             await player.stop()
 
@@ -371,9 +385,9 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.auto_play:
-            controller.auto_play = next(self.autoplay)
+            controller.auto_play = False
         if controller.loop:
-            controller.loop = next(self.Toggle)
+            controller.loop = False
         await player.stop()
         try:
             del self.controllers[ctx.guild.id]
@@ -407,28 +421,39 @@ class Music(commands.Cog):
         await player.set_eq(eq)
 
     @commands.command()
-    async def loop(self, ctx):
+    async def loop(self, ctx, mode="track"):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-        controller.loop = next(self.Toggle)
         if controller.loop == True:
-            await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
-        else:
+            controller.loop = False
             await ctx.send("Loop disabled!")
-
+        else:
+            if "q" in mode.lower():
+                if controller.loop_queue == False:
+                    controller.loop = True
+                    controller.loop_queue = True
+                    await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
+                else:
+                    controller.loop = False
+                    controller.loop_queue = False
+                    await ctx.send("loop track disabled!")
+            else:
+                controller.loop = True
+                await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
     @commands.command(aliases=['ap'])
     async def autoplay(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-        controller.auto_play = next(self.autoplay)
 
         if controller.auto_play == True:
-            self.check_autoplay_queue.start(ctx)
-            await ctx.send("Autoplay enabled!")
-        else:
+            controller.auto_play = False
             self.check_autoplay_queue.stop()
             controller.auto_play_queue._queue.clear()
             await ctx.send("Autoplay disabled!")
+        else:
+            controller.auto_play = True
+            self.check_autoplay_queue.start(ctx)
+            await ctx.send("Autoplay enabled!")
 
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):

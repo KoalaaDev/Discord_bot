@@ -12,7 +12,7 @@ import itertools
 import collections
 import random
 import os
-import requests
+import aiohttp
 import yaml
 import spotipy
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
@@ -53,14 +53,16 @@ class MusicController:
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.YoutubeAPIKEY = itertools.cycle([x for x in config['music'].values()])
-    def YoutubeSuggestion(self):
-        Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}").json()
-        return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
+    async def YoutubeSuggestion(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}") as video:
+                Videos = await video.json()
+                return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
     @tasks.loop(seconds=1.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
-            videolist = self.YoutubeSuggestion()
+            videolist = await self.YoutubeSuggestion()
 
             for video in videolist:
                 tracks = await self.bot.wavelink.get_tracks(video)

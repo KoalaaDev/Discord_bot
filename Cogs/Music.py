@@ -41,11 +41,13 @@ class MusicController:
         self.auto_play_queue = asyncio.Queue()
         self.auto_play = False
         self.volume = 50
+        self.requester = None
         self.now_playing = None
         self.current_track =  None
         self.loop = False
         self.loop_queue = False
         self.bot.loop.create_task(self.controller_loop())
+        self.check_autoplay_queue.start()
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
@@ -54,6 +56,20 @@ class MusicController:
         Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}").json()
         return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
+    @tasks.loop(seconds=5.0)
+    async def check_autoplay_queue(self):
+        if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
+            videolist = self.YoutubeSuggestion()
+
+            for video in videolist:
+                tracks = await self.bot.wavelink.get_tracks(video)
+                print(self.auto_play_queue._queue)
+                try:
+                    track = tracks[0]
+                    self.now_playing_id = track.ytid
+                    await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
+                except TypeError:
+                    print(video)
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -67,6 +83,7 @@ class MusicController:
             song = await self.queue.get()
             self.now_playing_uri = song.uri
             self.now_playing_id = song.ytid
+            self.requester = song.requester
             self.current_track = song
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
@@ -74,6 +91,8 @@ class MusicController:
             await self.next.wait()
             if self.loop:
                 while self.loop:
+                    if self.now_playing:
+                        await self.now_playing.delete()
                     if self.loop_queue:
                         await self.now_playing.delete()
                         list_of_songs = list(self.queue._queue)
@@ -140,7 +159,7 @@ class Music(commands.Cog):
         except KeyError:
             await player.disconnect()
         await player.disconnect()
-        self.check_autoplay_queue.cancel()
+        controller.check_autoplay_queue.cancel()
         await controller.now_playing.delete()
         if controller.auto_play:
             controller.auto_play = False
@@ -172,21 +191,7 @@ class Music(commands.Cog):
     #         await player.disconnect()
     #     print("something changed")
 
-    @tasks.loop(seconds=5.0)
-    async def check_autoplay_queue(self, ctx):
-        controller = self.get_controller(ctx)
-        if controller.auto_play_queue.empty() and controller.now_playing_id:
-            videolist = controller.YoutubeSuggestion()
 
-            for video in videolist:
-                tracks = await self.bot.wavelink.get_tracks(video)
-                print(controller.auto_play_queue._queue)
-                try:
-                    track = tracks[0]
-                    controller.now_playing_id = track.ytid
-                    await controller.auto_play_queue.put(Track(track.id, track.info, requester=ctx.author.mention))
-                except TypeError:
-                    print(video)
 
     @tasks.loop(seconds=60.0)
     async def check_listen(self, ctx):
@@ -234,7 +239,8 @@ class Music(commands.Cog):
         await msg.edit(content=f"Connected to **`{channel.name}`**", delete_after=15)
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
-        self.check_listen.start(ctx)
+        if not self.check_listen.is_running():
+            self.check_listen.start(ctx)
 
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
@@ -395,8 +401,9 @@ class Music(commands.Cog):
             await player.disconnect()
             return await ctx.send('There was no controller to stop.')
         await player.disconnect()
-        self.check_autoplay_queue.cancel()
-        self.check_listen.cancel()
+        controller.check_autoplay_queue.cancel()
+        if self.check_listen.is_running():
+            self.check_listen.cancel()
         await ctx.message.add_reaction("\N{Octagonal Sign}")
 
     @commands.command(aliases=['eq'])
@@ -442,17 +449,14 @@ class Music(commands.Cog):
                 await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
     @commands.command(aliases=['ap'])
     async def autoplay(self, ctx):
-        player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-
         if controller.auto_play == True:
             controller.auto_play = False
-            self.check_autoplay_queue.stop()
+            controller.check_autoplay_queue.cancel()
             controller.auto_play_queue._queue.clear()
             await ctx.send("Autoplay disabled!")
         else:
             controller.auto_play = True
-            self.check_autoplay_queue.start(ctx)
             await ctx.send("Autoplay enabled!")
 
     @commands.command(aliases=["mix"])
@@ -467,11 +471,13 @@ class Music(commands.Cog):
     @commands.command(aliases=['clr','clear'])
     async def _clr(self, ctx):
         controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
         controller.queue._queue.clear()
-        controller.now_playing_id = None
         if not controller.auto_play_queue.empty():
-            await ctx.invoke(self.skip)
+            await player.stop()
+            controller.check_autoplay_queue.cancel()
             controller.auto_play_queue._queue.clear()
+
         await ctx.send("Cleared the queue")
 
     @commands.command()

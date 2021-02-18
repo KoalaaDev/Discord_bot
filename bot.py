@@ -156,7 +156,7 @@ async def help(ctx):
     embed.add_field(name="-invite",
                     value="Returns invite link of the client",
                     inline=False)
-    embed.add_field(name="-clear",
+    embed.add_field(name="-purge",
                     value="Clears an X amount of messages",
                     inline=False)
     embed.add_field(name="-echo", value="Repeats your message", inline=False)

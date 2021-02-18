@@ -48,6 +48,7 @@ class MusicController:
         self.loop_queue = False
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
+        self.check_listen.start()
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
@@ -56,7 +57,7 @@ class MusicController:
         Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}").json()
         return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
-    @tasks.loop(seconds=5.0)
+    @tasks.loop(seconds=1.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
             videolist = self.YoutubeSuggestion()
@@ -70,6 +71,27 @@ class MusicController:
                     await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
                     print(self.guild_id, video)
+
+    @tasks.loop(seconds=60.0)
+    async def check_listen(self):
+        player = self.bot.wavelink.get_player(self.guild_id)
+        channel = self.bot.get_channel(player.channel_id)
+        global member_list
+        try:
+            member_list = [x.name for x in channel.members if x.bot == False]
+        except AttributeError:
+            pass
+        if not member_list and player.is_connected:
+            embed = discord.Embed(title="Everyone left me alone..Disconecting!")
+            embed.set_footer(text="I'll see you on the next doorbanging adventure!")
+            await self.channel.send(embed=embed,delete_after=60)
+            await player.stop()
+            await player.disconnect()
+            self.check_autoplay_queue.cancel()
+            if self.auto_play:
+                self.auto_play = False
+            if self.loop:
+                self.loop = False
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -149,23 +171,6 @@ class Music(commands.Cog):
             controller = self.get_controller(event.player)
             controller.next.set()
 
-    @commands.command()
-    async def _stopInternal(self, ctx):
-        controller = self.get_controller(ctx)
-        player = self.bot.wavelink.get_player(ctx.guild.id)
-        await player.stop()
-        try:
-            del self.controllers[ctx.guild.id]
-        except KeyError:
-            await player.disconnect()
-        await player.disconnect()
-        controller.check_autoplay_queue.cancel()
-        await controller.now_playing.delete()
-        if controller.auto_play:
-            controller.auto_play = False
-        if controller.loop:
-            controller.loop = False
-
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
         if isinstance(value, commands.Context):
             gid = value.guild.id
@@ -193,20 +198,7 @@ class Music(commands.Cog):
 
 
 
-    @tasks.loop(seconds=60.0)
-    async def check_listen(self, ctx):
-        player = self.bot.wavelink.get_player(ctx.guild.id)
-        channel = self.bot.get_channel(player.channel_id)
-        global member_list
-        try:
-            member_list = [x.name for x in channel.members if x.bot == False]
-        except AttributeError:
-            pass
-        if not member_list and player.is_connected:
-            await ctx.invoke(self._stopInternal)
-            embed = discord.Embed(title="Everyone left me alone..Disconecting!")
-            embed.set_footer(text="I'll see you on the next doorbanging adventure!")
-            await ctx.send(embed=embed,delete_after=60)
+
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -239,8 +231,7 @@ class Music(commands.Cog):
         await msg.edit(content=f"Connected to **`{channel.name}`**", delete_after=15)
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
-        if not self.check_listen.is_running():
-            self.check_listen.start(ctx)
+
 
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
@@ -303,7 +294,7 @@ class Music(commands.Cog):
         await ctx.message.add_reaction("\N{Black Right-Pointing Triangle}")
         await player.set_pause(False)
 
-    @commands.command()
+    @commands.command(aliases=["s"])
     async def skip(self, ctx):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -402,8 +393,7 @@ class Music(commands.Cog):
             return await ctx.send('There was no controller to stop.')
         await player.disconnect()
         controller.check_autoplay_queue.cancel()
-        if self.check_listen.is_running():
-            self.check_listen.cancel()
+
         await ctx.message.add_reaction("\N{Octagonal Sign}")
 
     @commands.command(aliases=['eq'])

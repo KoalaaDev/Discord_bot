@@ -63,13 +63,13 @@ class MusicController:
 
             for video in videolist:
                 tracks = await self.bot.wavelink.get_tracks(video)
-                print(self.auto_play_queue._queue)
+                print(self.guild_id, self.auto_play_queue._queue)
                 try:
                     track = tracks[0]
                     self.now_playing_id = track.ytid
                     await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
-                    print(video)
+                    print(self.guild_id, video)
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()

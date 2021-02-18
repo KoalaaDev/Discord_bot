@@ -52,7 +52,7 @@ class MusicController:
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
-            self.YoutubeAPIKEY = itertools.cycle([config['music']['YoutubeAPIKEY'],config['music']['YoutubeAPIKEY2']])
+            self.YoutubeAPIKEY = itertools.cycle([x for x in config['music'].values()])
     def YoutubeSuggestion(self):
         Videos = requests.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}").json()
         return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
@@ -226,9 +226,12 @@ class Music(commands.Cog):
                 raise discord.DiscordException('No channel to join. Please either specify a valid channel or join one.')
 
         player = self.bot.wavelink.get_player(ctx.guild.id)
-        msg = await ctx.send(f'Connecting to **`{channel.name}...`**', delete_after=15)
+        embed1 = discord.Embed(description=f'Connecting to **`{channel.name}...`**')
+        msg = await ctx.send(embed=embed1, delete_after=15)
         await player.connect(channel.id)
-        await msg.edit(content=f"Connected to **`{channel.name}`**", delete_after=15)
+        await msg.delete()
+        embed2 = discord.Embed(description=f"Connected to **`{channel.name}`**")
+        await ctx.send(embed=embed2, delete_after=15)
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
@@ -238,7 +241,7 @@ class Music(commands.Cog):
         """Search for and add a song to the Queue."""
         song = query
         if not RURL.match(query):
-            query = f'ytsearch:{query}'
+            query = f'ytmsearch:{query}'
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
         if not tracks:
@@ -246,8 +249,8 @@ class Music(commands.Cog):
             query = f'scsearch:{query}'
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
         if not tracks:
-            print("falling back to youtube music")
-            query = f'ytmsearch:{query}'
+            print("falling back to youtube")
+            query = f'ytsearch:{query}'
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
         if not tracks:
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
@@ -444,19 +447,19 @@ class Music(commands.Cog):
             controller.auto_play = False
             controller.check_autoplay_queue.cancel()
             controller.auto_play_queue._queue.clear()
-            await ctx.send("Autoplay disabled!")
+            await ctx.send(embed=discord.Embed(description="Autoplay disabled"))
         else:
             controller.auto_play = True
-            await ctx.send("Autoplay enabled!")
+            await ctx.send(embed=discord.Embed(description="Autoplay enabled"))
 
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):
         controller = self.get_controller(ctx)
         if controller.queue._queue:
             random.shuffle(controller.queue._queue)
-            await ctx.send("Shuffled")
+            await ctx.send(embed=discord.Embed(description="Shuffled"))
         else:
-            await ctx.send("Nothing in queue")
+            await ctx.send(embed=discord.Embed(description="Nothing to shuffle!"))
 
     @commands.command(aliases=['clr','clear'])
     async def _clr(self, ctx):
@@ -468,7 +471,7 @@ class Music(commands.Cog):
             controller.check_autoplay_queue.cancel()
             controller.auto_play_queue._queue.clear()
 
-        await ctx.send("Cleared the queue")
+        await ctx.send(embed=discord.Embed(description="Cleared the queue"))
 
     @commands.command()
     async def information(self, ctx):
@@ -481,7 +484,7 @@ class Music(commands.Cog):
         free = humanize.naturalsize(node.stats.memory_free)
         cpu = node.stats.cpu_cores
 
-        fmt = f'**WaveLink:** `{wavelink.__version__}`\n\n' \
+        fmt = f'**Doorbanger:** `v2.3.1`\n\n' \
               f'Connected to `{len(self.bot.wavelink.nodes)}` nodes.\n' \
               f'Best available Node `{self.bot.wavelink.get_best_node().__repr__()}`\n' \
               f'`{len(self.bot.wavelink.players)}` players are distributed on nodes.\n' \

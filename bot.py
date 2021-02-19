@@ -38,9 +38,12 @@ sponsor = [
 ]
 print(custom2_fig.renderText("Message of the day:"))
 print(custom_fig.renderText(random.choice(sponsor)))
-
+async def get_prefix(bot, message):
+    with open("prefixes.yaml") as f:
+        server_prefixes = yaml.safe_load(f)
+        return server_prefixes.get(message.guild.id,"~")
 client = commands.Bot(
-    command_prefix=commands.when_mentioned_or("~"),
+    command_prefix=get_prefix,
     description="A Totally normal bot!",
     case_insensitive=True,intents=intents
 )
@@ -96,7 +99,17 @@ async def on_member_join(member):
         to_send = "Welcome {0.mention} to {1.name}!".format(member, guild)
         await guild.system_channel.send(to_send)
 
-
+@client.event
+async def on_message(message):
+    if client.user.mentioned_in(message):
+        prefix = message.content.split()[1]
+        print("changing prefixes")
+        with open('prefixes.yaml', 'r') as f:
+            prefixes = yaml.safe_load(f)
+        prefixes[message.guild.id] = prefix
+        with open("prefixes.yaml","w") as f:
+            yaml.dump(prefixes, f)
+    await client.process_commands(message)
 @client.event
 async def on_guild_join(guild):
     print("\u001b[33m Joining server {0} \u001b[0m".format(guild.name))

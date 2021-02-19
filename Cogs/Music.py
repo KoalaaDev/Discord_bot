@@ -83,7 +83,6 @@ class MusicController:
         try:
             member_list = [x.name for x in channel.members if x.bot == False]
         except AttributeError:
-            print("COULD NOT GRAB MEMBER LIST")
             member_list = None
         if not member_list and player.is_connected:
             embed = discord.Embed(title="Everyone left me alone..Disconecting!")

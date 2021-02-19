@@ -88,7 +88,8 @@ class MusicController:
         if not member_list and player.is_connected:
             embed = discord.Embed(title="Everyone left me alone..Disconecting!")
             embed.set_footer(text="I'll see you on the next doorbanging adventure!")
-            await self.channel.send(embed=embed,delete_after=60)
+            if self.channel:
+                await self.channel.send(embed=embed,delete_after=60)
             self.queue.clear()
             await player.stop()
             await player.disconnect()

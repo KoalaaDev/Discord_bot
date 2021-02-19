@@ -53,6 +53,7 @@ class MusicController:
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.YoutubeAPIKEY = itertools.cycle([x for x in config['music'].values()])
+
     async def YoutubeSuggestion(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}") as video:
@@ -82,16 +83,18 @@ class MusicController:
         try:
             member_list = [x.name for x in channel.members if x.bot == False]
         except AttributeError:
-            pass
+            print("COULD NOT GRAB MEMBER LIST")
+            member_list = None
         if not member_list and player.is_connected:
             embed = discord.Embed(title="Everyone left me alone..Disconecting!")
             embed.set_footer(text="I'll see you on the next doorbanging adventure!")
             await self.channel.send(embed=embed,delete_after=60)
+            self.queue.clear()
             await player.stop()
             await player.disconnect()
-            self.check_autoplay_queue.cancel()
             if self.auto_play:
                 self.auto_play = False
+                self.auto_play_queue.clear()
             if self.loop:
                 self.loop = False
 
@@ -187,19 +190,20 @@ class Music(commands.Cog):
 
         return controller
 
-    # @commands.Cog.listener()
-    # async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-    #     await asyncio.sleep(2)
-    #     player = self.bot.wavelink.get_player(member.guild.id)
-    #     print(player.channel_id,player.is_connected)
-    #     if not player.channel_id or not player.is_connected:
-    #         print("[DEBUG]")
-    #         await player.stop()
-    #         await player.disconnect()
-    #     print("something changed")
-
-
-
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        player = self.bot.wavelink.get_player(member.guild.id)
+        controller = self.get_controller(player)
+        if  before.channel and after.channel:
+            if controller.auto_play:
+                controller.auto_play = False
+                controller.auto_play_queue.clear()
+            if controller.loop:
+                controller.loop = False
+            controller.queue._queue.clear()
+            await player.stop()
+            await player.disconnect()
+            await player.connect(after.channel.id)
 
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
@@ -247,13 +251,15 @@ class Music(commands.Cog):
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
         if not tracks:
-            print("falling back to soundcloud")
-            query = f'scsearch:{query}'
-        tracks = await self.bot.wavelink.get_tracks(f'{query}')
-        if not tracks:
             print("falling back to youtube")
             query = f'ytsearch:{query}'
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
+
+        if not tracks:
+            print("falling back to soundcloud")
+            query = f'scsearch:{query}'
+        tracks = await self.bot.wavelink.get_tracks(f'{query}')
+
         if not tracks:
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
             return await ctx.send(embed=embed,delete_after=5)
@@ -397,7 +403,6 @@ class Music(commands.Cog):
             await player.disconnect()
             return await ctx.send('There was no controller to stop.')
         await player.disconnect()
-        controller.check_autoplay_queue.cancel()
 
         await ctx.message.add_reaction("\N{Octagonal Sign}")
 
@@ -447,7 +452,6 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         if controller.auto_play == True:
             controller.auto_play = False
-            controller.check_autoplay_queue.cancel()
             controller.auto_play_queue._queue.clear()
             await ctx.send(embed=discord.Embed(description="Autoplay disabled"))
         else:
@@ -469,9 +473,10 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller.queue._queue.clear()
         if not controller.auto_play_queue.empty():
-            await player.stop()
-            controller.check_autoplay_queue.cancel()
+            controller.auto_play = False
             controller.auto_play_queue._queue.clear()
+            await player.stop()
+
 
         await ctx.send(embed=discord.Embed(description="Cleared the queue"))
 

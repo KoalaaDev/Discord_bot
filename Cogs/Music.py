@@ -194,10 +194,11 @@ class Music(commands.Cog):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         player = self.bot.wavelink.get_player(member.guild.id)
         controller = self.get_controller(player)
-        if  before.channel and after.channel:
+        if ( before.channel and after.channel) and not (before.channel.id == after.channel.id):
+            print("reconnecting..")
             if controller.auto_play:
                 controller.auto_play = False
-                controller.auto_play_queue.clear()
+                controller.auto_play_queue._queue.clear()
             if controller.loop:
                 controller.loop = False
             controller.queue._queue.clear()

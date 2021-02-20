@@ -102,7 +102,7 @@ async def on_member_join(member):
 @client.event
 async def on_message(message):
     if client.user.mentioned_in(message):
-        prefix = message.content.split()[1]
+        prefix = "".join(message.content.split()[1:])
         print("changing prefixes")
         with open('prefixes.yaml', 'r') as f:
             prefixes = yaml.safe_load(f)
@@ -118,7 +118,12 @@ async def on_guild_join(guild):
 @client.event
 async def on_guild_leave(guild):
     print("\u001b[33m Left server {0} \u001b[0m".format(guild.name))
-
+    print(f"deleting prefixes for {guild.name}")
+    with open('prefixes.yaml', 'r') as f:
+        prefixes = yaml.safe_load(f)
+    prefixes.pop(guild.id,None)
+    with open("prefixes.yaml","w") as f:
+        yaml.dump(prefixes, f)
 
 @client.event
 async def on_disconnect():

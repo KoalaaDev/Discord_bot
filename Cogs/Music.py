@@ -15,12 +15,13 @@ import os
 import aiohttp
 import yaml
 import spotipy
+from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
-
+genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
-    __slots__ = ('requester', )
+    __slots__ = ('requester')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
@@ -480,7 +481,18 @@ class Music(commands.Cog):
 
 
         await ctx.send(embed=discord.Embed(description="Cleared the queue"))
-
+    @commands.command()
+    async def lyrics(self,ctx):
+        controller = self.get_controller(ctx)
+        try:
+            lyric = genius.search_song(controller.current_track.title)
+        except:
+            await ctx.send(description="something broke oopsies")
+        if lyric:
+            embed = discord.Embed(title=controller.current_track.title,description=lyric.lyrics)
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(embed=discord.Embed(description="No lyrics found!"))
     @commands.command()
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""

@@ -485,13 +485,13 @@ class Music(commands.Cog):
     async def lyrics(self,ctx):
         controller = self.get_controller(ctx)
         try:
-            lyric = genius.search_song(controller.current_track.title)
+            lyric = genius.search_song(controller.current_track.title,controller.current_track.author)
         except:
             await ctx.send(description="something broke oopsies")
         if lyric:
             if len(lyric.lyrics)>2000:
                 embed = discord.Embed(title=controller.current_track.title,description=lyric.lyrics[:2000])
-                embed2 = discord.Embed(title=controller.current_track.title,description=lyric.lyrics[2000:])
+                embed2 = discord.Embed(description=lyric.lyrics[2000:])
                 await ctx.send(embed=embed)
                 await ctx.send(embed=embed2)
             else:

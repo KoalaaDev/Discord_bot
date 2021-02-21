@@ -75,7 +75,7 @@ class MusicController:
                 except TypeError:
                     print(self.guild_id, video)
 
-    @tasks.loop(seconds=60.0)
+    @tasks.loop(seconds=1.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
         channel = self.bot.get_channel(player.channel_id)
@@ -89,12 +89,12 @@ class MusicController:
             embed.set_footer(text="I'll see you on the next doorbanging adventure!")
             if self.channel:
                 await self.channel.send(embed=embed,delete_after=60)
-            self.queue.clear()
+            self.queue._queue.clear()
             await player.stop()
             await player.disconnect()
             if self.auto_play:
                 self.auto_play = False
-                self.auto_play_queue.clear()
+                self.auto_play_queue._queue.clear()
             if self.loop:
                 self.loop = False
 

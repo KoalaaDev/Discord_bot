@@ -8,8 +8,11 @@ class API(commands.Cog):
 
     @commands.command()
     async def cat(self, ctx):
-        pic = requests.get("https://aws.random.cat/meow").json()['file']
-        embed = discord.Embed(title="Random Cat",Colour=discord.Colour.random())
+        if ctx.author.id == 451008924032827395:
+            pic = "https://cdn.discordapp.com/attachments/541880222065098762/812967503080194088/alvin_school_pic.JPG"
+        else:
+            pic = requests.get("https://aws.random.cat/meow").json()['file']
+        embed = discord.Embed(title="Random Cat",Colour=discord.Colour.purple())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)

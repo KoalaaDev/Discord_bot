@@ -489,6 +489,8 @@ class Music(commands.Cog):
         except:
             await ctx.send(description="something broke oopsies")
         if lyric:
+            if lyric.lyrics>2000:
+                embed = discord.Embed(title=controller.current_track.title,description=lyric.lyrics[:2000])
             embed = discord.Embed(title=controller.current_track.title,description=lyric.lyrics)
             await ctx.send(embed=embed)
         else:

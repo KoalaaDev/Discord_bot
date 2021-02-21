@@ -1,0 +1,17 @@
+cexprtk
+wavelink
+humanize
+python_chess
+requests
+aiohttp
+sympy
+passlib
+spotipy
+discord.py
+wikipedia
+urbandict
+pyfiglet
+chess
+discord
+PyYAML
+rich

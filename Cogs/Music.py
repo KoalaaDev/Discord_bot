@@ -399,7 +399,6 @@ class Music(commands.Cog):
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)
-            print(embeds)
             try:
                 await ctx.send(embed=embeds[pageno-1])
             except IndexError:

@@ -34,7 +34,7 @@ class MusicController:
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
-        self.last_songs = asyncio.LifoQueue()
+        self.last_songs = asyncio.LifoQueue(maxsize=11)
         self.now_playing_uri = None
         self.now_playing_id = None
         self.next = asyncio.Event()
@@ -50,6 +50,7 @@ class MusicController:
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
+        self.check_last_songs.start()
         config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
@@ -75,7 +76,11 @@ class MusicController:
                     await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
                     print(self.guild_id, video)
-
+    @tasks.loop(seconds=5.0)
+    async def check_last_songs(self):
+        if self.last_songs.full():
+            print("Song history full! Removing...")
+            self.last_songs._queue.pop()
     @tasks.loop(seconds=1.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
@@ -109,14 +114,12 @@ class MusicController:
                 await self.now_playing.delete()
             self.next.clear()
             song = await self.queue.get()
-            self.now_playing_uri = song.uri
-            self.now_playing_id = song.ytid
-            self.requester = song.requester
-            self.current_track = song
+            self.now_playing_uri, self.now_playing_id, self.requester, self.current_track = song.uri, song.ytid, song.requester, song
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
+            await self.last_songs.put(song)
             if self.loop:
                 while self.loop:
                     if self.now_playing:
@@ -148,6 +151,7 @@ class MusicController:
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
                     await player.play(song)
                     await self.next.wait()
+                    await self.last_songs.put(song)
 class Music(commands.Cog):
 
     def __init__(self, bot):
@@ -358,7 +362,6 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently playing anything!')
 
         controller = self.get_controller(ctx)
-        await controller.now_playing.delete()
         track = controller.current_track
         tlpbar = round(track.length // 15)
         pppbar = round(player.position // tlpbar)
@@ -368,27 +371,39 @@ class Music(commands.Cog):
                pbar += ":radio_button:"
             else:
                pbar += "▬"
-        embed = discord.Embed(title=f'Now playing: `{player.current}`', description=f"{pbar}")
+        embed = discord.Embed(title=f'Now playing: `{player.current}`', description=f"{pbar}[{datetime.timedelta(milliseconds=player.position)}/{datetime.timedelta(milliseconds=track.length)}]")
         controller.now_playing = await ctx.send(embed=embed)
 
     @commands.command(aliases=['q'])
-    async def queue(self, ctx):
+    async def queue(self, ctx, pageno=1):
         """Retrieve information on the next 5 songs from the queue."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 
         if not player.current and not controller.queue._queue:
             return await ctx.send('There are no songs currently in the queue.', delete_after=20)
-        if player.current and not controller.queue._queue:
+        elif player.current and not controller.queue._queue:
             return await ctx.send(f"Currently only playing: `{player.current}`")
+        elif not player.is_connected:
+            return
         else:
-            upcoming = list(itertools.islice(controller.queue._queue, 0, 5))
-
-            fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=1))
-            embed = discord.Embed(title=f'Queue', colour=discord.Colour.random())
-            embed.add_field(name=f"Now playing: `{player.current}`",value=fmt)
-            await ctx.send(embed=embed)
-
+            pages = (len(controller.queue._queue)//5)+1
+            pagenumber = itertools.count(1)
+            embeds = []
+            for x in range(pages+1):
+                upcoming = list(itertools.islice(controller.queue._queue, x*5,x*5+5))
+                print(upcoming)
+                fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
+                print(fmt)
+                page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
+                page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
+                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
+                embeds.append(page)
+            print(embeds)
+            try:
+                await ctx.send(embed=embeds[pageno-1])
+            except IndexError:
+                await ctx.send(embed=discord.Embed(description="Could not get page!"))
     @commands.command(aliases=['disconnect', 'dc'])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
@@ -499,6 +514,43 @@ class Music(commands.Cog):
                 await ctx.send(embed=embed)
         else:
             await ctx.send(embed=discord.Embed(description="No lyrics found!"))
+    @commands.command()
+    async def remove(self, ctx,num: int = 1):
+        controller = self.get_controller(ctx)
+        try:
+            del controller.queue._queue[num-1]
+        except IndexError:
+            await ctx.send(discord.Embed(description="Could not remove"))
+    @commands.command(aliases=['back'])
+    async def last(self, ctx, num = 0):
+        controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if controller.last_songs.qsize()<1:
+            return
+        if controller.last_songs.qsize() >= num:
+            controller.queue._queue.appendleft(controller.current_track)
+            for x in range(num+1):
+                last_song = await controller.last_songs.get()
+                print(last_song)
+                controller.queue._queue.appendleft(last_song)
+                if controller.loop and controller.auto_play:
+                    controller.loop = False
+                    controller.auto_play = False
+                    await player.stop()
+                    await asyncio.sleep(1)
+                    controller.loop = True
+                    controller.auto_play = True
+                elif controller.loop:
+                    if controller.loop_queue:
+                        await player.stop()
+                    else:
+                        controller.loop = False
+                        await player.stop()
+                        await asyncio.sleep(1)
+                        controller.loop = True
+                else:
+                    await player.stop()
     @commands.command()
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""

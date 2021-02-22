@@ -38,7 +38,7 @@ class Math(commands.Cog):
                     await message.add_reaction('\N{Cross Mark}')
                     print(f'[MATH COG] Encountered exception with {message.content}: {Exception}')
             else:
-                print(f'[MATH COG] not a math problem: {message.content}')
+                pass
 
     @commands.command()
     async def solve(self, ctx, *, equation):

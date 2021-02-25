@@ -58,7 +58,7 @@ class MusicController:
 
     async def YoutubeSuggestion(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}&chart=mostpopular&maxResults=3&regionCode=SG") as video:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}&chart=mostpopular&maxResults=4&regionCode=SG") as video:
                 Videos = await video.json()
                 return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
@@ -406,6 +406,65 @@ class Music(commands.Cog):
                 await ctx.send(embed=embeds[pageno-1])
             except IndexError:
                 await ctx.send(embed=discord.Embed(description="Could not get page!"))
+    @commands.command(aliases=['aq'])
+    async def autoqueue(self, ctx, pageno=1):
+        """Retrieve information on the next 5 songs from the queue."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+
+        if not player.current and not controller.auto_play_queue._queue:
+            return await ctx.send('There are no songs currently in the queue.', delete_after=20)
+        elif player.current and not controller.auto_play_queue._queue:
+            return await ctx.send(f"Currently only playing: `{player.current}`")
+        elif not player.is_connected:
+            return
+        else:
+            pages = (len(controller.auto_play_queue._queue)//5)+1
+            pagenumber = itertools.count(1)
+            embeds = []
+            for x in range(pages+1):
+                upcoming = list(itertools.islice(controller.auto_play_queue._queue, x*5,x*5+5))
+                print(upcoming)
+                fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
+                print(fmt)
+                page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
+                page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
+                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
+                embeds.append(page)
+            try:
+                await ctx.send(embed=embeds[pageno-1])
+            except IndexError:
+                await ctx.send(embed=discord.Embed(description="Could not get page!"))
+    @commands.command(aliases=['lq'])
+    async def lastqueue(self, ctx, pageno=1):
+        """Retrieve information on the next 5 songs from the queue."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+
+        if not player.current and not controller.last_songs._queue:
+            return await ctx.send('There are no songs currently in the queue.', delete_after=20)
+        elif player.current and not controller.last_songs._queue:
+            return await ctx.send(f"Currently only playing: `{player.current}`")
+        elif not player.is_connected:
+            return
+        else:
+            pages = (len(controller.last_songs._queue)//5)+1
+            pagenumber = itertools.count(1)
+            embeds = []
+            for x in range(pages+1):
+                upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
+                print(upcoming)
+                fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
+                print(fmt)
+                page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
+                page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
+                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
+                embeds.append(page)
+            try:
+                await ctx.send(embed=embeds[pageno-1])
+            except IndexError:
+                await ctx.send(embed=discord.Embed(description="Could not get page!"))
+
     @commands.command(aliases=['disconnect', 'dc'])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""

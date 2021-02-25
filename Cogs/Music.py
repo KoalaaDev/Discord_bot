@@ -114,7 +114,7 @@ class MusicController:
             if self.now_playing:
                 await self.now_playing.delete()
             if self.current_track:
-                await self.current_track.delete()
+                self.current_track = None
             self.next.clear()
             song = await self.queue.get()
             self.now_playing_uri, self.now_playing_id, self.requester, self.current_track = song.uri, song.ytid, song.requester, song

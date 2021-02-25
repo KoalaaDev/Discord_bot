@@ -427,7 +427,7 @@ class Music(commands.Cog):
                 print(upcoming)
                 fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
                 print(fmt)
-                page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
+                page = discord.Embed(title=f'Autoplay Queue', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)
@@ -456,7 +456,7 @@ class Music(commands.Cog):
                 print(upcoming)
                 fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
                 print(fmt)
-                page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
+                page = discord.Embed(title=f'Song history', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)
@@ -581,7 +581,7 @@ class Music(commands.Cog):
         try:
             del controller.queue._queue[num-1]
         except IndexError:
-            await ctx.send(discord.Embed(description="Could not remove"))
+            await ctx.send(embed=discord.Embed(description="Could not remove"))
     @commands.command(aliases=['back'])
     async def last(self, ctx, num = 0):
         controller = self.get_controller(ctx)

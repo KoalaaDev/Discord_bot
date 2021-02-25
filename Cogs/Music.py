@@ -58,7 +58,7 @@ class MusicController:
 
     async def YoutubeSuggestion(self):
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}") as video:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}&chart=mostpopular&maxResults=3&regionCode=SG") as video:
                 Videos = await video.json()
                 return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
 
@@ -72,8 +72,9 @@ class MusicController:
                 print(self.guild_id, self.auto_play_queue._queue)
                 try:
                     track = tracks[0]
-                    self.now_playing_id = track.ytid
-                    await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
+                    if track.length<=480000:
+                        self.now_playing_id = track.ytid
+                        await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
                     print(self.guild_id, video)
     @tasks.loop(seconds=5.0)
@@ -81,7 +82,7 @@ class MusicController:
         if self.last_songs.full():
             print("Song history full! Removing...")
             self.last_songs._queue.pop()
-    @tasks.loop(seconds=1.0)
+    @tasks.loop(seconds=60.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
         channel = self.bot.get_channel(player.channel_id)
@@ -112,6 +113,8 @@ class MusicController:
         while True:
             if self.now_playing:
                 await self.now_playing.delete()
+            if self.current_track:
+                await self.current_track.delete()
             self.next.clear()
             song = await self.queue.get()
             self.now_playing_uri, self.now_playing_id, self.requester, self.current_track = song.uri, song.ytid, song.requester, song
@@ -501,10 +504,10 @@ class Music(commands.Cog):
         try:
             lyric = genius.search_song(controller.current_track.title,controller.current_track.author)
         except:
-            await ctx.send(description="something broke oopsies")
+            return await ctx.send(embed=discord.Embed(description="something broke oopsies"))
         if lyric:
             if len(lyric.lyrics)>2000:
-                embed = discord.Embed(title=controller.current_track.title,description=lyric.lyrics[:2000])
+                embed = discord.Embed(title=lyric.title,description=lyric.lyrics[:2000])
                 embed2 = discord.Embed(description=lyric.lyrics[2000:])
                 await ctx.send(embed=embed)
                 await ctx.send(embed=embed2)

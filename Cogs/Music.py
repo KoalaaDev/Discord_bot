@@ -170,13 +170,20 @@ class Music(commands.Cog):
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
 
-        node = await self.bot.wavelink.initiate_node(host='127.0.0.1',
+        node = await self.bot.wavelink.initiate_node(host='34.126.126.36',
                                                      port=8080,
-                                                     rest_uri='http://127.0.0.1:8080',
+                                                     rest_uri='http://34.126.126.36:8080/',
                                                      password='youshallnotpass',
                                                      identifier='Koalaa-server-4',
                                                      region='singapore')
+         node2 = await self.bot.wavelink.initiate_node(host='35.232.26.63',
+                                                      port=8080,
+                                                      rest_uri='http://35.232.26.63:8080/',
+                                                      password='youshallnotpass',
+                                                      identifier='Koalaa-server-3',
+                                                      region='singapore')
         # Set our node hook callback
+        node2.set_hook(self.on_event_hook)
         node.set_hook(self.on_event_hook)
     async def on_event_hook(self, event):
         """Node hook callback."""

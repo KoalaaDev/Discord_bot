@@ -243,7 +243,7 @@ class Music(commands.Cog):
                 pass
         if isinstance(error, commands.Forbidden):
             print("Missing permissions!")
-        
+
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
@@ -413,7 +413,6 @@ class Music(commands.Cog):
                 upcoming = list(itertools.islice(controller.queue._queue, x*5,x*5+5))
                 print(upcoming)
                 fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
-                print(fmt)
                 page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
@@ -442,7 +441,6 @@ class Music(commands.Cog):
                 upcoming = list(itertools.islice(controller.auto_play_queue._queue, x*5,x*5+5))
                 print(upcoming)
                 fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
-                print(fmt)
                 page = discord.Embed(title=f'Autoplay Queue', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
@@ -471,7 +469,6 @@ class Music(commands.Cog):
                 upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
                 print(upcoming)
                 fmt = '\n'.join(f'```{k}. [{str(song)}]({song.uri})```' for k,song in enumerate(upcoming,start=x*5+1))
-                print(fmt)
                 page = discord.Embed(title=f'Song history', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")

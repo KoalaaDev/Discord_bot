@@ -176,7 +176,7 @@ class Music(commands.Cog):
                                                      password='youshallnotpass',
                                                      identifier='Koalaa-server-4',
                                                      region='singapore')
-         node2 = await self.bot.wavelink.initiate_node(host='35.232.26.63',
+        node2 = await self.bot.wavelink.initiate_node(host='35.232.26.63',
                                                       port=8080,
                                                       rest_uri='http://35.232.26.63:8080/',
                                                       password='youshallnotpass',

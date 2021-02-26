@@ -142,6 +142,7 @@ class MusicController:
                     await player.play(song)
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
+                    self.current_track = song
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
                 while self.auto_play and self.queue.empty():
@@ -152,6 +153,7 @@ class MusicController:
                     self.now_playing_id = song.ytid
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{song.requester}]")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
+                    self.current_track = song
                     await player.play(song)
                     await self.next.wait()
                     await self.last_songs.put(song)
@@ -181,16 +183,21 @@ class Music(commands.Cog):
                                                       rest_uri='http://35.232.26.63:8080/',
                                                       password='youshallnotpass',
                                                       identifier='Koalaa-server-3',
-                                                      region='singapore')
+                                                      region='us-central')
         # Set our node hook callback
         node2.set_hook(self.on_event_hook)
         node.set_hook(self.on_event_hook)
     async def on_event_hook(self, event):
         """Node hook callback."""
-        if isinstance(event, (wavelink.TrackEnd, wavelink.TrackException)):
+        if isinstance(event, (wavelink.TrackEnd, wavelink.TrackStuck)):
             controller = self.get_controller(event.player)
+            print(event.track)
             controller.next.set()
-
+        if isinstance(event, wavelink.TrackException):
+            controller = self.get_controller(event.player)
+            print(f"An error has occured: {event.error}, Switching nodes!")
+            await event.player.change_node()
+            controller.next.set()
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
         if isinstance(value, commands.Context):
             gid = value.guild.id
@@ -234,7 +241,9 @@ class Music(commands.Cog):
                 return await ctx.send('This command can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
-
+        if isinstance(error, commands.Forbidden):
+            print("Missing permissions!")
+        
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
 
@@ -461,7 +470,7 @@ class Music(commands.Cog):
             for x in range(pages+1):
                 upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
                 print(upcoming)
-                fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
+                fmt = '\n'.join(f'```{k}. [{str(song)}]({song.uri})```' for k,song in enumerate(upcoming,start=x*5+1))
                 print(fmt)
                 page = discord.Embed(title=f'Song history', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)

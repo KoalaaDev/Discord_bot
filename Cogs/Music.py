@@ -191,7 +191,7 @@ class Music(commands.Cog):
         """Node hook callback."""
         if isinstance(event, (wavelink.TrackEnd, wavelink.TrackStuck)):
             controller = self.get_controller(event.player)
-            print(event.track)
+            print(event.track.title)
             controller.next.set()
         if isinstance(event, wavelink.TrackException):
             controller = self.get_controller(event.player)
@@ -468,9 +468,8 @@ class Music(commands.Cog):
             for x in range(pages+1):
                 upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
                 print(upcoming)
-                fmt = '\n'.join(f'```{k}. [{str(song)}]({song.uri})```' for k,song in enumerate(upcoming,start=x*5+1))
-                page = discord.Embed(title=f'Song history', colour=discord.Colour.random())
-                page.add_field(name=f"Now playing: `{player.current}`",value=fmt)
+                fmt = '\n'.join(f'{k}. [{str(song)}]({song.uri})' for k,song in enumerate(upcoming,start=x*5+1))
+                page = discord.Embed(title=f'Song history', description=fmt, colour=discord.Colour.random())
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)
             try:

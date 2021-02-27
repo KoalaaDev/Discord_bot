@@ -1,9 +1,14 @@
 from discord.ext import commands
 import random
 import discord
+import yaml
+import os
+from discord.ext.commands.cooldowns import BucketType
+
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.balances = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bank.yml')
 
     @commands.command()
     async def jason(self,ctx):
@@ -49,5 +54,23 @@ class Fun(commands.Cog):
       emoji = get(client.emojis, name='pepelaugh')
       await message.add_reaction(emoji)
 
+    async def get_currency(self, MemberID):
+        with open(self.balances) as f:
+            balances = yaml.safe_load(f)
+            return balances.get(MemberID, None)
+    async def create_account(self, MemberID):
+        with open(self.balances,"r") as f:
+            balances = yaml.safe_load(f)
+        balances[MemberID] = 0
+        with open(self.balances,"w") as f:
+            balances = yaml.dump(balances, f)
+
+    @commands.command()
+    async def daily(self, ctx):
+        userbalance = await self.get_currency(ctx.author.id)
+        print(userbalance)
+        if not userbalance:
+            await self.create_account(ctx.author.id)
+            print("CREATING USER BALANCE")
 def setup(bot):
     bot.add_cog(Fun(bot))

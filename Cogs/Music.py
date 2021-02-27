@@ -122,7 +122,7 @@ class MusicController:
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
-            await self.last_songs._queue.appendleft(song)
+            await self.last_songs._queue.append(song)
             if self.loop:
                 while self.loop:
                     if self.now_playing:
@@ -156,7 +156,7 @@ class MusicController:
                     self.current_track = song
                     await player.play(song)
                     await self.next.wait()
-                    await self.last_songs._queue.appendleft(song)
+                    await self.last_songs._queue.append(song)
 class Music(commands.Cog):
 
     def __init__(self, bot):

@@ -427,10 +427,8 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 
-        if not player.current and not controller.auto_play_queue._queue:
-            return await ctx.send('There are no songs currently in the queue.', delete_after=20)
-        elif player.current and not controller.auto_play_queue._queue:
-            return await ctx.send(f"Currently only playing: `{player.current}`")
+        if not controller.auto_play:
+            return await ctx.send('Autoplay is not enabled', delete_after=20)
         elif not player.is_connected:
             return
         else:
@@ -456,9 +454,7 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
 
         if not player.current and not controller.last_songs._queue:
-            return await ctx.send('There are no songs currently in the queue.', delete_after=20)
-        elif player.current and not controller.last_songs._queue:
-            return await ctx.send(f"Currently only playing: `{player.current}`")
+            return await ctx.send('There are no songs currently in the history.', delete_after=20)
         elif not player.is_connected:
             return
         else:

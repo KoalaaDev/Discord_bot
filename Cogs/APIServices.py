@@ -33,7 +33,7 @@ class API(commands.Cog):
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
-    async def img(self, ctx, query):
+    async def img(self, ctx, *, query):
         pic = requests.get(f"https://normal-api.ml/image-search?query={query}&redirect=false").json()['image']
         embed = discord.Embed(title=query,Colour=discord.Colour.random())
         embed.set_image(url=pic)

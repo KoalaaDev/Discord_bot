@@ -122,7 +122,7 @@ class MusicController:
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
-            await self.last_songs.put(song)
+            await self.last_songs._queue.appendleft(song)
             if self.loop:
                 while self.loop:
                     if self.now_playing:
@@ -156,7 +156,7 @@ class MusicController:
                     self.current_track = song
                     await player.play(song)
                     await self.next.wait()
-                    await self.last_songs.put(song)
+                    await self.last_songs._queue.appendleft(song)
 class Music(commands.Cog):
 
     def __init__(self, bot):
@@ -464,7 +464,7 @@ class Music(commands.Cog):
             for x in range(pages+1):
                 upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
                 print(upcoming)
-                fmt = '\n'.join(f'{k}. [{str(song)}]({song.uri})' for k,song in enumerate(upcoming,start=x*5+1))
+                fmt = '\n'.join(f'{k}. [{str(song)}]({song.uri})' for k,song in enumerate(upcoming.reverse(),start=x*5+1))
                 page = discord.Embed(title=f'Song history', description=fmt, colour=discord.Colour.random())
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)

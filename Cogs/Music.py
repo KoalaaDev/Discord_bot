@@ -156,7 +156,7 @@ class MusicController:
                     self.current_track = song
                     await player.play(song)
                     await self.next.wait()
-                    await self.last_songs._queue.append(song)
+                    await self.last_songs.put(song)
 class Music(commands.Cog):
 
     def __init__(self, bot):

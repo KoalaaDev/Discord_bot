@@ -57,14 +57,27 @@ class Fun(commands.Cog):
     async def get_currency(self, MemberID):
         with open(self.balances) as f:
             balances = yaml.safe_load(f)
-            return balances.get(MemberID, None)#####MAKE ADD MONEY AND NO ADD MONEY############
+            return balances.get(MemberID, None)
     async def create_account(self, MemberID):
         with open(self.balances,"r") as f:
             balances = yaml.safe_load(f)
         balances[MemberID] = 0
         with open(self.balances,"w") as f:
             balances = yaml.dump(balances, f)
-
+    async def write(self, MemberID, amount):
+        with open(self.balances) as f:
+            balances = yaml.safe_load(f)
+        balances[MemberID] = amount
+        with open(self.balances,"w") as f:##W = write R = read
+            balances = yaml.dump(balances, f)
+    @commands.command()
+    async def beg(self, ctx):
+        balance = await self.get_currency(ctx.author.id)
+        if not balance:
+            await self.create_account(ctx.author.id)
+            balance = await self.get_currency(ctx.author.id)
+        await self.write(ctx.author.id, random.randint(1,100)+balance)
+        await ctx.send("UR A LINCOLN")
     @commands.cooldown(1,86400,BucketType.user)
     @commands.command()
     async def daily(self, ctx):

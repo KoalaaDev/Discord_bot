@@ -122,7 +122,7 @@ class MusicController:
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
-            await self.last_songs._queue.append(song)
+            await self.last_songs.put(song)
             if self.loop:
                 while self.loop:
                     if self.now_playing:
@@ -241,8 +241,6 @@ class Music(commands.Cog):
                 return await ctx.send('This command can not be used in Private Messages.')
             except discord.HTTPException:
                 pass
-        if isinstance(error, commands.Forbidden):
-            print("Missing permissions!")
 
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

@@ -57,28 +57,33 @@ class MusicController:
             self.YoutubeAPIKEY = itertools.cycle([x for x in config['music'].values()])
 
     async def YoutubeSuggestion(self):
+        key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}&chart=mostpopular&maxResults=4&regionCode=SG") as video:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={key}&chart=mostpopular&maxResults=4&regionCode=SG") as video:
                 Videos = await video.json()
                 try:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
                 except KeyError:
-                    print("Being Rate limited!")
-    @tasks.loop(seconds=1.0)
+                    print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
+    @tasks.loop(seconds=5.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
             videolist = await self.YoutubeSuggestion()
-
+            if not videolist:
+                return
             for video in videolist:
                 tracks = await self.bot.wavelink.get_tracks(video)
-                print(self.guild_id, self.auto_play_queue._queue)
+                if not tracks:
+                    tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
                 try:
                     track = tracks[0]
                     if track.length<=480000:
                         self.now_playing_id = track.ytid
                         await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
-                    print(self.guild_id, video)
+                    print(self.guild_id, "Could not play", video)
+            else:
+                print(self.guild_id, [x.title for x in self.auto_play_queue._queue])
     @tasks.loop(seconds=5.0)
     async def check_last_songs(self):
         if self.last_songs.full():
@@ -180,14 +185,7 @@ class Music(commands.Cog):
                                                      password='youshallnotpass',
                                                      identifier='Koalaa-server-4',
                                                      region='singapore')
-        node2 = await self.bot.wavelink.initiate_node(host='35.232.26.63',
-                                                      port=8080,
-                                                      rest_uri='http://35.232.26.63:8080/',
-                                                      password='youshallnotpass',
-                                                      identifier='Koalaa-server-3',
-                                                      region='us-central')
-        # Set our node hook callback
-        node2.set_hook(self.on_event_hook)
+
         node.set_hook(self.on_event_hook)
     async def on_event_hook(self, event):
         """Node hook callback."""

@@ -13,7 +13,7 @@ class API(commands.Cog):
         else:
             async with aiohttp.ClientSession() as session:
                 with session.get("https://aws.random.cat/meow") as f:
-                    pic = f.json()['file']
+                    pic = await f.json()['file']
         embed = discord.Embed(title="Random Cat",Colour=discord.Colour.purple())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
@@ -31,7 +31,7 @@ class API(commands.Cog):
         else:
             async with aiohttp.ClientSession() as session:
                 with session.get("https://random.dog/woof.json") as f:
-                    pic = f.json()['url']
+                    pic = await f.json()['url']
         embed = discord.Embed(title="Random Dog",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
@@ -40,7 +40,7 @@ class API(commands.Cog):
     async def img(self, ctx, *, query):
         async with aiohttp.ClientSession() as session:
             with session.get(f"https://normal-api.ml/image-search?query={query}&redirect=false") as f:
-                pic = f.json()['image']
+                pic = await f.json()['image']
         embed = discord.Embed(title=query,Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Img Gen Service")
@@ -49,7 +49,7 @@ class API(commands.Cog):
     async def fox(self, ctx):
         async with aiohttp.ClientSession() as session:
             with session.get("https://randomfox.ca/floof/") as f:
-                pic = f.json()['image']
+                pic = await f.json()['image']
         embed = discord.Embed(title="Random Fox",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
@@ -59,7 +59,7 @@ class API(commands.Cog):
         params = {"lang":lang,"type":"json"}
         async with aiohttp.ClientSession() as session:
             with session.get("https://evilinsult.com/generate_insult.php",params=params) as f:
-                insult = f.json()
+                insult = await f.json()
         embed = discord.Embed(title=insult["insult"],Colour=discord.Colour.random())
         embed.set_footer(text=f"{lang} Insult Gen Service")
         await ctx.send(embed=embed)
@@ -67,7 +67,7 @@ class API(commands.Cog):
     async def rabbit(self, ctx):
         async with aiohttp.ClientSession() as session:
             with session.get("https://api.bunnies.io/v2/loop/random/?media=gif,png") as f:
-                pic = f.json()['media']['gif']
+                pic = await f.json()['media']['gif']
         embed = discord.Embed(title="Random Rabbit",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")
@@ -76,7 +76,7 @@ class API(commands.Cog):
     async def duck(self, ctx):
         async with aiohttp.ClientSession() as session:
             with session.get("https://random-d.uk/api/v1/random?type=png") as f:
-                pic = f.json()["url"]
+                pic = await f.json()["url"]
         embed = discord.Embed(title="Random duck",Colour=discord.Colour.random())
         embed.set_image(url=pic)
         embed.set_footer(text="Animal Img Gen Service")

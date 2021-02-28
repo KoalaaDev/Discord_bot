@@ -456,6 +456,8 @@ class Music(commands.Cog):
         elif not player.is_connected:
             return
         else:
+            if not controller.last_songs._queue:
+                return
             pages = (len(controller.last_songs._queue)//5)+1
             pagenumber = itertools.count(1)
             embeds = []

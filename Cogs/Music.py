@@ -60,8 +60,10 @@ class MusicController:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={next(self.YoutubeAPIKEY)}&chart=mostpopular&maxResults=4&regionCode=SG") as video:
                 Videos = await video.json()
-                return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
-
+                try:
+                    return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
+                except KeyError:
+                    print("Being Rate limited!")
     @tasks.loop(seconds=1.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:

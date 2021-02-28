@@ -12,10 +12,10 @@ class API(commands.Cog):
             pic = "https://cdn.discordapp.com/attachments/541880222065098762/812999751339474954/alvin_lol.JPG"
         else:
             async with aiohttp.ClientSession() as session:
-                with session.get("https://aws.random.cat/meow") as f:
-                    pic = await f.json()['file']
+                async with session.get("https://aws.random.cat/meow") as f:
+                    pic = await f.json()
         embed = discord.Embed(title="Random Cat",Colour=discord.Colour.purple())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic['file'])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
@@ -30,35 +30,35 @@ class API(commands.Cog):
                 pic = picture_json['message']
         else:
             async with aiohttp.ClientSession() as session:
-                with session.get("https://random.dog/woof.json") as f:
-                    pic = await f.json()['url']
+                async with session.get("https://random.dog/woof.json") as f:
+                    pic = await f.json()
         embed = discord.Embed(title="Random Dog",Colour=discord.Colour.random())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic['url'])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
     async def img(self, ctx, *, query):
         async with aiohttp.ClientSession() as session:
-            with session.get(f"https://normal-api.ml/image-search?query={query}&redirect=false") as f:
-                pic = await f.json()['image']
+            async with session.get(f"https://normal-api.ml/image-search?query={query}&redirect=false") as f:
+                pic = await f.json()
         embed = discord.Embed(title=query,Colour=discord.Colour.random())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic['image'])
         embed.set_footer(text="Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
     async def fox(self, ctx):
         async with aiohttp.ClientSession() as session:
-            with session.get("https://randomfox.ca/floof/") as f:
-                pic = await f.json()['image']
+            async with session.get("https://randomfox.ca/floof/") as f:
+                pic = await f.json()
         embed = discord.Embed(title="Random Fox",Colour=discord.Colour.random())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic['image'])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
     async def insult(self, ctx, lang="en"):
         params = {"lang":lang,"type":"json"}
         async with aiohttp.ClientSession() as session:
-            with session.get("https://evilinsult.com/generate_insult.php",params=params) as f:
+            async with session.get("https://evilinsult.com/generate_insult.php",params=params) as f:
                 insult = await f.json()
         embed = discord.Embed(title=insult["insult"],Colour=discord.Colour.random())
         embed.set_footer(text=f"{lang} Insult Gen Service")
@@ -66,19 +66,19 @@ class API(commands.Cog):
     @commands.command(aliases=['bunny'])
     async def rabbit(self, ctx):
         async with aiohttp.ClientSession() as session:
-            with session.get("https://api.bunnies.io/v2/loop/random/?media=gif,png") as f:
-                pic = await f.json()['media']['gif']
+            async with session.get("https://api.bunnies.io/v2/loop/random/?media=gif,png") as f:
+                pic = await f.json()
         embed = discord.Embed(title="Random Rabbit",Colour=discord.Colour.random())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic['media']['gif'])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
     async def duck(self, ctx):
         async with aiohttp.ClientSession() as session:
-            with session.get("https://random-d.uk/api/v1/random?type=png") as f:
-                pic = await f.json()["url"]
+            async with session.get("https://random-d.uk/api/v1/random?type=png") as f:
+                pic = await f.json()
         embed = discord.Embed(title="Random duck",Colour=discord.Colour.random())
-        embed.set_image(url=pic)
+        embed.set_image(url=pic["url"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
 def setup(bot):

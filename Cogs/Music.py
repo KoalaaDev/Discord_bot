@@ -18,6 +18,7 @@ import spotipy
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
+config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
@@ -51,15 +52,14 @@ class MusicController:
         self.check_autoplay_queue.start()
         self.check_listen.start()
         self.check_last_songs.start()
-        config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
-            self.YoutubeAPIKEY = itertools.cycle([x for x in config['music'].values()])
+            self.YoutubeAPIKEY = itertools.cycle([x for x in config['music']["Youtube"].values()])
 
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=snippet&relatedToVideoId={self.now_playing_id}&type=video&key={key}&chart=mostpopular&maxResults=4&regionCode=SG") as video:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=id&relatedToVideoId={self.now_playing_id}&type=video&key={key}&chart=mostpopular&maxResults=4&regionCode=SG&videoCategoryId=10") as video:
                 Videos = await video.json()
                 try:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
@@ -164,7 +164,7 @@ class MusicController:
                     await player.play(song)
                     await self.next.wait()
                     await self.last_songs.put(song)
-class Music(commands.Cog):
+class Music(commands.Cog, wavelink.WavelinkMixin):
 
     def __init__(self, bot):
         self.bot = bot
@@ -178,20 +178,18 @@ class Music(commands.Cog):
 
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
+        with open(config_file_path) as f:
+            config = yaml.safe_load(f)
+            nodes = config['music']['nodes']
+        for n in nodes.values():
+            node = await self.bot.wavelink.initiate_node(**n)
+            node.set_hook(self.on_event_hook)
 
-        node = await self.bot.wavelink.initiate_node(host='34.126.126.36',
-                                                     port=8080,
-                                                     rest_uri='http://34.126.126.36:8080/',
-                                                     password='youshallnotpass',
-                                                     identifier='Koalaa-server-4',
-                                                     region='singapore')
-
-        node.set_hook(self.on_event_hook)
     async def on_event_hook(self, event):
         """Node hook callback."""
         if isinstance(event, (wavelink.TrackEnd, wavelink.TrackStuck)):
             controller = self.get_controller(event.player)
-            print(event.track.title)
+            print(str(event.track.title))
             controller.next.set()
         if isinstance(event, wavelink.TrackException):
             controller = self.get_controller(event.player)
@@ -462,9 +460,8 @@ class Music(commands.Cog):
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):
-                upcoming = list(itertools.islice(controller.last_songs._queue, x*5,x*5+5))
-                print(upcoming)
-                fmt = '\n'.join(f'{k}. [{str(song)}]({song.uri})' for k,song in enumerate(upcoming.reverse(),start=x*5+1))
+                upcoming = reversed(list(itertools.islice(controller.last_songs._queue, x*5,x*5+5)))
+                fmt = '\n'.join(f'{k}. [{str(song)}]({song.uri})' for k,song in enumerate(upcoming,start=x*5+1))
                 page = discord.Embed(title=f'Song history', description=fmt, colour=discord.Colour.random())
                 page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
                 embeds.append(page)

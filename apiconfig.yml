@@ -4,13 +4,29 @@ bot:
 #koalabot acc = "NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k"
 #doorbanger acc = "Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww"
 music:
-  YoutubeAPIKEY: "AIzaSyCxWtM0W-C-f8erujaPMQiBqK4TuELE-NA"
-  YoutubeAPIKEY2: "AIzaSyC1rmupwaAB8Q-xaOiPCZCMPnYZ_mJML0Q"
-  YoutubeAPIKEY3: "AIzaSyD_31eugYm3WubUF3vT_J8rpI7QazE9mPk"
-  YoutubeAPIKEY4: "AIzaSyAtI0bDMqhbiatYfIf7gmj490jiGixcQVw"
-  YoutubeAPIKEY5: "AIzaSyACVC_AQzCREQopnO6U-g8bOVTi1pdOpwo"
-  YoutubeAPIKEY6: "AIzaSyAoz_H5akWX0z2nQRcmSW_FgPD7BcuWWkM"
-  YoutubeAPIKEY7: "AIzaSyAskB97YEIjZSZO84GDuJYn33NMHMqUADo"
+  Youtube:
+    YoutubeAPIKEY: "AIzaSyCxWtM0W-C-f8erujaPMQiBqK4TuELE-NA"
+    YoutubeAPIKEY2: "AIzaSyC1rmupwaAB8Q-xaOiPCZCMPnYZ_mJML0Q"
+    YoutubeAPIKEY3: "AIzaSyD_31eugYm3WubUF3vT_J8rpI7QazE9mPk"
+    YoutubeAPIKEY4: "AIzaSyAtI0bDMqhbiatYfIf7gmj490jiGixcQVw"
+    YoutubeAPIKEY5: "AIzaSyACVC_AQzCREQopnO6U-g8bOVTi1pdOpwo"
+    YoutubeAPIKEY6: "AIzaSyAoz_H5akWX0z2nQRcmSW_FgPD7BcuWWkM"
+    YoutubeAPIKEY7: "AIzaSyAskB97YEIjZSZO84GDuJYn33NMHMqUADo"
+  nodes:
+    main:
+      host: "34.126.126.36"
+      port: 8080
+      rest_uri: 'http://34.126.126.36:8080/'
+      password: 'youshallnotpass'
+      identifier: 'Koalaa-server-3'
+      region: "singapore"
+    node2:
+      host: "35.232.26.63"
+      port: 8080
+      rest_uri: 'http://35.232.26.63:8080/'
+      password: 'youshallnotpass'
+      identifier: 'Koalaa-server-4'
+      region: "singapore"
 spying:
   text_spying_channel: 697347420123561995
   bot_text_spying_channel: 698536354468069427

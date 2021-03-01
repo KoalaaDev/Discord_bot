@@ -83,7 +83,7 @@ class MusicController:
                 except TypeError:
                     print(self.guild_id, "Could not play", video)
             else:
-                print(self.guild_id, [x.title for x in self.auto_play_queue._queue])
+                print(self.guild_id, "has generated ", [x.title for x in self.auto_play_queue._queue])
     @tasks.loop(seconds=5.0)
     async def check_last_songs(self):
         if self.last_songs.full():
@@ -152,7 +152,7 @@ class MusicController:
                     self.current_track = song
                     await self.next.wait()
             if self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty():
-                while self.auto_play and self.queue.empty():
+                while self.auto_play and self.queue.empty() and not self.auto_play_queue.empty():
                     await self.now_playing.delete()
                     self.next.clear()
                     song = await self.auto_play_queue.get()

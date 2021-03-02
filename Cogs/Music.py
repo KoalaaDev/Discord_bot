@@ -446,7 +446,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return
         else:
             if len(controller.queue._queue)%5 == 0:
-                pages = len(controller.queue._queue)/5
+                pages = int(len(controller.queue._queue)/5)
             else:
                 pages = (len(controller.queue._queue)//5)+1
             pagenumber = itertools.count(1)
@@ -479,7 +479,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             if not controller.last_songs._queue:
                 return
             if len(controller.queue._queue)%5 == 0:
-                pages = len(controller.queue._queue)/5
+                pages = int(len(controller.queue._queue)/5)
             else:
                 pages = (len(controller.queue._queue)//5)+1
             pagenumber = itertools.count(1)

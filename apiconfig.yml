@@ -21,12 +21,12 @@ music:
       identifier: 'Koalaa-server-3'
       region: "singapore"
     node2:
-      host: "35.232.26.63"
+      host: "34.96.225.168"
       port: 8080
-      rest_uri: 'http://35.232.26.63:8080/'
+      rest_uri: 'http://34.96.225.168:8080/'
       password: 'youshallnotpass'
       identifier: 'Koalaa-server-4'
-      region: "singapore"
+      region: "hongkong"
 spying:
   text_spying_channel: 697347420123561995
   bot_text_spying_channel: 698536354468069427

@@ -48,6 +48,7 @@ class MusicController:
         self.current_track =  None
         self.loop = False
         self.loop_queue = False
+        self.region = None
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
@@ -89,7 +90,7 @@ class MusicController:
         if self.last_songs.full():
             print("Song history full! Removing...")
             self.last_songs._queue.pop()
-    @tasks.loop(seconds=60.0)
+    @tasks.loop(seconds=1.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
         channel = self.bot.get_channel(player.channel_id)
@@ -104,17 +105,15 @@ class MusicController:
             if self.channel:
                 await self.channel.send(embed=embed,delete_after=60)
             self.queue._queue.clear()
-            await player.stop()
             await player.disconnect()
             if self.auto_play:
                 self.auto_play = False
                 self.auto_play_queue._queue.clear()
             if self.loop:
                 self.loop = False
-
+            await player.destroy()
     async def controller_loop(self):
         await self.bot.wait_until_ready()
-
         player = self.bot.wavelink.get_player(self.guild_id)
         await player.set_volume(self.volume)
         while True:
@@ -127,6 +126,7 @@ class MusicController:
             self.now_playing_uri, self.now_playing_id, self.requester, self.current_track = song.uri, song.ytid, song.requester, song
             await player.play(song)
             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
+            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
             self.now_playing = await self.channel.send(embed=MusicEmbed)
             await self.next.wait()
             await self.last_songs.put(song)
@@ -142,12 +142,14 @@ class MusicController:
                             self.next.clear()
                             await player.play(x)
                             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]")
+                            MusicEmbed.set_footer(text=f"{self.user.bot.name} | {player.node.region}")
                             self.now_playing = await self.channel.send(embed=MusicEmbed)
                             list_of_songs = list(self.queue._queue)
                             await self.next.wait()
                     self.next.clear()
                     await player.play(song)
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")
+                    MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
                     self.current_track = song
                     await self.next.wait()
@@ -159,6 +161,7 @@ class MusicController:
                     self.now_playing_uri = song.uri
                     self.now_playing_id = song.ytid
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({song.uri}) [{song.requester}]")
+                    MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                     self.now_playing = await self.channel.send(embed=MusicEmbed)
                     self.current_track = song
                     await player.play(song)
@@ -182,20 +185,26 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             config = yaml.safe_load(f)
             nodes = config['music']['nodes']
         for n in nodes.values():
-            node = await self.bot.wavelink.initiate_node(**n)
-            node.set_hook(self.on_event_hook)
+            await self.bot.wavelink.initiate_node(**n)
 
-    async def on_event_hook(self, event):
-        """Node hook callback."""
-        if isinstance(event, (wavelink.TrackEnd, wavelink.TrackStuck)):
-            controller = self.get_controller(event.player)
-            print(str(event.track.title))
-            controller.next.set()
-        if isinstance(event, wavelink.TrackException):
-            controller = self.get_controller(event.player)
-            print(f"An error has occured: {event.error}, Switching nodes!")
-            await event.player.change_node()
-            controller.next.set()
+    @wavelink.WavelinkMixin.listener()
+    async def on_node_ready(self, node: wavelink.Node):
+        print(f'Node {node.identifier} is ready!')
+    @wavelink.WavelinkMixin.listener()
+    async def on_track_end(self, node: wavelink.node.Node, event: wavelink.events.TrackEnd):
+        controller = self.get_controller(event.player)
+        controller.next.set()
+    @wavelink.WavelinkMixin.listener()
+    async def on_track_stuck(self, node: wavelink.node.Node, event: wavelink.events.TrackStuck):
+        controller = self.get_controller(event.player)
+        print(f"Track stuck! Skipping!")
+        controller.next.set()
+    @wavelink.WavelinkMixin.listener()
+    async def on_track_exception(self, node: wavelink.node.Node, event: wavelink.events.TrackException):
+        controller = self.get_controller(event.player)
+        print(f"An error has occured: {event.error}, Switching nodes!")
+        await event.player.change_node()
+
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
         if isinstance(value, commands.Context):
             gid = value.guild.id
@@ -284,6 +293,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not tracks:
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
             return await ctx.send(embed=embed,delete_after=5)
+
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
@@ -295,6 +305,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             for track in playlist:
                 await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {controller.region}")
             await ctx.send(embed=MusicEmbed)
 
         else:
@@ -304,6 +315,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             if not controller.queue.empty() and player.is_playing:
                 MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+                MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                 await ctx.send(embed=MusicEmbed)
 
     @commands.command()
@@ -402,7 +414,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif not player.is_connected:
             return
         else:
-            pages = (len(controller.queue._queue)//5)+1
+            if len(controller.queue._queue)%5 == 0:
+                pages = len(controller.queue._queue)/5
+            else:
+                pages = (len(controller.queue._queue)//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):
@@ -427,8 +442,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send('Autoplay is not enabled', delete_after=20)
         elif not player.is_connected:
             return
+        elif controller.auto_play_queue.empty():
+            return
         else:
-            pages = (len(controller.auto_play_queue._queue)//5)+1
+            if len(controller.queue._queue)%5 == 0:
+                pages = len(controller.queue._queue)/5
+            else:
+                pages = (len(controller.queue._queue)//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):
@@ -453,10 +473,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send('There are no songs currently in the history.', delete_after=20)
         elif not player.is_connected:
             return
+        elif controller.last_songs.empty():
+            return await ctx.send(embed=discord.Embed(description='Song history empty'))
         else:
             if not controller.last_songs._queue:
                 return
-            pages = (len(controller.last_songs._queue)//5)+1
+            if len(controller.queue._queue)%5 == 0:
+                pages = len(controller.queue._queue)/5
+            else:
+                pages = (len(controller.queue._queue)//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):

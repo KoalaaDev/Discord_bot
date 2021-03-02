@@ -48,7 +48,6 @@ class MusicController:
         self.current_track =  None
         self.loop = False
         self.loop_queue = False
-        self.region = None
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
@@ -66,7 +65,7 @@ class MusicController:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
-    @tasks.loop(seconds=5.0)
+    @tasks.loop(seconds=2.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
             videolist = await self.YoutubeSuggestion()
@@ -105,13 +104,14 @@ class MusicController:
             if self.channel:
                 await self.channel.send(embed=embed,delete_after=60)
             self.queue._queue.clear()
+            await player.stop()
             await player.disconnect()
             if self.auto_play:
                 self.auto_play = False
                 self.auto_play_queue._queue.clear()
             if self.loop:
                 self.loop = False
-            await player.destroy()
+
     async def controller_loop(self):
         await self.bot.wait_until_ready()
         player = self.bot.wavelink.get_player(self.guild_id)
@@ -305,7 +305,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             for track in playlist:
                 await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
-            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {controller.region}")
+            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
             await ctx.send(embed=MusicEmbed)
 
         else:
@@ -339,33 +339,39 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await player.set_pause(False)
 
     @commands.command(aliases=["s"])
-    async def skip(self, ctx):
+    async def skip(self, ctx, times: int = 1):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-        if not player.is_playing and not controller.auto_play_queue.empty():
+        if not player.is_playing and controller.auto_play_queue.empty() and controller.queue.empty():
             return await ctx.send('I am not currently playing anything!', delete_after=15)
-
+        if times<1:
+            times = 1
         await ctx.message.add_reaction('\N{OK Hand Sign}')
 
         if controller.loop and controller.auto_play:
             controller.loop = False
             controller.auto_play = False
-            await player.stop()
-            await asyncio.sleep(1)
+            for x in range(times):
+                await player.stop()
+                await asyncio.sleep(1)
             controller.loop = True
             controller.auto_play = True
         elif controller.loop:
             if controller.loop_queue:
-                await player.stop()
+                for x in range(times):
+                    await player.stop()
+                    await asyncio.sleep(1)
             else:
                 controller.loop = False
-                await player.stop()
-                await asyncio.sleep(1)
+                for x in range(times):
+                    await player.stop()
+                    await asyncio.sleep(1)
                 controller.loop = True
         else:
-            await player.stop()
-
+            for x in range(times):
+                await player.stop()
+                await asyncio.sleep(1)
     @commands.command(aliases=['vol'])
     async def volume(self, ctx, *, vol: int):
         """Set the player volume."""
@@ -414,10 +420,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif not player.is_connected:
             return
         else:
-            if len(controller.queue._queue)%5 == 0:
-                pages = len(controller.queue._queue)/5
+            if controller.queue.qsize()%5 == 0:
+                pages = int(controller.queue.qsize()/5)
             else:
-                pages = (len(controller.queue._queue)//5)+1
+                pages = (controller.queue.qsize()//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):
@@ -443,12 +449,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         elif not player.is_connected:
             return
         elif controller.auto_play_queue.empty():
-            return
+            return await ctx.send(embed=discord.Embed(description="Autoplay queue empty!"))
         else:
-            if len(controller.queue._queue)%5 == 0:
-                pages = int(len(controller.queue._queue)/5)
+            if controller.auto_play_queue.qsize()%5 == 0:
+                pages = int(controller.queue.qsize()/5)
             else:
-                pages = (len(controller.queue._queue)//5)+1
+                pages = (controller.auto_play_queue.qsize()//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):
@@ -478,10 +484,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         else:
             if not controller.last_songs._queue:
                 return
-            if len(controller.queue._queue)%5 == 0:
-                pages = int(len(controller.queue._queue)/5)
+            if controller.last_songs.qsize()%5 == 0:
+                pages = int(controller.last_songs.qsize()/5)
             else:
-                pages = (len(controller.queue._queue)//5)+1
+                pages = (controller.last_songs.qsize()//5)+1
             pagenumber = itertools.count(1)
             embeds = []
             for x in range(pages+1):

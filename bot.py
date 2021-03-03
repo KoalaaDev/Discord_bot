@@ -155,29 +155,94 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 
 @client.command()
 async def help(ctx):
-    embed = discord.Embed(colour=discord.Colour.dark_blue())
-    embed.set_author(name="help")
-    embed.add_field(name="-ping",
-                    value="Gives ping to client (expressed in ms)",
-                    inline=False)
-    embed.add_field(name="-kick", value="Kicks specified user", inline=False)
-    embed.add_field(name="-ban", value="Bans specified user", inline=False)
-    embed.add_field(name="-info",
-                    value="Gives information of a user",
-                    inline=False)
-    embed.add_field(name="-invite",
-                    value="Returns invite link of the client",
-                    inline=False)
-    embed.add_field(name="-purge",
-                    value="Clears an X amount of messages",
-                    inline=False)
-    embed.add_field(name="-echo", value="Repeats your message", inline=False)
-    embed.set_image(
-        url=
-        "https://cdn.discordapp.com/attachments/591237894715342874/658309549027098634/hsisindian.png"
-    )
-    embed.set_footer(text="for voice commands type -voicehelp")
-    await ctx.send(embed=embed)
+    contents = ["This is page 1! \n ~purge - Deletes X amount of messages in a channel"
+     "\n ~ping - Gives ping to client (expressed in ms)"
+     "\n ~help - Returns invite link of the client"
+     "\n ~echo - Repeats your message",
+     "This is page 2!"
+     "\n ~connect - Connect to a valid voice channel"
+     "\n ~play or ~p (song name or link) - Search for and add a song to the Queue"
+     "\n ~autoplay or ~ap - Autoplay"
+     "\n ~pause - Pause the player"
+     "\n ~resume - Resume the player from a paused state"
+     "\n ~skip - Skip the currently playing song"
+     "\n ~volume (number) - Set the player volume"
+     "\n ~now_playing - Retrieve the currently playing song"
+     "\n ~queue - Retrieve information on the next 5 songs from the queue"
+     "\n ~clear or ~clr - Clear queue"
+     "\n ~shuffle - Shuffle queue"
+     "\n ~stop - Stop and disconnect the player and controller"
+     "\n ~equalizer - Equalizer for the player"
+     "\n ~loop - Loop current playing song"
+     "\n ~lyrics - Gives lyrics to the current playing song"
+     "\n ~remove (number) - Remove the chosen song number in the queue"
+     "\n ~last - Plays previous song"
+     "\n ~information - Retrieve various Node/Server/Player information",
+     "This is page 3!"
+     "\n ~cat - Gives a random cat picture"
+     "\n ~dog - Gives a random dog picture"
+     "\n ~fox - Gives a random fox picture"
+     "\n ~rabbit - Gives a random rabbit picture"
+     "\n ~duck - Gives a random duck picture"
+     "\n ~img - Google searches your img"
+     "\n ~insult (@member) - Generates an insult for the tagged member",
+     "This is page 4!"
+     "\n ~hotcalc (@member)- Generates a random percentage that determinds how hot you are"
+     "\n ~pepeflip - Sends good luck with a crying or smiling pepe",
+     "This is page 5!"
+     "\n ~batman_slap - Generates the meme"
+     "\n ~distracted - Generates the meme"
+     "\n ~shame - Generates the meme"
+     "\n ~table_flip - Generates the meme"
+     "\n ~first_time - Generates the meme"
+     "\n ~heaven - Generates the meme"
+     "\n ~npc - Generates the meme"
+     "\n ~stonks - Generates the meme"
+     "\n ~wolverine - Generates the meme"
+     "\n ~widen - widens your profile picture"
+     "\n ~speedy - Generates the meme"
+     "\n ~milk - Generates the meme"
+     "\n ~car_reverse - Generates the meme"
+     "\n ~water - Generates the meme"
+     "\n ~emergency - Generates the meme"
+     "\n ~eject - Generates the meme"
+     "\n ~rip - Generates the meme"]
+    pages = 5
+    cur_page = 1
+    message = await ctx.send(f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+    # getting the message object for editing and reacting
+
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+        # This makes sure nobody except the command sender can interact with the "menu"
+
+    while True:
+        try:
+            reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
+            # waiting for a reaction to be added - times out after x seconds, 60 in this
+            # example
+
+            if str(reaction.emoji) == "▶️" and cur_page != pages:
+                cur_page += 1
+                await message.edit(content=f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+                await message.remove_reaction(reaction, user)
+
+            elif str(reaction.emoji) == "◀️" and cur_page > 1:
+                cur_page -= 1
+                await message.edit(content=f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+                await message.remove_reaction(reaction, user)
+
+            else:
+                await message.remove_reaction(reaction, user)
+                # removes reactions if the user tries to go forward on the last page or
+                # backwards on the first page
+        except asyncio.TimeoutError:
+            await message.delete()
+            break
+            # ending the loop if user doesn't react after x seconds
 
 @client.command()
 async def purge(ctx, amount: int):

@@ -223,8 +223,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         player = self.bot.wavelink.get_player(member.guild.id)
         controller = self.get_controller(player)
-        if ( before.channel and after.channel) and not (before.channel.id == after.channel.id) and member.bot and member == self.bot.user:
-            print("reconnecting..")
+        if ( before.channel and not after.channel)  and member.bot and member == self.bot.user:
+            print("Player has been closed! Stopping!")
             if controller.auto_play:
                 controller.auto_play = False
                 controller.auto_play_queue._queue.clear()
@@ -233,7 +233,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             controller.queue._queue.clear()
             await player.stop()
             await player.disconnect()
-            await player.connect(after.channel.id)
 
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
@@ -475,11 +474,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 
-        if not player.current and not controller.last_songs._queue:
-            return await ctx.send('There are no songs currently in the history.', delete_after=20)
-        elif not player.is_connected:
-            return
-        elif controller.last_songs.empty():
+        if controller.last_songs.empty():
             return await ctx.send(embed=discord.Embed(description='Song history empty'))
         else:
             if not controller.last_songs._queue:
@@ -629,7 +624,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             controller.queue._queue.appendleft(controller.current_track)
             for x in range(num+1):
                 last_song = await controller.last_songs.get()
-                print(last_song)
                 controller.queue._queue.appendleft(last_song)
                 if controller.loop and controller.auto_play:
                     controller.loop = False
@@ -641,6 +635,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 elif controller.loop:
                     if controller.loop_queue:
                         await player.stop()
+                        await asyncio.sleep(1)
                     else:
                         controller.loop = False
                         await player.stop()
@@ -648,6 +643,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         controller.loop = True
                 else:
                     await player.stop()
+                    await asyncio.sleep(1)
     @commands.command()
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""

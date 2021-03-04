@@ -283,10 +283,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
         if not tracks:
-            print("falling back to soundcloud")
-            query = f'scsearch:{query}'
-        tracks = await self.bot.wavelink.get_tracks(f'{query}')
-
+            for x in range(3):
+                if tracks:
+                    break
+                else:
+                    print("Retrying...")
+                    tracks = await self.bot.wavelink.get_tracks(f'{query}')
+                    asyncio.sleep(1)
         if not tracks:
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
             return await ctx.send(embed=embed,delete_after=5)

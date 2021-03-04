@@ -9,10 +9,10 @@ cexprtk==0.3.4
 humanize==0.5.1
 wikipedia==1.4.0
 aiohttp==3.6.2
-spotipy==2.4.4
 discord.py==1.6.0
 passlib==1.7.2
 chess==1.4.0
 discord==1.0.1
 PyYAML==5.4.1
 rich==9.12.3
+spotify

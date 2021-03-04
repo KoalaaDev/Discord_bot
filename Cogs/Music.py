@@ -14,7 +14,7 @@ import random
 import os
 import aiohttp
 import yaml
-import spotipy
+import spotify
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
@@ -35,7 +35,7 @@ class MusicController:
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
-        self.last_songs = asyncio.LifoQueue(maxsize=11)
+        self.last_songs = asyncio.Queue(maxsize=11)
         self.now_playing_uri = None
         self.now_playing_id = None
         self.next = asyncio.Event()
@@ -88,7 +88,8 @@ class MusicController:
     async def check_last_songs(self):
         if self.last_songs.full():
             print("Song history full! Removing...")
-            self.last_songs._queue.pop()
+            song = await self.last_songs.get()
+            del song
     @tasks.loop(seconds=1.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
@@ -174,17 +175,19 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         self.controllers = {}
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
-
+        with open(config_file_path) as f:
+            config = yaml.safe_load(f)
+            self.nodes = config['music']['nodes']
+            self.spotify = config['music']['Spotify']
+        self.spotify_client = spotify.Client(self.spotify['ClientID'],self.spotify['ClientSecret'])
         self.bot.loop.create_task(self.start_nodes())
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
-        with open(config_file_path) as f:
-            config = yaml.safe_load(f)
-            nodes = config['music']['nodes']
-        for n in nodes.values():
+
+        for n in self.nodes.values():
             await self.bot.wavelink.initiate_node(**n)
 
     @wavelink.WavelinkMixin.listener()
@@ -201,8 +204,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         controller.next.set()
     @wavelink.WavelinkMixin.listener()
     async def on_track_exception(self, node: wavelink.node.Node, event: wavelink.events.TrackException):
-        controller = self.get_controller(event.player)
-        print(f"An error has occured: {event.error}, Switching nodes!")
+        print(f"[{node.identifier}] An error has occured: {event.error}, Switching nodes!")
         await event.player.change_node()
 
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
@@ -276,12 +278,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         """Search for and add a song to the Queue."""
         song = query
         if not RURL.match(query):
-            query = f'ytmsearch:{query}'
-
-        tracks = await self.bot.wavelink.get_tracks(f'{query}')
-        if not tracks:
-            print("falling back to youtube")
             query = f'ytsearch:{query}'
+
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
         if not tracks:

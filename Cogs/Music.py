@@ -17,6 +17,7 @@ import yaml
 import spotify
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
+spotify_url = re.compile('https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
 class Track(wavelink.Track):
@@ -179,7 +180,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             config = yaml.safe_load(f)
             self.nodes = config['music']['nodes']
             self.spotify = config['music']['Spotify']
-        self.spotify_client = spotify.Client(self.spotify['ClientID'],self.spotify['ClientSecret'])
+        self.spotify_client = spotify.HTTPClient(self.spotify['ClientID'],self.spotify['ClientSecret'])
         self.bot.loop.create_task(self.start_nodes())
     async def start_nodes(self):
         await self.bot.wait_until_ready()
@@ -276,7 +277,28 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
         """Search for and add a song to the Queue."""
+        controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
         song = query
+        if not player.is_connected:
+            await ctx.invoke(self.connect_)
+        if spotify_url.match(query):
+            if 'playlist' in query:
+                id = query.strip('https://open.spotify.com/playlist/')
+                list = await self.spotify_client.get_playlist(id)
+                song_names = [x['track']['name'] for x in list['tracks']['items']]
+                artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]
+                to_load = zip(song_names,artistsdata)
+                for x in to_load:
+                    tracks = await self.bot.wavelink.get_tracks(f'ytmsearch:{x[0]+" "+ x[1]}')
+                    if tracks:
+                        track = tracks[0]
+                        await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
+                else:
+                    print(f"Adding {list['tracks']['total']} to queue")
+                MusicEmbed = discord.Embed(title=f"Added {list['tracks']['total']} songs from {list['name']}",colour=discord.Colour.random())
+                MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
+                return await ctx.send(embed=MusicEmbed)
         if not RURL.match(query):
             query = f'ytsearch:{query}'
 
@@ -294,13 +316,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
             return await ctx.send(embed=embed,delete_after=5)
 
-        player = self.bot.wavelink.get_player(ctx.guild.id)
-        if not player.is_connected:
-            await ctx.invoke(self.connect_)
+
         if "list=" in query and RURL.match(query):
             playlist = tracks.tracks
             track = playlist[0]
-            controller = self.get_controller(ctx)
             controller.auto_play_queue._queue.clear()
             for track in playlist:
                 await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
@@ -310,7 +329,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         else:
             track = tracks[0]
-            controller = self.get_controller(ctx)
             controller.auto_play_queue._queue.clear()
             await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
             if not controller.queue.empty() and player.is_playing:

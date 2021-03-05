@@ -10,7 +10,7 @@ from discord.ext import commands
 from discord.utils import get
 from passlib.hash import sha512_crypt as sha512
 from pyfiglet import Figlet
-
+import itertools
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -155,65 +155,52 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 
 @client.command()
 async def help(ctx):
-    contents = ["This is page 1! \n ~purge - Deletes X amount of messages in a channel"
-     "\n ~ping - Gives ping to client (expressed in ms)"
-     "\n ~help - Returns invite link of the client"
-     "\n ~echo - Repeats your message",
-     "This is page 2!"
-     "\n ~connect - Connect to a valid voice channel"
-     "\n ~play or ~p (song name or link) - Search for and add a song to the Queue"
-     "\n ~autoplay or ~ap - Autoplay"
-     "\n ~pause - Pause the player"
-     "\n ~resume - Resume the player from a paused state"
-     "\n ~skip - Skip the currently playing song"
-     "\n ~volume (number) - Set the player volume"
-     "\n ~now_playing - Retrieve the currently playing song"
-     "\n ~queue - Retrieve information on the next 5 songs from the queue"
-     "\n ~clear or ~clr - Clear queue"
-     "\n ~shuffle - Shuffle queue"
-     "\n ~stop - Stop and disconnect the player and controller"
-     "\n ~equalizer - Equalizer for the player"
-     "\n ~loop - Loop current playing song"
-     "\n ~lyrics - Gives lyrics to the current playing song"
-     "\n ~remove (number) - Remove the chosen song number in the queue"
-     "\n ~last - Plays previous song"
-     "\n ~information - Retrieve various Node/Server/Player information",
-     "This is page 3!"
-     "\n ~cat - Gives a random cat picture"
-     "\n ~dog - Gives a random dog picture"
-     "\n ~fox - Gives a random fox picture"
-     "\n ~rabbit - Gives a random rabbit picture"
-     "\n ~duck - Gives a random duck picture"
-     "\n ~img - Google searches your img"
-     "\n ~insult (@member) - Generates an insult for the tagged member",
-     "This is page 4!"
-     "\n ~hotcalc (@member)- Generates a random percentage that determinds how hot you are"
-     "\n ~pepeflip - Sends good luck with a crying or smiling pepe",
-     "This is page 5!"
-     "\n ~batman_slap - Generates the meme"
-     "\n ~distracted - Generates the meme"
-     "\n ~shame - Generates the meme"
-     "\n ~table_flip - Generates the meme"
-     "\n ~first_time - Generates the meme"
-     "\n ~heaven - Generates the meme"
-     "\n ~npc - Generates the meme"
-     "\n ~stonks - Generates the meme"
-     "\n ~wolverine - Generates the meme"
-     "\n ~widen - widens your profile picture"
-     "\n ~speedy - Generates the meme"
-     "\n ~milk - Generates the meme"
-     "\n ~car_reverse - Generates the meme"
-     "\n ~water - Generates the meme"
-     "\n ~emergency - Generates the meme"
-     "\n ~eject - Generates the meme"
-     "\n ~rip - Generates the meme"]
+    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)'],['~help','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
+    ,['~play or ~p (song name or link)','Search for and add a song to the Queue'],['~autoplay or ~ap','Autoplay'],['~pause','Pause the player'],['~resume','Resume the player from a paused state'],['~skip','Skip the currently playing song']
+    ,['~volume (number)','Set the player volume'],['~now_playing','Retrieve the currently playing song'],['~queue','Retrieve information on the next 5 songs from the queue'],['~clear or ~clr','Clear queue'],['~shuffle','Shuffle queue']
+    ,['~stop','Stop and disconnect the player and controller'],['~equalizer','Equalizer for the player'],['~loop','Loop current playing song'],['~lyrics','Gives lyrics to the current playing song'],['~remove (number)','Remove the chosen song number in the queue']
+    ,['~last','Plays previous song'],['~information','Retrieve various Node/Server/Player information'],['~cat','Gives a random cat picture'],['~dog','Gives a random dog picture'],['~fox','Gives a random fox picture']
+    ,['~rabbit','Gives a random rabbit picture'],['~duck','Gives a random duck picture'],['~img','Google searches your img'],['~insult (@member)','Generates an insult for the tagged member']#29
+    ,['~hotcalc (@member)','Generates a random percentage that determinds how hot you are'],['~pepeflip','Sends good luck with a crying or smiling pepe'],['~batman_slap','Generates the meme'],['~distracted','Generates the meme']
+    ,['~shame','Generates the meme'],['~table_flip','Generates the meme'],['~first_time','Generates the meme'],['~heaven','Generates the meme'],['~npc','Generates the meme'],['~stonks','Generates the meme']
+    ,['~wolverine','Generates the meme'],['~widen','widens your profile picture'],['~speedy','Generates the meme'],['~milk','Generates the meme'],['~car_reverse','Generates the meme'],['~water','Generates the meme'],['~emergency','Generates the meme'],['~eject','Generates the meme']
+    ,['~rip','Generates the meme']]#ALVIN IS BIG FURRY
+    embeds = []
     pages = 5
-    cur_page = 1
-    message = await ctx.send(f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+    cur_page = 0
+    embed = discord.Embed(title=f"Help")
+    [embed.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,0,4))]
+    embed.set_footer(text=f"Page 1/{pages}")
+    message = await ctx.send(embed=embed)
+    embeds.append(embed)
     # getting the message object for editing and reacting
-
+    embed2 = discord.Embed(title=f"Help")
+    [embed2.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,5,22))]
+    embed2.set_footer(text=f"Page 2/{pages}")
     await message.add_reaction("◀️")
     await message.add_reaction("▶️")
+    embeds.append(embed2)
+
+    embed3 = discord.Embed(title=f"Help")
+    [embed3.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,23,29))]
+    embed3.set_footer(text=f"Page 3/{pages}")
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+    embeds.append(embed3)
+
+    embed4 = discord.Embed(title=f"Help")
+    [embed4.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,30,31))]
+    embed4.set_footer(text=f"Page 4/{pages}")
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+    embeds.append(embed4)
+
+    embed5 = discord.Embed(title=f"Help")
+    [embed5.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,32,48))]
+    embed5.set_footer(text=f"Page 5/{pages}")
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+    embeds.append(embed5)
 
     def check(reaction, user):
         return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
@@ -227,12 +214,12 @@ async def help(ctx):
 
             if str(reaction.emoji) == "▶️" and cur_page != pages:
                 cur_page += 1
-                await message.edit(content=f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+                await message.edit(embed=embeds[cur_page])
                 await message.remove_reaction(reaction, user)
 
             elif str(reaction.emoji) == "◀️" and cur_page > 1:
                 cur_page -= 1
-                await message.edit(content=f"Page {cur_page}/{pages}:\n{contents[cur_page-1]}")
+                await message.edit(embed=embeds[cur_page])
                 await message.remove_reaction(reaction, user)
 
             else:

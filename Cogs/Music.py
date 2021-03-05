@@ -134,20 +134,23 @@ class MusicController:
             await self.last_songs.put(song)
             if self.loop:
                 while self.loop:
-                    if self.now_playing:
-                        await self.now_playing.delete()
                     if self.loop_queue:
-                        await self.now_playing.delete()
+                        if song not in self.queue._queue:
+                            await self.queue.put(song)
+                            print('readding song into queue')
                         list_of_songs = list(self.queue._queue)
                         for x in list_of_songs:
-                            await self.now_playing.delete()
+                            if self.now_playing:
+                                await self.now_playing.delete()
                             self.next.clear()
                             await player.play(x)
                             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]")
-                            MusicEmbed.set_footer(text=f"{self.user.bot.name} | {player.node.region}")
+                            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                             self.now_playing = await self.channel.send(embed=MusicEmbed)
                             list_of_songs = list(self.queue._queue)
                             await self.next.wait()
+                    if self.now_playing:
+                        await self.now_playing.delete()
                     self.next.clear()
                     await player.play(song)
                     MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{song}]({self.now_playing_uri}) [{song.requester}]")

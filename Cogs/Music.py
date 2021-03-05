@@ -288,6 +288,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if spotify_url.match(query):
             if 'playlist' in query:
                 id = query.strip('https://open.spotify.com/playlist/')
+                if '?' in id:
+                    id = id.split('?')[0]
                 list = await self.spotify_client.get_playlist(id)
                 song_names = [x['track']['name'] for x in list['tracks']['items']]
                 artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]

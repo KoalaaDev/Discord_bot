@@ -296,9 +296,29 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
                 else:
                     print(f"Adding {list['tracks']['total']} to queue")
+                controller.auto_play_queue._queue.clear()
                 MusicEmbed = discord.Embed(title=f"Added {list['tracks']['total']} songs from {list['name']}",colour=discord.Colour.random())
                 MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                 return await ctx.send(embed=MusicEmbed)
+            if "track" in query:
+                id = query.strip('https://open.spotify.com/track/')
+                if '?' in id:
+                    id = id.split('?')[0]
+                track = await self.spotify_client.track(id)
+                song_name = track['name']
+                song_artist = track['artists'][0]['name']
+                tracks = await self.bot.wavelink.get_tracks(f'ytmsearch:{song_name } {song_artist}')
+                if not tracks:
+                    return await ctx.send(embed=discord.Embed(description='Could not find song'))
+                track = tracks[0]
+                await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
+                controller.auto_play_queue._queue.clear()
+                if not controller.queue.empty() and player.is_playing:
+                    MusicEmbed = discord.Embed(title="Queued",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+                    MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
+                    return await ctx.send(embed=MusicEmbed)
+                else:
+                    return
         if not RURL.match(query):
             query = f'ytsearch:{query}'
 

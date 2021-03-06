@@ -155,7 +155,7 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 
 @client.command()
 async def help(ctx):
-    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)'],['~help','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
+    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)'],['~invite','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
     ,['~play or ~p (song name or link)','Search for and add a song to the Queue'],['~autoplay or ~ap','Autoplay'],['~pause','Pause the player'],['~resume','Resume the player from a paused state'],['~skip','Skip the currently playing song']
     ,['~volume (number)','Set the player volume'],['~now_playing','Retrieve the currently playing song'],['~queue','Retrieve information on the next 5 songs from the queue'],['~clear or ~clr','Clear queue'],['~shuffle','Shuffle queue']
     ,['~stop','Stop and disconnect the player and controller'],['~equalizer','Equalizer for the player'],['~loop','Loop current playing song'],['~lyrics','Gives lyrics to the current playing song'],['~remove (number)','Remove the chosen song number in the queue']

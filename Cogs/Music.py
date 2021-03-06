@@ -18,6 +18,7 @@ import spotify
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
+
 spotify_url = re.compile('https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
@@ -71,7 +72,7 @@ class MusicController:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=1)
     async def update_playlist(self):
         self.spotify_playlists = await spotify_client.featured_playlists(country="SG")
         print("Updating Spotify playlists")
@@ -300,7 +301,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 id = query.strip('https://open.spotify.com/playlist/')
                 if '?' in id:
                     id = id.split('?')[0]
-                list = await spotify_client.get_playlist(id)
+                try:
+                    list = await spotify_client.get_playlist(id)
+                except spotify.NotFound:
+                    ctx.send(embed=discord.Embed(description="Playlist not found. Try another!"),delete_after=10)
                 song_names = [x['track']['name'] for x in list['tracks']['items']]
                 artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]
                 to_load = zip(song_names,artistsdata)
@@ -319,7 +323,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 id = query.strip('https://open.spotify.com/track/')
                 if '?' in id:
                     id = id.split('?')[0]
-                track = await spotify_client.track(id)
+                try:
+                    track = await spotify_client.track(id)
+                except spotify.NotFound:
+                    return await ctx.send(embed=discord.Embed(description="Playlist not found. Try another!"),delete_after=10)
                 song_name = track['name']
                 song_artist = track['artists'][0]['name']
                 tracks = await self.bot.wavelink.get_tracks(f'ytmsearch:{song_name } {song_artist}')
@@ -684,11 +691,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             [Embed.add_field(name=x[0],value=x[1]) for x in Spotify_List]
             await ctx.send(embed=Embed)
         elif mode.lower() == 'play':
+            play = self.bot.get_command("play")
             search = [x for x in Spotify_List if query in x[0]]
             if not search:
-                return await ctx.send(embed=discord.Embed(description='Query not found'))
-            play = self.bot.get_command("play")
-            await play(ctx,query=search[0][2])
+                search_results = await spotify_client.search(query,"playlist")
+                url = search_results['playlists']['items'][0]['external_urls']['spotify']
+                return await play(ctx,query=url)
+                # return await ctx.send(embed=discord.Embed(description='Query not found'))
+
+            return await play(ctx,query=search[0][2])
         else:
             await ctx.send(embed=discord.Embed(description='Hasnt been implemented :()'))
     @commands.command(aliases=['back'])
@@ -733,7 +744,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         free = humanize.naturalsize(node.stats.memory_free)
         cpu = node.stats.cpu_cores
 
-        fmt = f'**Doorbanger:** `v2.3.1`\n\n' \
+        fmt = f'**Doorbanger:** `v2.6.1`\n\n' \
               f'Connected to `{len(self.bot.wavelink.nodes)}` nodes.\n' \
               f'Best available Node `{self.bot.wavelink.get_best_node().__repr__()}`\n' \
               f'`{len(self.bot.wavelink.players)}` players are distributed on nodes.\n' \

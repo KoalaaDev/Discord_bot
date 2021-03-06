@@ -17,9 +17,13 @@ import yaml
 import spotify
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
+
 spotify_url = re.compile('https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
+with open(config_file_path) as f:
+    config = yaml.safe_load(f)
+    spotify_client = spotify.HTTPClient(config['music']['Spotify']['ClientID'],config['music']['Spotify']['ClientSecret'])
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
@@ -49,14 +53,15 @@ class MusicController:
         self.current_track =  None
         self.loop = False
         self.loop_queue = False
+        self.spotify_playlists = None
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
         self.check_last_songs.start()
+        self.update_playlist.start()
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.YoutubeAPIKEY = itertools.cycle([x for x in config['music']["Youtube"].values()])
-
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
@@ -66,6 +71,10 @@ class MusicController:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
+    @tasks.loop(hours=12)
+    async def update_playlist(self):
+        self.spotify_playlists = await spotify_client.featured_playlists(country="SG")
+        print("Updating Spotify playlists")
     @tasks.loop(seconds=2.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
@@ -183,8 +192,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             config = yaml.safe_load(f)
             self.nodes = config['music']['nodes']
             self.spotify = config['music']['Spotify']
-        self.spotify_client = spotify.HTTPClient(self.spotify['ClientID'],self.spotify['ClientSecret'])
+
         self.bot.loop.create_task(self.start_nodes())
+
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
@@ -290,7 +300,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 id = query.strip('https://open.spotify.com/playlist/')
                 if '?' in id:
                     id = id.split('?')[0]
-                list = await self.spotify_client.get_playlist(id)
+                list = await spotify_client.get_playlist(id)
                 song_names = [x['track']['name'] for x in list['tracks']['items']]
                 artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]
                 to_load = zip(song_names,artistsdata)
@@ -309,7 +319,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 id = query.strip('https://open.spotify.com/track/')
                 if '?' in id:
                     id = id.split('?')[0]
-                track = await self.spotify_client.track(id)
+                track = await spotify_client.track(id)
                 song_name = track['name']
                 song_artist = track['artists'][0]['name']
                 tracks = await self.bot.wavelink.get_tracks(f'ytmsearch:{song_name } {song_artist}')
@@ -657,6 +667,30 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             del controller.queue._queue[num-1]
         except IndexError:
             await ctx.send(embed=discord.Embed(description="Could not remove"))
+    @commands.command()
+    async def playlist(self, ctx, mode: str =None, *, query:str =None):
+        controller = self.get_controller(ctx)
+        await asyncio.sleep(1)
+        spotify_playlist_names = [x['name'] for x in controller.spotify_playlists['playlists']['items']]
+        spotify_playlist_descriptions = [x['description'] for x in controller.spotify_playlists['playlists']['items']]
+        spotify_playlist_urls = [x['external_urls']['spotify'] for x in controller.spotify_playlists['playlists']['items']]
+        Spotify_List = zip(spotify_playlist_names,spotify_playlist_descriptions,spotify_playlist_urls)
+        if mode == None:
+            await ctx.send(embed=discord.Embed(description='Please select mode:\n```list```\n```play```\n```create```'))
+        elif query == None and mode.lower() != 'list':
+            await ctx.send(embed=discord.Embed(description='Query not selected'))
+        if mode.lower() == "list":
+            Embed = discord.Embed(title="Playlists")
+            [Embed.add_field(name=x[0],value=x[1]) for x in Spotify_List]
+            await ctx.send(embed=Embed)
+        elif mode.lower() == 'play':
+            search = [x for x in Spotify_List if query in x[0]]
+            if not search:
+                return await ctx.send(embed=discord.Embed(description='Query not found'))
+            play = self.bot.get_command("play")
+            await play(ctx,query=search[0][2])
+        else:
+            await ctx.send(embed=discord.Embed(description='Hasnt been implemented :()'))
     @commands.command(aliases=['back'])
     async def last(self, ctx, num = 0):
         controller = self.get_controller(ctx)

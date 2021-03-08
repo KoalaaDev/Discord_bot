@@ -304,7 +304,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 try:
                     list = await spotify_client.get_playlist(id)
                 except spotify.NotFound:
-                    ctx.send(embed=discord.Embed(description="Playlist not found. Try another!"),delete_after=10)
+                    ctx.send(embed=discord.Embed(description=f"Playlist could not be found"))
+                except 
                 song_names = [x['track']['name'] for x in list['tracks']['items']]
                 artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]
                 to_load = zip(song_names,artistsdata)
@@ -353,7 +354,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 else:
                     print("Retrying...")
                     tracks = await self.bot.wavelink.get_tracks(f'{query}')
-                    asyncio.sleep(1)
+                    await asyncio.sleep(1)
         if not tracks:
             embed = discord.Embed(description='failed to find any songs on youtube or soundcloud')
             return await ctx.send(embed=embed,delete_after=5)

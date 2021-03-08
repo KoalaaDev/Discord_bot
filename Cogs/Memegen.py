@@ -112,7 +112,7 @@ class Meme(commands.Cog):
         await ctx.send(embed=embed)
     @commands.command()
     async def change_my_mind(self, ctx, member:discord.Member):
-        img = await self.api.grave(member.avatar_url)
+        img = await self.api.change_my_mind(member.avatar_url)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)

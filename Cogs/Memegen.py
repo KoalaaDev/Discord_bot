@@ -21,7 +21,7 @@ class Meme(commands.Cog):
         await ctx.send(embed=embed)
     @commands.command()
     async def shame(self, ctx, user:discord.Member = None):
-        img = await self.api.dock_of_shame(user)
+        img = await self.api.dock_of_shame(user.avatar_url)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
@@ -110,6 +110,11 @@ class Meme(commands.Cog):
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
-
+    @commands.command()
+    async def change_my_mind(self, ctx, member:discord.Member):
+        img = await self.api.change_my_mind(member.avatar_url)
+        embed = discord.Embed()
+        embed.set_image(url=img.url)
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Meme(bot))

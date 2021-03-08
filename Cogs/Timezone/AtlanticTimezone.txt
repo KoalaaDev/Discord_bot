@@ -1,0 +1,12 @@
+Atlantic/Azores
+Atlantic/Bermuda
+Atlantic/Canary
+Atlantic/Cape_Verde
+Atlantic/Faeroe
+Atlantic/Faroe
+Atlantic/Jan_Mayen
+Atlantic/Madeira
+Atlantic/Reykjavik
+Atlantic/South_Georgia
+Atlantic/St_Helena
+Atlantic/Stanley

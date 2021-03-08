@@ -16,3 +16,5 @@ discord==1.0.1
 PyYAML==5.4.1
 rich==9.12.3
 spotify
+datetime
+pytz

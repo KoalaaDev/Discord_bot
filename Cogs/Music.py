@@ -305,7 +305,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     list = await spotify_client.get_playlist(id)
                 except spotify.NotFound:
                     ctx.send(embed=discord.Embed(description=f"Playlist could not be found"))
-                except spotify.
+                except spotify.Forbidden:
+                    print("spotify rate limited!")
                 song_names = [x['track']['name'] for x in list['tracks']['items']]
                 artistsdata = [x['track']['artists'][0]['name'] for x in list['tracks']['items']]
                 to_load = zip(song_names,artistsdata)

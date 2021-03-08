@@ -155,13 +155,20 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 
 @client.command()
 async def help(ctx):
-    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)'],['~invite','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
+    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)']
+    ,['~invite','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
+    ####################################################################
     ,['~play or ~p (song name or link)','Search for and add a song to the Queue'],['~autoplay or ~ap','Autoplay'],['~pause','Pause the player'],['~resume','Resume the player from a paused state'],['~skip','Skip the currently playing song']
     ,['~volume (number)','Set the player volume'],['~now_playing','Retrieve the currently playing song'],['~queue','Retrieve information on the next 5 songs from the queue'],['~clear or ~clr','Clear queue'],['~shuffle','Shuffle queue']
     ,['~stop','Stop and disconnect the player and controller'],['~equalizer','Equalizer for the player'],['~loop','Loop current playing song'],['~lyrics','Gives lyrics to the current playing song'],['~remove (number)','Remove the chosen song number in the queue']
-    ,['~last','Plays previous song'],['~information','Retrieve various Node/Server/Player information'],['~cat','Gives a random cat picture'],['~dog','Gives a random dog picture'],['~fox','Gives a random fox picture']
-    ,['~rabbit','Gives a random rabbit picture'],['~duck','Gives a random duck picture'],['~img','Google searches your img'],['~insult (@member)','Generates an insult for the tagged member']#29
-    ,['~hotcalc (@member)','Generates a random percentage that determinds how hot you are'],['~pepeflip','Sends good luck with a crying or smiling pepe'],['~batman_slap','Generates the meme'],['~distracted','Generates the meme']
+    ,['~last','Plays previous song'],['~information','Retrieve various Node/Server/Player information']
+    ####################################################################
+    ,['~cat','Gives a random cat picture'],['~dog','Gives a random dog picture'],['~fox','Gives a random fox picture']
+    ,['~rabbit','Gives a random rabbit picture'],['~duck','Gives a random duck picture'],['~img','Google searches your img'],['~insult (@member)','Generates an insult for the tagged member']
+    ####################################################################
+    ,['~hotcalc (@member)','Generates a random percentage that determinds how hot you are'],['~pepeflip','Sends good luck with a crying or smiling pepe']
+    ####################################################################
+    ,['~batman_slap','Generates the meme'],['~distracted','Generates the meme']
     ,['~shame','Generates the meme'],['~table_flip','Generates the meme'],['~first_time','Generates the meme'],['~heaven','Generates the meme'],['~npc','Generates the meme'],['~stonks','Generates the meme']
     ,['~wolverine','Generates the meme'],['~widen','widens your profile picture'],['~speedy','Generates the meme'],['~milk','Generates the meme'],['~car_reverse','Generates the meme'],['~water','Generates the meme'],['~emergency','Generates the meme'],['~eject','Generates the meme']
     ,['~rip','Generates the meme']]#ALVIN IS BIG FURRY

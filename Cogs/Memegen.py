@@ -21,7 +21,7 @@ class Meme(commands.Cog):
         await ctx.send(embed=embed)
     @commands.command()
     async def shame(self, ctx, user:discord.Member = None):
-        img = await self.api.dock_of_shame(user)
+        img = await self.api.dock_of_shame(user.avatar_url)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)

@@ -61,7 +61,7 @@ elif COGS_CONFIG == 'normal':
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Test" not in cog]
 elif COGS_CONFIG == 'disarmed':
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Spying" not in cog and "Test" not in cog]
+    if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Spying" not in cog and "Test" not in cog and "Time" not in cog]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 

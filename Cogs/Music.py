@@ -488,7 +488,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             embeds = []
             for x in range(pages+1):
                 upcoming = list(itertools.islice(controller.queue._queue, x*5,x*5+5))
-                print(upcoming)
                 fmt = '\n'.join(f'```{k}. {str(song)}```' for k,song in enumerate(upcoming,start=x*5+1))
                 page = discord.Embed(title=f'Queue', colour=discord.Colour.random())
                 page.add_field(name=f"Now playing: `{player.current}`",value=fmt)

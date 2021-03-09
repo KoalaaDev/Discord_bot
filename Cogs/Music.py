@@ -361,7 +361,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send(embed=embed,delete_after=5)
 
 
-        if "list=" in query and RURL.match(query):
+        if "list=" in query and RURL.match(query) and isinstance(tracks, wavelink.TrackPlaylist):
             playlist = tracks.tracks
             track = playlist[0]
             controller.auto_play_queue._queue.clear()

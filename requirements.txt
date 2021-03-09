@@ -1,5 +1,5 @@
 sympy==1.6.2
-wavelink==0.9.8
+wavelink==0.9.9
 pyfiglet==0.8.post1
 urbandict==0.6.1
 lyricsgenius==1.4.0
@@ -16,5 +16,4 @@ discord==1.0.1
 PyYAML==5.4.1
 rich==9.12.3
 spotify
-datetime
 pytz

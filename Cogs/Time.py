@@ -59,13 +59,15 @@ class Time(commands.Cog):
     @commands.command()
     async def AreaChoice(self, ctx, choice: str):
         await ctx.send(f"Your timezone list of choices is {choice}")
-        choice = f'{choice}.txt'
-        with open(f"{choice}","r") as time:
-            showlist = time.read()
-            await ctx.send(showlist)
-    # @commands.command()
-    # async def timezone(self, ctx, tzchoice = str):
-    #         dt_now = datetime.datetime.now(tz=pytz.(tzchoice))
+        with open(f"Cogs\\Timezone\\{choice}.txt") as timezone:
+            showlist = timezone.read()
+            print(timezone)
+        await ctx.send(showlist)
+        choice = ""
+
+    @commands.command()
+    async def timezone(self, ctx, tzchoice: str):
+        dt_now = datetime.datetime.now(tz=pytz.{tzchoice})
     #
     # @commands.command()
     # async def timezonelist(self, ctx, area = "timezonelist.txt"):

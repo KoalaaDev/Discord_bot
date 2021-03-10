@@ -51,15 +51,19 @@ client = commands.Bot(
 client.remove_command("help")
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
-print(f"\u001b[36m Starting HS Bot v2 at {d1} \u001b[0m")
+print(f"\u001b[36m Starting HS Bot v3 at {d1} \u001b[0m")
 if COGS_CONFIG == 'all':
     Cogs_to_load = [
         "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
         if "py" in cog and "pycache" not in cog
     ]
 elif COGS_CONFIG == 'normal':
-    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Test" not in cog]
+    normal_blacklist = ["Grief",'Test']
+    excluded = len(normal_blacklist)
+    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and cog not in normal_blacklist]
 elif COGS_CONFIG == 'disarmed':
+    disarmed_blacklist = ["Grief",'Test','Spying']
+    excluded = len(disarmed_blacklist)
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
     if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Spying" not in cog and "Test" not in cog and "Time" not in cog]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
@@ -73,13 +77,19 @@ async def on_connect():
 
 @client.event
 async def on_ready():
+    COGS_LOADED = 0
+    COGS_FAILED = 0
     for cogger in Cogs_to_load:
         try:
             client.load_extension(cogger)
             cogger = cogger.replace("Cogs.", "")
-            print(f"Cog \u001b[43m {cogger} \u001b[0m loaded")
+            print(f"Cog \u001b[102m {cogger} \u001b[0m loaded")
+            COGS_LOADED += 1
         except Exception as e:
-            print(f"ERROR {cogger}: {e}")
+            print(f"ERROR {cogger}: \u001b[101m {e} \u001b[0m")
+            COGS_FAILED += 1
+    else:
+        print(f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED")
     await client.change_presence(activity=discord.Activity(
         type=discord.ActivityType.listening, name="help"))
     print("\u001b[33m Logged in as {0} ({0.id}) \u001b[0m".format(client.user))
@@ -88,9 +98,7 @@ async def on_ready():
           str(len(set(client.get_all_members()))) + " users | " +
           "Connected to " + str(len(client.voice_clients)) +
           " voice clients \u001b[0m")
-    print(
-        "\u001b[37m ------------------------------------------------------------------------------------- \u001b[0m"
-    )
+    print("\u001b[97m ------------------------------------------------------------------------------------- \u001b[0m")
 
 
 @client.event

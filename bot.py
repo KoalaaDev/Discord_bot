@@ -98,7 +98,7 @@ async def on_ready():
           str(len(set(client.get_all_members()))) + " users | " +
           "Connected to " + str(len(client.voice_clients)) +
           " voice clients \u001b[0m")
-    print("\u001b[97m ------------------------------------------------------------------------------------- \u001b[0m")
+    print("\u001b[7m ------------------------------------------------------------------------------------- \u001b[0m")
 
 
 @client.event

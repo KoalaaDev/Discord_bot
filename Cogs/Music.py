@@ -724,15 +724,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 play = self.bot.get_command("play")
                 with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"r") as f:
                     saved_playlist = yaml.safe_load(f)
-                    playlists = saved_playlist.get(ctx.guild.id)
+                    playlists = saved_playlist.get(ctx.guild.id,None)
                     if playlists:
-                        search = playlists.get(query)
-                        searchURL = search[1]
-                        if searchURL:
-                            return await play(ctx,query=searchURL)
+                        searched = playlists.get(query)
+                        if search:
+                            search = searched[1]
+                            return await play(ctx,query=search)
+                    else:
+                        search = None
                 if not search:
-                    search = [x for x in Spotify_List if query in x[0]]
-                    return await play(ctx,query=search[0][2])
+                    search_results = [x for x in Spotify_List if query in x[0]]
+                    return await play(ctx,query=search_results[0][2])
                 if not search:
                     search_results = await spotify_client.search(query,"playlist")
                     url = search_results['playlists']['items'][0]['external_urls']['spotify']

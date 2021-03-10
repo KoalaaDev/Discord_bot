@@ -60,12 +60,12 @@ if COGS_CONFIG == 'all':
 elif COGS_CONFIG == 'normal':
     normal_blacklist = ["Grief",'Test']
     excluded = len(normal_blacklist)
-    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and cog not in normal_blacklist]
+    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and cog.strip(".py") not in normal_blacklist]
 elif COGS_CONFIG == 'disarmed':
-    disarmed_blacklist = ["Grief",'Test','Spying']
+    disarmed_blacklist = ["Grief",'Test','Spying','Time']
     excluded = len(disarmed_blacklist)
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog and "Grief" not in cog and "Spying" not in cog and "Test" not in cog and "Time" not in cog]
+    if "py" in cog and "pycache" not in cog and  cog.strip(".py") not in disarmed_blacklist]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 

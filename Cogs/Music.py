@@ -15,9 +15,20 @@ import os
 import aiohttp
 import yaml
 import spotify
+import pycountry
 from lyricsgenius import Genius
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
-
+spotify_countries = ['AD','AE','AG','AL','AM','AR','AT','AU','AZ','BA','BB','BD','BE','BF',
+ 'BG','BH','BI','BN','BO','BR','BS','BT','BW','BY','BZ','CA','CH','CL','CM','CO',
+ 'CR','CV','CY','CZ','DE','DK','DM','DO','DZ','EC','EE','EG','ES','FI','FJ','FM',
+ 'FR','GA','GB','GD','GE','GH','GM','GN','GQ','GR','GT','GW','GY','HK','HN','HR','HT',
+ 'HU','ID','IE','IL','IN','IS','IT','JM','JO','JP','KE','KG','KH','KI','KM','KN','KR',
+ 'KW','KZ','LA','LB','LC','LI','LK','LR','LS','LT','LU','LV','MA','MC','MD','ME',
+ 'MH','MK','ML','MN','MO','MR','MT','MV','MW','MX','MY','NA','NE','NG','NI','NL',
+ 'NO','NP','NR','NZ','OM','PA','PE','PG','PH','PK','PL','PS','PT','PW','PY','QA',
+ 'RO','RS','RU','RW','SA','SB','SC','SE','SG','SI','SK','SL','SM','SN','SR','ST',
+ 'SV','SZ','TD','TG','TH','TL','TN','TO','TR','TT','TV','TW','TZ','UA','UG','US',
+ 'UY','UZ','VC','VN','VU','WS','XK','ZA','ZW']
 
 spotify_url = re.compile('https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
@@ -55,6 +66,7 @@ class MusicController:
         self.loop = False
         self.loop_queue = False
         self.spotify_playlists = None
+        self.spotify_region = "SG"
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
@@ -74,7 +86,7 @@ class MusicController:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
     @tasks.loop(hours=1)
     async def update_playlist(self):
-        self.spotify_playlists = await spotify_client.featured_playlists(country="SG")
+        self.spotify_playlists = await spotify_client.featured_playlists(country=self.spotify_region)
         print("Updating Spotify playlists")
     @tasks.loop(seconds=2.0)
     async def check_autoplay_queue(self):
@@ -111,18 +123,23 @@ class MusicController:
         except AttributeError:
             member_list = None
         if not member_list and player.is_connected:
-            embed = discord.Embed(title="Everyone left me alone..Disconecting!")
-            embed.set_footer(text="I'll see you on the next doorbanging adventure!")
-            if self.channel:
-                await self.channel.send(embed=embed,delete_after=60)
-            self.queue._queue.clear()
-            await player.stop()
-            await player.disconnect()
-            if self.auto_play:
-                self.auto_play = False
-                self.auto_play_queue._queue.clear()
-            if self.loop:
-                self.loop = False
+            await asyncio.sleep(300)
+            member_list = [x.name for x in channel.members if x.bot == False]
+            if member_list:
+                return
+            else:
+                embed = discord.Embed(title="Everyone left me alone..Disconecting!")
+                embed.set_footer(text="I'll see you on the next doorbanging adventure!")
+                if self.channel:
+                    await self.channel.send(embed=embed,delete_after=60)
+                self.queue._queue.clear()
+                await player.stop()
+                await player.disconnect()
+                if self.auto_play:
+                    self.auto_play = False
+                    self.auto_play_queue._queue.clear()
+                if self.loop:
+                    self.loop = False
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -634,7 +651,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         controller = self.get_controller(ctx)
         if controller.queue._queue:
             random.shuffle(controller.queue._queue)
-            await ctx.send(embed=discord.Embed(description="Shuffled"))
+            await ctx.message.add_reaction("\N{Twisted Rightwards Arrows}")
         else:
             await ctx.send(embed=discord.Embed(description="Nothing to shuffle!"))
 
@@ -684,25 +701,39 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         spotify_playlist_urls = [x['external_urls']['spotify'] for x in controller.spotify_playlists['playlists']['items']]
         Spotify_List = zip(spotify_playlist_names,spotify_playlist_descriptions,spotify_playlist_urls)
         if mode == None:
-            await ctx.send(embed=discord.Embed(description='Please select mode:\n```list```\n```play```\n```create```'))
-        elif query == None and mode.lower() != 'list':
-            await ctx.send(embed=discord.Embed(description='Query not selected'))
-        if mode.lower() == "list":
-            Embed = discord.Embed(title="Playlists")
-            [Embed.add_field(name=x[0],value=x[1]) for x in Spotify_List]
-            await ctx.send(embed=Embed)
-        elif mode.lower() == 'play':
-            play = self.bot.get_command("play")
-            search = [x for x in Spotify_List if query in x[0]]
-            if not search:
-                search_results = await spotify_client.search(query,"playlist")
-                url = search_results['playlists']['items'][0]['external_urls']['spotify']
-                return await play(ctx,query=url)
-                # return await ctx.send(embed=discord.Embed(description='Query not found'))
-
-            return await play(ctx,query=search[0][2])
+            return await ctx.send(embed=discord.Embed(description='Please select mode:'+"\n".join([f'```{x}```' for x in ["list",'play','region','refresh']])))
         else:
-            await ctx.send(embed=discord.Embed(description='Hasnt been implemented :()'))
+            if mode.lower() == "list":
+                Embed = discord.Embed(title="Featured Playlists")
+                [Embed.add_field(name=x[0],value=x[1]) for x in Spotify_List]
+                Embed.set_footer(text=f"{pycountry.countries.get(alpha_2=controller.spotify_region).name}")
+                return await ctx.send(embed=Embed)
+            elif mode.lower() == 'play':
+                play = self.bot.get_command("play")
+                search = [x for x in Spotify_List if query in x[0]]
+                if not search:
+                    search_results = await spotify_client.search(query,"playlist")
+                    url = search_results['playlists']['items'][0]['external_urls']['spotify']
+                    return await play(ctx,query=url)
+                    # return await ctx.send(embed=discord.Embed(description='Query not found'))
+                return await play(ctx,query=search[0][2])
+            elif mode.lower() == 'refresh' and not query:
+                print("FORCE REFRESH PLAYLIST")
+                try:
+                    controller.update_playlist.restart()
+                    await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                except Exception as e:
+                    await message.add_reaction('\N{Cross Mark}')
+            elif mode.lower() == 'region':
+                if len(query)>2:
+                    query = pycountry.countries.get(name=query).alpha_2
+                if query in spotify_countries:
+                    controller.spotify_region = query
+                    return await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                else:
+                    return await message.add_reaction('\N{Cross Mark}')
+            else:
+                return await ctx.send(embed=discord.Embed(description='Invalid option'))
     @commands.command(aliases=['back'])
     async def last(self, ctx, num = 0):
         controller = self.get_controller(ctx)

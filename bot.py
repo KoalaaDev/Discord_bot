@@ -41,6 +41,8 @@ print(custom_fig.renderText(random.choice(sponsor)))
 async def get_prefix(bot, message):
     with open("prefixes.yaml") as f:
         server_prefixes = yaml.safe_load(f)
+        if not message.guild:
+            return "~"
         return server_prefixes.get(message.guild.id,"~")
 client = commands.Bot(
     command_prefix=get_prefix,

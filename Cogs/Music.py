@@ -726,9 +726,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     saved_playlist = yaml.safe_load(f)
                     playlists = saved_playlist.get(ctx.guild.id,None)
                     if playlists:
-                        searched = playlists.get(query)
+                        search = playlists.get(query,None)
                         if search:
-                            search = searched[1]
+                            search = search[1]
                             return await play(ctx,query=search)
                     else:
                         search = None
@@ -754,12 +754,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             elif mode.lower() == 'region':
                 if len(query)>2:
                     query = pycountry.countries.get(name=query).alpha_2
-                if query in spotify_countries:
-                    controller.spotify_region = query
+                if query.upper() in spotify_countries:
+                    controller.spotify_region = query.upper()
                     controller.update_playlist.restart()
                     return await ctx.message.add_reaction('\N{White Heavy Check Mark}')
                 else:
-                    return await message.add_reaction('\N{Cross Mark}')
+                    return await ctx.message.add_reaction('\N{Cross Mark}')
             elif mode.lower() == 'save':
                 if query:
                     with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"r") as f:

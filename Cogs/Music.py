@@ -734,7 +734,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         search = None
                 if not search:
                     search_results = [x for x in Spotify_List if query in x[0]]
-                    return await play(ctx,query=search_results[0][2])
+                    if search_results:
+                        return await play(ctx,query=search_results[0][2])
+                    else:
+                        search = None
                 if not search:
                     search_results = await spotify_client.search(query,"playlist")
                     url = search_results['playlists']['items'][0]['external_urls']['spotify']

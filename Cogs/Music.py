@@ -641,10 +641,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if controller.auto_play == True:
             controller.auto_play = False
             controller.auto_play_queue._queue.clear()
-            await ctx.send(embed=discord.Embed(description="Autoplay ```disabled```"))
+            await ctx.send(embed=discord.Embed(description="Autoplay disabled"))
         else:
             controller.auto_play = True
-            await ctx.send(embed=discord.Embed(description="Autoplay ```enabled```"))
+            await ctx.send(embed=discord.Embed(description="Autoplay enabled"))
 
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):

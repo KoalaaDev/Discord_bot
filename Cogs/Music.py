@@ -782,7 +782,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                             yaml.dump(saved_playlist,f)
                             await ctx.message.add_reaction('\N{White Heavy Check Mark}')
                     else:
-                        saved_playlist = {ctx.message.guild.id:{name:[description,f"{url}"]}}
+                        saved_playlist[ctx.message.guild.id] = {name:[description,f"{url}"]}
                         with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"w") as f:
                             yaml.dump(saved_playlist,f)
                             await ctx.message.add_reaction('\N{White Heavy Check Mark}')

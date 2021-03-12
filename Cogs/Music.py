@@ -113,7 +113,7 @@ class MusicController:
             print("Song history full! Removing...")
             song = await self.last_songs.get()
             del song
-    @tasks.loop(seconds=90.0)
+    @tasks.loop(seconds=1.0)
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
         channel = self.bot.get_channel(player.channel_id)

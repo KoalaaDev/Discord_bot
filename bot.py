@@ -106,7 +106,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if client.user.mentioned_in(message):
-        if message.content.startswith("<@!654581273028853770> "):
+        if message.content.startswith(f"<@!{client.user.id}> "):
             prefix = " ".join(message.content.split()[1:])
             print("changing prefixes")
             with open('prefixes.yaml', 'r') as f:

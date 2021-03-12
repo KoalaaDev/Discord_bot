@@ -78,7 +78,7 @@ class MusicController:
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=id&relatedToVideoId={self.now_playing_id}&type=video&key={key}&chart=mostpopular&maxResults=4&regionCode=SG&videoCategoryId=10") as video:
+            async with session.get(f"https://www.googleapis.com/youtube/v3/search?part=id&relatedToVideoId={self.now_playing_id}&type=video&key={key}&chart=mostpopular&maxResults=10&regionCode=SG&videoCategoryId=10&topicId=/m/04rlf&videoCaption=closedCaption&relevanceLanguage=en&videoLicense=youtube&videoDefinition=high") as video:
                 Videos = await video.json()
                 try:
                     return list(set(["https://www.youtube.com/watch?v="+x['id']['videoId'] for x in Videos['items']]))
@@ -100,7 +100,7 @@ class MusicController:
                     tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
                 try:
                     track = tracks[0]
-                    if track.length<=480000:
+                    if track.length<=480000 and not track.title.startswith(self.current_track.title) and track.title not in self.last_songs._queue:
                         self.now_playing_id = track.ytid
                         await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
@@ -691,7 +691,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             del controller.queue._queue[num-1]
         except IndexError:
             await ctx.send(embed=discord.Embed(description="Could not remove"))
-    @commands.command(aliases=['playlists'])
+    @commands.command(aliases=['playlists','pl'])
     async def playlist(self, ctx, mode: str =None, *, query:str =None):
         controller = self.get_controller(ctx)
         await asyncio.sleep(1)

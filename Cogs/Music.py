@@ -164,7 +164,6 @@ class MusicController:
                     if self.loop_queue:
                         if song not in self.queue._queue:
                             await self.queue.put(song)
-                            print('readding song into queue')
                         list_of_songs = list(self.queue._queue)
                         for x in list_of_songs:
                             if self.now_playing:
@@ -701,7 +700,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         spotify_playlist_urls = [x['external_urls']['spotify'] for x in controller.spotify_playlists['playlists']['items']]
         Spotify_List = zip(spotify_playlist_names,spotify_playlist_descriptions,spotify_playlist_urls)
         if mode == None:
-            return await ctx.send(embed=discord.Embed(description='Please select mode:'+"\n".join([f'```{x}```' for x in ["list",'play','region','refresh']])))
+            return await ctx.send(embed=discord.Embed(description='Please select mode:'+"\n".join([f'```{x}```' for x in ["list",'play','region','refresh','save','delete']])))
         else:
             if mode.lower() == "list":
                 if not query:
@@ -740,9 +739,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                         search = None
                 if not search:
                     search_results = await spotify_client.search(query,"playlist")
-                    url = search_results['playlists']['items'][0]['external_urls']['spotify']
-                    return await play(ctx,query=url)
-                    # return await ctx.send(embed=discord.Embed(description='Query not found'))
+                    if search_results:
+                        url = search_results['playlists']['items'][0]['external_urls']['spotify']
+                        return await play(ctx,query=url)
+                    else:
+                        return await ctx.send(embed=discord.Embed(description='Query not found'))
 
             elif mode.lower() == 'refresh' and not query:
                 print("FORCE REFRESH PLAYLIST")
@@ -790,9 +791,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                     with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"r") as f:
                         saved_playlist = yaml.safe_load(f)
                         guild_playlist = saved_playlist[ctx.message.guild.id]
-                        current_queue = controller.queue._queue
+                        current_queue = list(controller.queue._queue)
             elif mode.lower() == 'delete':
-                pass
+                with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"r") as f:
+                    saved_playlist = yaml.safe_load(f)
+                try:
+                    saved_playlist[ctx.message.guild.id].pop(query)
+                    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'saved_playlists.yml'),"w") as f:
+                        yaml.dump(saved_playlist,f)
+                    return await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                except:
+                    return await ctx.message.add_reaction('\N{Cross Mark}')
             else:
                 return await ctx.send(embed=discord.Embed(description='Invalid option'))
     @commands.command(aliases=['back'])
@@ -837,7 +846,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         free = humanize.naturalsize(node.stats.memory_free)
         cpu = node.stats.cpu_cores
 
-        fmt = f'**Doorbanger:** `v2.6.1`\n\n' \
+        fmt = f'**Doorbanger:** `v3.0.1`\n\n' \
               f'Connected to `{len(self.bot.wavelink.nodes)}` nodes.\n' \
               f'Best available Node `{self.bot.wavelink.get_best_node().__repr__()}`\n' \
               f'`{len(self.bot.wavelink.players)}` players are distributed on nodes.\n' \

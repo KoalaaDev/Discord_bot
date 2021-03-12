@@ -740,8 +740,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 if not search:
                     search_results = await spotify_client.search(query,"playlist")
                     if search_results:
-                        url = search_results['playlists']['items'][0]['external_urls']['spotify']
-                        return await play(ctx,query=url)
+                        try:
+                            url = search_results['playlists']['items'][0]['external_urls']['spotify']
+                            await play(ctx,query=url)
+                            return await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                        except IndexError:
+                            return await ctx.message.add_reaction('\N{Cross Mark}')
                     else:
                         return await ctx.send(embed=discord.Embed(description='Query not found'))
 

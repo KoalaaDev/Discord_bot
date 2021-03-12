@@ -281,7 +281,7 @@ async def info(ctx, user: discord.Member = None):
 async def invite(ctx):
     embed = discord.Embed(
         description=
-        "[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id=654581273028853770&permissions=8&scope=bot)",
+        f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot)",
         colour=discord.Colour(0xFF001D),
     )
     await ctx.send(embed=embed)

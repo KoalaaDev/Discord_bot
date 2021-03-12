@@ -106,13 +106,14 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if client.user.mentioned_in(message):
-        prefix = "".join(message.content.split()[1:])
-        print("changing prefixes")
-        with open('prefixes.yaml', 'r') as f:
-            prefixes = yaml.safe_load(f)
-        prefixes[message.guild.id] = prefix
-        with open("prefixes.yaml","w") as f:
-            yaml.dump(prefixes, f)
+        if message.content.startswith("<@!654581273028853770> "):
+            prefix = " ".join(message.content.split()[1:])
+            print("changing prefixes")
+            with open('prefixes.yaml', 'r') as f:
+                prefixes = yaml.safe_load(f)
+            prefixes[message.guild.id] = prefix
+            with open("prefixes.yaml","w") as f:
+                yaml.dump(prefixes, f)
     await client.process_commands(message)
 @client.event
 async def on_guild_join(guild):

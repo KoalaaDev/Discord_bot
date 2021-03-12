@@ -180,8 +180,9 @@ class Spying(commands.Cog, name="Spying logic"):
                             text=f"Activity Update Detector Service <{st}>")
                         try:
                             await self.member_update_channel.send(embed=playEmbedded)
-                        except AttributeError:
+                        except:
                             pass
+
                     elif after.activity.type == discord.ActivityType.streaming:
                         streamingEmbedded = discord.Embed(
                             title="Streamer Detector Service",

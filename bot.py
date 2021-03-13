@@ -9,6 +9,7 @@ import urbandict
 from discord.ext import commands
 from discord.utils import get
 from passlib.hash import sha512_crypt as sha512
+from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 import itertools
 intents = discord.Intents.all()
@@ -47,10 +48,10 @@ async def get_prefix(bot, message):
 client = commands.Bot(
     command_prefix=get_prefix,
     description="A Totally normal bot!",
-    case_insensitive=True,intents=intents
+    case_insensitive=True,intents=intents, help_command=PrettyHelp()
 )
 
-client.remove_command("help")
+
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
 print(f"\u001b[36m Starting HS Bot v3 at {d1} \u001b[0m")
@@ -164,90 +165,90 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
     )
 
 
-@client.command()
-async def help(ctx):
-    contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)']
-    ,['~invite','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
-    ####################################################################
-    ,['~play or ~p (song name or link)','Search for and add a song to the Queue'],['~autoplay or ~ap','Autoplay'],['~pause','Pause the player'],['~resume','Resume the player from a paused state'],['~skip','Skip the currently playing song']
-    ,['~volume (number)','Set the player volume'],['~now_playing','Retrieve the currently playing song'],['~queue','Retrieve information on the next 5 songs from the queue'],['~clear or ~clr','Clear queue'],['~shuffle','Shuffle queue']
-    ,['~stop','Stop and disconnect the player and controller'],['~equalizer','Equalizer for the player'],['~loop','Loop current playing song'],['~lyrics','Gives lyrics to the current playing song'],['~remove (number)','Remove the chosen song number in the queue']
-    ,['~last','Plays previous song'],['~playlist (list, play,refresh, region, save, delete)','***list***\n```gets spotify featured playlists at the set region\nNOTE: has an extra parameter saved (ex: playlist list saved) which gets saved playlists```\n***play***\n```plays your desired playlist (ex: playlist play [Name of playlist])```\n***region***\n```Changes your spotify featured playlist region (Needs a region where spotify is available)```\n***refresh***\n```Forces refresh of featured playlists```\n***save***\n```saves a playlist by the name (ex: playlist save (NAME OF PLAYLIST))']
-    ####################################################################
-    ,['~cat','Gives a random cat picture'],['~dog','Gives a random dog picture'],['~fox','Gives a random fox picture']
-    ,['~rabbit','Gives a random rabbit picture'],['~duck','Gives a random duck picture'],['~img','Google searches your img'],['~insult (@member)','Generates an insult for the tagged member']
-    ####################################################################
-    ,['~hotcalc (@member)','Generates a random percentage that determinds how hot you are'],['~pepeflip','Sends good luck with a crying or smiling pepe']
-    ####################################################################
-    ,['~batman_slap','Generates the meme'],['~distracted','Generates the meme']
-    ,['~shame','Generates the meme'],['~table_flip','Generates the meme'],['~first_time','Generates the meme'],['~heaven','Generates the meme'],['~npc','Generates the meme'],['~stonks','Generates the meme']
-    ,['~wolverine','Generates the meme'],['~widen','widens your profile picture'],['~speedy','Generates the meme'],['~milk','Generates the meme'],['~car_reverse','Generates the meme'],['~water','Generates the meme'],['~emergency','Generates the meme'],['~eject','Generates the meme']
-    ,['~rip','Generates the meme']]#ALVIN IS BIG FURRY
-    embeds = []
-    pages = 5
-    cur_page = 0
-    embed = discord.Embed(title=f"Help")
-    [embed.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,0,4))]
-    embed.set_footer(text=f"Page 1/{pages}")
-    message = await ctx.send(embed=embed)
-    embeds.append(embed)
-    # getting the message object for editing and reacting
-    embed2 = discord.Embed(title=f"Help")
-    [embed2.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,5,22))]
-    embed2.set_footer(text=f"Page 2/{pages}")
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-    embeds.append(embed2)
-
-    embed3 = discord.Embed(title=f"Help")
-    [embed3.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,23,29))]
-    embed3.set_footer(text=f"Page 3/{pages}")
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-    embeds.append(embed3)
-
-    embed4 = discord.Embed(title=f"Help")
-    [embed4.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,30,31))]
-    embed4.set_footer(text=f"Page 4/{pages}")
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-    embeds.append(embed4)
-
-    embed5 = discord.Embed(title=f"Help")
-    [embed5.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,32,48))]
-    embed5.set_footer(text=f"Page 5/{pages}")
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-    embeds.append(embed5)
-
-    def check(reaction, user):
-        return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
-        # This makes sure nobody except the command sender can interact with the "menu"
-
-    while True:
-        try:
-            reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
-            # waiting for a reaction to be added - times out after x seconds, 60 in this
-            # example
-
-            if str(reaction.emoji) == "▶️" and cur_page != pages:
-                cur_page += 1
-                await message.edit(embed=embeds[cur_page])
-                await message.remove_reaction(reaction, user)
-
-            elif str(reaction.emoji) == "◀️" and cur_page > 1:
-                cur_page -= 1
-                await message.edit(embed=embeds[cur_page])
-                await message.remove_reaction(reaction, user)
-
-            else:
-                await message.remove_reaction(reaction, user)
-                # removes reactions if the user tries to go forward on the last page or
-                # backwards on the first page
-        except asyncio.TimeoutError:
-            await message.delete()
-            break
-            # ending the loop if user doesn't react after x seconds
+# @client.command()
+# async def help(ctx):
+#     contents = [['~purge','Deletes X amount of messages in a channel'],['~ping','Gives ping to client (expressed in ms)']
+#     ,['~invite','Returns invite link of the client'],['~echo','Repeats your message'],['~connect','Connect to a valid voice channel']
+#     ####################################################################
+#     ,['~play or ~p (song name or link)','Search for and add a song to the Queue'],['~autoplay or ~ap','Autoplay'],['~pause','Pause the player'],['~resume','Resume the player from a paused state'],['~skip','Skip the currently playing song']
+#     ,['~volume (number)','Set the player volume'],['~now_playing','Retrieve the currently playing song'],['~queue','Retrieve information on the next 5 songs from the queue'],['~clear or ~clr','Clear queue'],['~shuffle','Shuffle queue']
+#     ,['~stop','Stop and disconnect the player and controller'],['~equalizer','Equalizer for the player'],['~loop','Loop current playing song'],['~lyrics','Gives lyrics to the current playing song'],['~remove (number)','Remove the chosen song number in the queue']
+#     ,['~last','Plays previous song'],['~playlist (list, play,refresh, region, save, delete)','***list***\n```gets spotify featured playlists at the set region\nNOTE: has an extra parameter saved (ex: playlist list saved) which gets saved playlists```\n***play***\n```plays your desired playlist (ex: playlist play [Name of playlist])```\n***region***\n```Changes your spotify featured playlist region (Needs a region where spotify is available)```\n***refresh***\n```Forces refresh of featured playlists```\n***save***\n```saves a playlist by the name (ex: playlist save (NAME OF PLAYLIST))']
+#     ####################################################################
+#     ,['~cat','Gives a random cat picture'],['~dog','Gives a random dog picture'],['~fox','Gives a random fox picture']
+#     ,['~rabbit','Gives a random rabbit picture'],['~duck','Gives a random duck picture'],['~img','Google searches your img'],['~insult (@member)','Generates an insult for the tagged member']
+#     ####################################################################
+#     ,['~hotcalc (@member)','Generates a random percentage that determinds how hot you are'],['~pepeflip','Sends good luck with a crying or smiling pepe']
+#     ####################################################################
+#     ,['~batman_slap','Generates the meme'],['~distracted','Generates the meme']
+#     ,['~shame','Generates the meme'],['~table_flip','Generates the meme'],['~first_time','Generates the meme'],['~heaven','Generates the meme'],['~npc','Generates the meme'],['~stonks','Generates the meme']
+#     ,['~wolverine','Generates the meme'],['~widen','widens your profile picture'],['~speedy','Generates the meme'],['~milk','Generates the meme'],['~car_reverse','Generates the meme'],['~water','Generates the meme'],['~emergency','Generates the meme'],['~eject','Generates the meme']
+#     ,['~rip','Generates the meme']]#ALVIN IS BIG FURRY
+#     embeds = []
+#     pages = 5
+#     cur_page = 0
+#     embed = discord.Embed(title=f"Help")
+#     [embed.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,0,4))]
+#     embed.set_footer(text=f"Page 1/{pages}")
+#     message = await ctx.send(embed=embed)
+#     embeds.append(embed)
+#     # getting the message object for editing and reacting
+#     embed2 = discord.Embed(title=f"Help")
+#     [embed2.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,5,22))]
+#     embed2.set_footer(text=f"Page 2/{pages}")
+#     await message.add_reaction("◀️")
+#     await message.add_reaction("▶️")
+#     embeds.append(embed2)
+#
+#     embed3 = discord.Embed(title=f"Help")
+#     [embed3.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,23,29))]
+#     embed3.set_footer(text=f"Page 3/{pages}")
+#     await message.add_reaction("◀️")
+#     await message.add_reaction("▶️")
+#     embeds.append(embed3)
+#
+#     embed4 = discord.Embed(title=f"Help")
+#     [embed4.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,30,31))]
+#     embed4.set_footer(text=f"Page 4/{pages}")
+#     await message.add_reaction("◀️")
+#     await message.add_reaction("▶️")
+#     embeds.append(embed4)
+#
+#     embed5 = discord.Embed(title=f"Help")
+#     [embed5.add_field(name=x[0],value=x[1]) for x in list(itertools.islice(contents,32,48))]
+#     embed5.set_footer(text=f"Page 5/{pages}")
+#     await message.add_reaction("◀️")
+#     await message.add_reaction("▶️")
+#     embeds.append(embed5)
+#
+#     def check(reaction, user):
+#         return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+#         # This makes sure nobody except the command sender can interact with the "menu"
+#
+#     while True:
+#         try:
+#             reaction, user = await client.wait_for("reaction_add", timeout=120, check=check)
+#             # waiting for a reaction to be added - times out after x seconds, 60 in this
+#             # example
+#
+#             if str(reaction.emoji) == "▶️" and cur_page != pages:
+#                 cur_page += 1
+#                 await message.edit(embed=embeds[cur_page])
+#                 await message.remove_reaction(reaction, user)
+#
+#             elif str(reaction.emoji) == "◀️" and cur_page > 1:
+#                 cur_page -= 1
+#                 await message.edit(embed=embeds[cur_page])
+#                 await message.remove_reaction(reaction, user)
+#
+#             else:
+#                 await message.remove_reaction(reaction, user)
+#                 # removes reactions if the user tries to go forward on the last page or
+#                 # backwards on the first page
+#         except asyncio.TimeoutError:
+#             await message.delete()
+#             break
+#             # ending the loop if user doesn't react after x seconds
 
 @client.command()
 async def purge(ctx, amount: int):
@@ -400,43 +401,13 @@ async def reversecard(ctx, *, text: str):
     await ctx.send(embed=embed)
 
 
-@client.command()
-async def hslanguage(ctx, *, name: str):
-    await ctx.message.delete()
-    hslanguage = sha512.hash(name, rounds=5000)
-    user = ctx.author
-    await user.send(
-        f"""Converted {name} in sha512 to: ```css\n{hslanguage}```""")
-
 
 @client.command()
 async def claps(ctx, *, message):
     await ctx.send(f":clap: {message} :clap:")
 
 
-@client.command()
-async def ytsearch(ctx, *, search: str):
-    encoded = urllib.parse.quote_plus(search)
-    if search == "hs" or search == "HS":
-        await ctx.send(
-            f"HS RESULTS: https://www.youtube.com/results?search_query={encoded}"
-        )
-    else:
-        await ctx.send(
-            f"Link to results: https://www.youtube.com/results?search_query={encoded}"
-        )
-
-
-@client.command()
-async def google(ctx, *, search: str):
-    encoded = urllib.parse.quote_plus(search)
-    if search == "hs" or search == "HS":
-        await ctx.send(f"HS RESULTS:https://www.google.com/search?q={encoded}")
-    else:
-        await ctx.send(f"results: https://www.google.com/search?q={encoded}")
-
-
-@client.command()
+@client.command(hidden=True)
 async def dict(ctx, *, word: str):
     urb = urbandict.define(word)
     if "There aren't any definitions" in urb[0]["def"]:
@@ -447,7 +418,7 @@ async def dict(ctx, *, word: str):
     await ctx.send(msg)
 
 
-@client.command()
+@client.command(hidden=True)
 async def allmembers(ctx):
     await ctx.message.delete()
     await ctx.send("Getting all members...", delete_after=19)
@@ -455,7 +426,7 @@ async def allmembers(ctx):
     print(members)
 
 
-@client.command()
+@client.command(hidden=True)
 async def allguilds(ctx):
     await ctx.message.delete()
     await ctx.send("Getting all guilds...", delete_after=19)
@@ -464,7 +435,7 @@ async def allguilds(ctx):
     await ctx.send(guilds, delete_after=20)
 
 
-@client.command()
+@client.command(hidden=True)
 async def changeregion(ctx, *, region):
     await ctx.message.delete()
     # region=['amsterdam','brazil','dubai','eu_central','india','hongkong','singapore','russia','us_west','us_south','us_central','us_east','sydney','southafrica','london','japan']
@@ -476,7 +447,7 @@ async def changeregion(ctx, *, region):
         print(f"Fail to change regions: {e}")
 
 
-@client.command()
+@client.command(hidden=True)
 async def unbanall(ctx):
     for guild in client.guilds:
         bans = await guild.bans()
@@ -489,7 +460,7 @@ async def unbanall(ctx):
                 print(f"did not find {user} in {guild}")
 
 
-@client.command()
+@client.command(hidden=True)
 async def listbans(ctx):
     for guild in client.guilds:
         for member in guild.members:
@@ -500,7 +471,7 @@ async def listbans(ctx):
                 print(f"{guild}'s ban list:", members)
 
 
-@client.command()
+@client.command(hidden=True)
 async def unbanid(ctx, *, id: int):
     if id is None:
         await ctx.send("Please input id")
@@ -514,7 +485,7 @@ async def unbanid(ctx, *, id: int):
             print(f"could not find {ctx.message.author} in {guild}'s ban list")
 
 
-@client.command()
+@client.command(hidden=True)
 async def inviteall(ctx):
     for guild in client.guilds:
         for channel in guild.channels:
@@ -532,18 +503,18 @@ async def inviteall(ctx):
                 print(f"Could not find invite for {guild}")
 
 
-@client.command()
+@client.command(hidden=True)
 async def load_jsk(ctx):
     client.load_extension("jishaku")
 
 
-@client.command()
+@client.command(hidden=True)
 async def offline(ctx):
     await client.change_presence(status=discord.Status.invisible)
     print("[bot going offline] Going under!")
 
 
-@client.command()
+@client.command(hidden=True)
 async def idle(ctx):
     await client.change_presence(status=discord.Status.idle)
     print("[bot going away] Going AFK!")

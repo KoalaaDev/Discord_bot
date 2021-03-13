@@ -18,3 +18,4 @@ rich==9.12.3
 spotify
 pytz
 pycountry
+discord-pretty-help==1.2.3

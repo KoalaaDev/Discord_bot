@@ -6,9 +6,9 @@ class PasswordGen(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['passwordgen'])
     async def passwordgen(self, ctx, num: int = 20):
-
+        """A password generator"""#Lmao who would use this?
         choices = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*"
         print(choices := random.choices(choices, k = num))
         passwordshow = await ctx.send(f"{''.join(choices)}")

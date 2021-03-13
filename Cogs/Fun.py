@@ -10,7 +10,7 @@ class Fun(commands.Cog):
         self.bot = bot
         self.balances = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bank.yml')
 
-    @commands.command()
+    @commands.command(hidden=true)
     async def jason(self,ctx):
         await ctx.message.delete()
         embed1 ="https://cdn.discordapp.com/attachments/263190635434082315/803952123237761024/Jason_hanging_out_on_a_swing.jpg"
@@ -20,7 +20,7 @@ class Fun(commands.Cog):
         embed.set_image(url=random.choice([embed1,embed2,embed3]))
         await ctx.send(embed=embed,delete_after=5)
 
-    @commands.command()
+    @commands.command(aliases=["hotcalc"])
     async def hotcalc(self,ctx, *, user: discord.Member = None):
         """ Returns a random percent for how hot is a discord user """
         user = user or ctx.author
@@ -39,15 +39,16 @@ class Fun(commands.Cog):
 
         await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
 
-    @commands.command()
+    @commands.command(aliases=["papeflip"])
     async def pepeflip(self, ctx):
+        """Sends good luck with a crying or smiling pepe"""
         emoji1 = self.bot.get_emoji(799506321442996235)
         emoji2 = self.bot.get_emoji(742346196990951505)
         lmao = random.choice([emoji1,emoji2])
         bruh = await ctx.send("Good Luck!")
         await bruh.add_reaction(lmao)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def woohoo(self, ctx):
       gay = random.choice(["Koalaa","Skot","Alvin"])
       message = await ctx.send(f'Woohoo {gay} is confirmed gay!')
@@ -70,7 +71,7 @@ class Fun(commands.Cog):
         balances[MemberID] = amount
         with open(self.balances,"w") as f:##W = write R = read
             balances = yaml.dump(balances, f)
-    @commands.command()
+    @commands.command(hidden=True)
     async def beg(self, ctx):
         balance = await self.get_currency(ctx.author.id)
         if not balance:
@@ -79,7 +80,7 @@ class Fun(commands.Cog):
         await self.write(ctx.author.id, random.randint(1,100)+balance)
         await ctx.send("UR A LINCOLN")
     @commands.cooldown(1,86400,BucketType.user)
-    @commands.command()
+    @commands.command(hidden=True)
     async def daily(self, ctx):
         userbalance = await self.get_currency(ctx.author.id)
         print(userbalance)

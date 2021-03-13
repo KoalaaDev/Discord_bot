@@ -396,7 +396,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                 await ctx.send(embed=MusicEmbed)
 
-    @commands.command()
+    @commands.command(aliases=["pause"])
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -406,7 +406,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await ctx.message.add_reaction("\N{Double Vertical Bar}")
         await player.set_pause(True)
 
-    @commands.command()
+    @commands.command(aliases=["resume"])
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -614,8 +614,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         await ctx.send(f'Successfully changed equalizer to {equalizer}', delete_after=15)
         await player.set_eq(eq)
 
-    @commands.command()
+    @commands.command(aliases=["loop"])
     async def loop(self, ctx, mode="track"):
+        """Loop current playing song"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.loop == True:
@@ -636,6 +637,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await ctx.message.add_reaction("\N{Clockwise Rightwards and Leftwards Open Circle Arrows}")
     @commands.command(aliases=['ap'])
     async def autoplay(self, ctx):
+        """Enable auto play"""
         controller = self.get_controller(ctx)
         if controller.auto_play == True:
             controller.auto_play = False
@@ -647,6 +649,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):
+        """Suffle the queue"""
         controller = self.get_controller(ctx)
         if controller.queue._queue:
             random.shuffle(controller.queue._queue)
@@ -656,6 +659,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @commands.command(aliases=['clr','clear'])
     async def _clr(self, ctx):
+        """Clear queue"""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller.queue._queue.clear()
@@ -666,8 +670,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
 
         await ctx.send(embed=discord.Embed(description="Cleared the queue"))
-    @commands.command()
+    @commands.command(aliases=["lyrics"])
     async def lyrics(self,ctx):
+        """Gives lyrics of current playing song"""
         controller = self.get_controller(ctx)
         try:
             lyric = genius.search_song(controller.current_track.title,controller.current_track.author)
@@ -684,8 +689,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await ctx.send(embed=embed)
         else:
             await ctx.send(embed=discord.Embed(description="No lyrics found!"))
-    @commands.command()
+    @commands.command(aliases=["remove"])
     async def remove(self, ctx,num: int = 1):
+        """Removes the chosen song in queue"""
         controller = self.get_controller(ctx)
         try:
             del controller.queue._queue[num-1]
@@ -693,6 +699,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send(embed=discord.Embed(description="Could not remove"))
     @commands.command(aliases=['playlists','pl'])
     async def playlist(self, ctx, mode: str =None, *, query:str =None):
+        """Gives a list of playlist commands"""
         controller = self.get_controller(ctx)
         await asyncio.sleep(1)
         spotify_playlist_names = [x['name'] for x in controller.spotify_playlists['playlists']['items']]
@@ -811,6 +818,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 return await ctx.send(embed=discord.Embed(description='Invalid option'))
     @commands.command(aliases=['back'])
     async def last(self, ctx, num = 0):
+        """Plays last played song"""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
 
@@ -840,7 +848,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 else:
                     await player.stop()
                     await asyncio.sleep(1)
-    @commands.command()
+    @commands.command(aliases=['information'])
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""
         player = self.bot.wavelink.get_player(ctx.guild.id)

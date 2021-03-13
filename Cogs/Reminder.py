@@ -7,8 +7,9 @@ class Reminder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['RemindMe'])
     async def RemindMe(self, ctx, time: int = 5, *,message: str ):
+        """Remind you of something"""
         await ctx.message.delete()
         remindertime = await ctx.send(f"I will remind you in {time} seconds: {message}")
         await asyncio.sleep(time)

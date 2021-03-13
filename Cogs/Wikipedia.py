@@ -7,8 +7,9 @@ class Wikipedia(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=["wiki"])
     async def wiki(self, ctx, query):
+        """Searches wikipedia for information"""
         search = wikipedia.summary(wikipedia.search(query)[0])
         print(search)
         if len(search) > 2000:

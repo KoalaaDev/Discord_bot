@@ -7,7 +7,7 @@ import asyncio
 class Time(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    @commands.command()
+    @commands.command(hidden=True)
     async def TzArea(self, ctx):
         await ctx.message.delete()
         tzlistchoice = [['AfricanTimezone','For African Timezone'],['AmericaTimezone','For America Continent Timezone'],['AntarticaTimezone','For Antartica Timezone'],['ArcticTimezone','For Arctic Timezone'],['AsiaTimezone','For Asian Timezone'],['AtlanicTimezone','For Altanic Timezone'],['AustraliaTimezone','For Australian Timezone'],['BrazilTimezone','For Brazil Timezone'],['COTUSTimezone','For COTUS Timezone'],['EuropeTimezone','For European Timezone'],['IndianTimezone','For Indian Timezone'],['OceaniaTimezone','For Oceania Timezone'],['PacificTimezone','For Pacific Timezone'],['timezonelist','For all Timezone']]
@@ -56,7 +56,7 @@ class Time(commands.Cog):
                 break
                 # ending the loop if user doesn't react after x seconds
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def AreaChoice(self, ctx, choice: str):
         await ctx.send(f"Your timezone list of choices is {choice}")
         with open(f"Cogs\\Timezone\\{choice}.txt") as timezone:
@@ -65,7 +65,7 @@ class Time(commands.Cog):
         await ctx.send(showlist)
         choice = ""
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def timezone(self, ctx, tzchoice: str):
         dt_now = datetime.datetime.now(tz=pytz.{tzchoice})
     #

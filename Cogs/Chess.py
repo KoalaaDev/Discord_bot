@@ -25,13 +25,15 @@ class Chess(commands.Cog):
             Chess_game = ChessGame(userid)
             self.games[userid] = Chess_game
         return Chess_game
-    @commands.command()
+    @commands.command(aliases=["chess"])
     async def chess(self, ctx, Player2: discord.Member):
+        """Starts a chess game"""
         game = self.get_chess_game(ctx)
         game.player2 = Player2
         await ctx.send(embed=discord.Embed(title=f"{ctx.author} VS {Player2}", description=f"```{game.board}```",footer=f"{game.id}"))
-    @commands.command()
+    @commands.command(aliases=["move"])
     async def move(self, ctx, move: str):
+        """Move chess pieces on the board"""
         game = self.get_chess_game(ctx)
         try:
             game.make_move(move)

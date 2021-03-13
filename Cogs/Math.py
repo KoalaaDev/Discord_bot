@@ -40,8 +40,9 @@ class Math(commands.Cog):
             else:
                 pass
 
-    @commands.command()
+    @commands.command(aliases=["solve"])
     async def solve(self, ctx, *, equation):
+        """Solves linear equations"""
         eqn = solve(parse(equation))
         await ctx.send(eqn)
 
@@ -53,22 +54,26 @@ class Math(commands.Cog):
         eqn = diff(parse(equation))
         await ctx.send(eqn)
 
-    @commands.command()
+    @commands.command(aliases=["integrate"])
     async def integrate(self, ctx, *, equation):
+        """Sloves integrate equations"""
         eqn = integrate(parse(equation))
         await ctx.send(eqn)
 
-    @commands.command()
+    @commands.command(aliases=["factor"])
     async def factor(self, ctx, *, equation):
+        """Solves factor equations"""
         eqn = factor(parse(equation))
         await ctx.send(eqn)
 
-    @commands.command()
+    @commands.command(aliases=["expand"])
     async def expand(self, ctx, *, equation):
+        """"Expands 2 factors"""
         eqn = expand(parse(equation))
         await ctx.send(eqn)
-    @commands.command()
+    @commands.command(aliases=["poisson"])
     async def poisson(self, ctx, lamd, times,iterate=False,greater_than=False):
+        """Gets poisson probability distribution"""
         try:
             r = int(times)
             lam = float(cexprtk.evaluate_expression(lamd,{"pi": pi}))

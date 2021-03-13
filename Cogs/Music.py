@@ -487,7 +487,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
 
     @commands.command(aliases=['q'])
     async def queue(self, ctx, pageno=1):
-        """Retrieve information on the next 5 songs from the queue."""
+        """Retrieve the queue in pages of 5 per page."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 
@@ -517,7 +517,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
                 await ctx.send(embed=discord.Embed(description="Could not get page!"))
     @commands.command(aliases=['aq'])
     async def autoqueue(self, ctx, pageno=1):
-        """Retrieve information on the next 5 songs from the queue."""
+        """Retrieve the auto play queue in pages of 5 per page."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 
@@ -548,7 +548,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
                 await ctx.send(embed=discord.Embed(description="Could not get page!"))
     @commands.command(aliases=['lq'])
     async def lastqueue(self, ctx, pageno=1):
-        """Retrieve information on the next 5 songs from the queue."""
+        """Retrieve the song history in pages of 5 per page."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
 

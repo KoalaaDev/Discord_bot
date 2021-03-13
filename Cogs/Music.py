@@ -334,7 +334,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 else:
                     print(f"Adding {list['tracks']['total']} to queue")
                 controller.auto_play_queue._queue.clear()
-                MusicEmbed = discord.Embed(title=f"Added {list['tracks']['total']} songs from {list['name']}",colour=discord.Colour.random())
+                MusicEmbed = discord.Embed(title=f"Added {list['tracks']['total']} songs from {list['name']}",url=query,colour=discord.Colour.random())
                 MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                 return await ctx.send(embed=MusicEmbed)
             if "track" in query:
@@ -383,7 +383,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             controller.auto_play_queue._queue.clear()
             for track in playlist:
                 await controller.queue.put(Track(track.id, track.info, requester=ctx.author.mention))
-            MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]")
+            MusicEmbed = discord.Embed(title=f"Added {len(playlist)} songs from {tracks.data['playlistInfo']['name']}",colour=discord.Colour.random(),url=query)
             MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
             await ctx.send(embed=MusicEmbed)
 

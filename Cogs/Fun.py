@@ -10,7 +10,7 @@ class Fun(commands.Cog):
         self.bot = bot
         self.balances = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bank.yml')
 
-    @commands.command(hidden=true)
+    @commands.command(hidden=True)
     async def jason(self,ctx):
         await ctx.message.delete()
         embed1 ="https://cdn.discordapp.com/attachments/263190635434082315/803952123237761024/Jason_hanging_out_on_a_swing.jpg"
@@ -20,7 +20,7 @@ class Fun(commands.Cog):
         embed.set_image(url=random.choice([embed1,embed2,embed3]))
         await ctx.send(embed=embed,delete_after=5)
 
-    @commands.command(aliases=["hotcalc"])
+    @commands.command()
     async def hotcalc(self,ctx, *, user: discord.Member = None):
         """ Returns a random percent for how hot is a discord user """
         user = user or ctx.author
@@ -39,7 +39,7 @@ class Fun(commands.Cog):
 
         await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
 
-    @commands.command(aliases=["papeflip"])
+    @commands.command()
     async def pepeflip(self, ctx):
         """Sends good luck with a crying or smiling pepe"""
         emoji1 = self.bot.get_emoji(799506321442996235)

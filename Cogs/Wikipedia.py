@@ -7,7 +7,7 @@ class Wikipedia(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["wiki"])
+    @commands.command()
     async def wiki(self, ctx, query):
         """Searches wikipedia for information"""
         search = wikipedia.summary(wikipedia.search(query)[0])

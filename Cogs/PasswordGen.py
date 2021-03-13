@@ -6,7 +6,7 @@ class PasswordGen(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['passwordgen'])
+    @commands.command()
     async def passwordgen(self, ctx, num: int = 20):
         """A password generator"""#Lmao who would use this?
         choices = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890!@#$%^&*"

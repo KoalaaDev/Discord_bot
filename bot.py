@@ -61,7 +61,7 @@ if COGS_CONFIG == 'all':
         if "py" in cog and "pycache" not in cog
     ]
 elif COGS_CONFIG == 'normal':
-    normal_blacklist = ["Grief",'Test']
+    normal_blacklist = ["Grief",'Test','Time','Chess']
     excluded = len(normal_blacklist)
     Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and cog.strip(".py") not in normal_blacklist]
 elif COGS_CONFIG == 'disarmed':
@@ -407,7 +407,7 @@ async def claps(ctx, *, message):
     await ctx.send(f":clap: {message} :clap:")
 
 
-@client.command(hidden=True)
+@client.command()
 async def dict(ctx, *, word: str):
     urb = urbandict.define(word)
     if "There aren't any definitions" in urb[0]["def"]:

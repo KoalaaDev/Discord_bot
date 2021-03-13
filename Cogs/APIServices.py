@@ -6,7 +6,7 @@ class API(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=["cat"])
+    @commands.command()
     async def cat(self, ctx):
         """Gives a random cat picture"""#Alvin be like meow meow *while sucking staff*
         if ctx.author.id == 451008924032827395:
@@ -20,7 +20,7 @@ class API(commands.Cog):
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["dog"])
+    @commands.command()
     async def dog(self, ctx, breed=None):
         """Gives a random dog picture"""#lincoln is dog woof woof
         if breed:
@@ -40,7 +40,7 @@ class API(commands.Cog):
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["img"])
+    @commands.command()
     async def img(self, ctx, *, query):
         """Google searches your img"""
         async with aiohttp.ClientSession() as session:
@@ -51,7 +51,7 @@ class API(commands.Cog):
         embed.set_footer(text="Img Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["fox"])
+    @commands.command()
     async def fox(self, ctx):
         """Gives a random fox picture"""#Alvins sex toy xD
         async with aiohttp.ClientSession() as session:
@@ -62,7 +62,7 @@ class API(commands.Cog):
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["insult"])
+    @commands.command()
     async def insult(self, ctx, lang="en"):
         """Generates an insult for the tagged member"""#Why bully each other?
         params = {"lang":lang,"type":"json"}
@@ -73,7 +73,7 @@ class API(commands.Cog):
         embed.set_footer(text=f"{lang} Insult Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['rabbit'])
+    @commands.command()
     async def rabbit(self, ctx):
         """Gives a random rabbit picture"""
         async with aiohttp.ClientSession() as session:
@@ -84,7 +84,7 @@ class API(commands.Cog):
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['duck'])
+    @commands.command()
     async def duck(self, ctx):
         """Gives a random duck picture"""
         async with aiohttp.ClientSession() as session:

@@ -7,7 +7,7 @@ class Reminder(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['RemindMe'])
+    @commands.command()
     async def RemindMe(self, ctx, time: int = 5, *,message: str ):
         """Remind you of something"""
         await ctx.message.delete()

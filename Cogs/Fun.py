@@ -5,7 +5,7 @@ import yaml
 import os
 from discord.ext.commands.cooldowns import BucketType
 
-class Fun(commands.Cog):
+class Fun(commands.Cog,description="Fun commands such as love calculator and coin flips"):
     def __init__(self, bot):
         self.bot = bot
         self.balances = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'bank.yml')

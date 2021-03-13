@@ -19,7 +19,7 @@ def parse(string: str):
         return string
 
 
-class Math(commands.Cog):
+class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
 

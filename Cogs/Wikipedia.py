@@ -3,7 +3,7 @@ import wikipedia
 from discord.ext import commands
 
 
-class Wikipedia(commands.Cog):
+class Wikipedia(commands.Cog,description="Wikipedia related commands"):
     def __init__(self, bot):
         self.bot = bot
 

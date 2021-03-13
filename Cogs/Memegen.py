@@ -4,7 +4,7 @@ import aiohttp
 import discord
 import random
 import io
-class Meme(commands.Cog):
+class Meme(commands.Cog, description="Generate memes and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.api = vacefron.Client()

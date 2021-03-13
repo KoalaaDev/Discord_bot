@@ -198,7 +198,7 @@ class MusicController:
                     await player.play(song)
                     await self.next.wait()
                     await self.last_songs.put(song)
-class Music(commands.Cog, wavelink.WavelinkMixin):
+class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your server!\nYoutube, Spotify, Soundcloud supported!\n Comes with multiple features"):
 
     def __init__(self, bot):
         self.bot = bot
@@ -848,7 +848,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 else:
                     await player.stop()
                     await asyncio.sleep(1)
-    @commands.command()
+    @commands.command(hidden=True)
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""
         player = self.bot.wavelink.get_player(ctx.guild.id)

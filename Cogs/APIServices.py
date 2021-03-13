@@ -2,7 +2,7 @@ from discord.ext import commands
 import aiohttp
 import discord
 
-class API(commands.Cog):
+class API(commands.Cog,description='Random generator commands'):
     def __init__(self, bot):
         self.bot = bot
 

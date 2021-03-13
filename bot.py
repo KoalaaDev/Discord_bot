@@ -47,8 +47,8 @@ async def get_prefix(bot, message):
         return server_prefixes.get(message.guild.id,"~")
 client = commands.Bot(
     command_prefix=get_prefix,
-    description="A Totally normal bot!",
-    case_insensitive=True,intents=intents, help_command=PrettyHelp()
+    description="A bot with no restrictions!",
+    case_insensitive=True,intents=intents, help_command=PrettyHelp(no_category='Main')
 )
 
 
@@ -144,7 +144,7 @@ async def on_resumed():
 
 
 # sorta good purpose
-@client.command()
+@client.command(hidden=True)
 async def kick(ctx,
                member: discord.Member,
                days: int = 1,
@@ -156,7 +156,7 @@ async def kick(ctx,
     )
 
 
-@client.command()
+@client.command(hidden=True)
 async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
     await member.ban(delete_message_days=days)
     await ctx.send("Banned {}".format(ctx.member))
@@ -250,13 +250,13 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 #             break
 #             # ending the loop if user doesn't react after x seconds
 
-@client.command()
+@client.command(description='Delete messages on mass')
 async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
     print("Clearing messages")
 
 
-@client.command()
+@client.command(description='Latency to discord')
 async def ping(ctx):
     color = discord.Color(value=0x00FF00)
     em = discord.Embed(color=color, title="Pong! Your latency is:")
@@ -265,7 +265,7 @@ async def ping(ctx):
     await ctx.send(embed=em)
 
 
-@client.command()
+@client.command(description='Get info of a user on the server')
 async def info(ctx, user: discord.Member = None):
     if user is None:
         await ctx.send("Please input a user.")
@@ -278,7 +278,7 @@ async def info(ctx, user: discord.Member = None):
             "\nThe user joined at: {}".format(user.joined_at))
 
 
-@client.command()
+@client.command(description="Invite link of bot")
 async def invite(ctx):
     embed = discord.Embed(
         description=
@@ -288,7 +288,7 @@ async def invite(ctx):
     await ctx.send(embed=embed)
 
 
-@client.command()
+@client.command(description='Echo your text')
 async def echo(ctx, *, args):
     await ctx.message.delete()
     output = ""
@@ -298,12 +298,12 @@ async def echo(ctx, *, args):
         await ctx.send(output)
 
 
-@client.command()
+@client.command(description='add numbers')
 async def add(ctx, left: str, right: str):
     await ctx.send(left + right)
 
 
-@client.command()
+@client.command(description='multiply numbers')
 async def multiply(ctx, left: str, right: str):
     if left == "hs" and right == "hs":
         await ctx.send("hs2")
@@ -311,12 +311,12 @@ async def multiply(ctx, left: str, right: str):
         await ctx.send(int(left) * int(right))
 
 
-@client.command()
+@client.command(description='divide numbers')
 async def divide(ctx, left: int, right: int):
     await ctx.send(left / right)
 
 
-@client.command()
+@client.command(description='Subtract numbers')
 async def minus(ctx, left: int, right: int):
     await ctx.send(left - right)
 
@@ -404,11 +404,13 @@ async def reversecard(ctx, *, text: str):
 
 @client.command()
 async def claps(ctx, *, message):
+    """Adds clapping emojis to text"""
     await ctx.send(f":clap: {message} :clap:")
 
 
 @client.command()
 async def dict(ctx, *, word: str):
+    """Gets a term from urbandictionary"""
     urb = urbandict.define(word)
     if "There aren't any definitions" in urb[0]["def"]:
         await ctx.send("No definitions found")

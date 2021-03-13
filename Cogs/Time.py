@@ -64,11 +64,6 @@ class Time(commands.Cog):
             print(timezone)
         await ctx.send(showlist)
         choice = ""
-
-    @commands.command(hidden=True)
-    async def timezone(self, ctx, tzchoice: str):
-        dt_now = datetime.datetime.now(tz=pytz.{tzchoice})
-    #
     # @commands.command()
     # async def timezonelist(self, ctx, area = "timezonelist.txt"):
     #     f = open(area, "r")

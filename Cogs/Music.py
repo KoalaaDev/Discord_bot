@@ -749,8 +749,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
                     if search_results:
                         try:
                             url = search_results['playlists']['items'][0]['external_urls']['spotify']
-                            return await ctx.message.add_reaction('\N{White Heavy Check Mark}')
-                            await play(ctx,query=url)
+                            await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                            return await play(ctx,query=url)
 
                         except IndexError:
                             return await ctx.message.add_reaction('\N{Cross Mark}')

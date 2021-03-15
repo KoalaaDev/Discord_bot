@@ -30,7 +30,7 @@ class Spying(commands.Cog, name="Spying logic"):
     @commands.Cog.listener()
     async def on_message(self, message: str):
         if message.author.bot:
-            if message.author != self.bot.user and message.author.id != 799134976515375154:
+            if message.author != self.bot.user and message.author.id != 799134976515375154 and message.author.id != 654581273028853770:
                 if message.embeds:
                     await self.bot_channel.send(embed=message.embeds[0])
                 else:

@@ -17,6 +17,9 @@ import yaml
 import spotify
 import pycountry
 from lyricsgenius import Genius
+with open("whitelist.txt") as f:
+    whitelist = [int(x.strip("\n")) for x in f.readlines()]
+
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 spotify_countries = ['AD','AE','AG','AL','AM','AR','AT','AU','AZ','BA','BB','BD','BE','BF',
  'BG','BH','BI','BN','BO','BR','BS','BT','BW','BY','BZ','CA','CH','CL','CM','CO',
@@ -33,6 +36,7 @@ spotify_countries = ['AD','AE','AG','AL','AM','AR','AT','AU','AZ','BA','BB','BD'
 spotify_url = re.compile('https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)')
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'apiconfig.yml')
+
 with open(config_file_path) as f:
     config = yaml.safe_load(f)
     spotify_client = spotify.HTTPClient(config['music']['Spotify']['ClientID'],config['music']['Spotify']['ClientSecret'])
@@ -67,6 +71,7 @@ class MusicController:
         self.loop_queue = False
         self.spotify_playlists = None
         self.spotify_region = "SG"
+        self.remote_control = False
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
         self.check_listen.start()
@@ -100,7 +105,7 @@ class MusicController:
                     tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
                 try:
                     track = tracks[0]
-                    if track.length<=480000 and not track.title.startswith(self.current_track.title) and track.title not in self.last_songs._queue:
+                    if track.length<=480000 and not track.title.startswith(self.current_track.title) and track.title not in [x.title for x in self.last_songs._queue]:
                         self.now_playing_id = track.ytid
                         await self.auto_play_queue.put(Track(track.id, track.info, requester=self.requester))
                 except TypeError:
@@ -212,6 +217,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
 
         self.bot.loop.create_task(self.start_nodes())
 
+
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
@@ -287,31 +293,45 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     @commands.command(name='connect',hidden=True)
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
         """Connect to a valid voice channel."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if player.is_playing:
+            if controller.remote_control:
+                channel = self.bot.get_channel(player.channel_id)
+                members = [x.id for x in channel.members if x.bot == False]
+                if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                    return await ctx.message.add_reaction('\N{Cross Mark}')
         if not channel:
             try:
                 channel = ctx.author.voice.channel
             except AttributeError:
                 raise discord.DiscordException('No channel to join. Please either specify a valid channel or join one.')
 
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+
         embed1 = discord.Embed(description=f'Connecting to **`{channel.name}...`**')
         msg = await ctx.send(embed=embed1, delete_after=15)
         await player.connect(channel.id)
         await msg.delete()
         embed2 = discord.Embed(description=f"Connected to **`{channel.name}`**")
         await ctx.send(embed=embed2, delete_after=15)
-        controller = self.get_controller(ctx)
-        controller.channel = ctx.channel
 
+        controller.channel = ctx.channel
 
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str):
         """Search for and add a song to the Queue."""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
+
         song = query
         if not player.is_connected:
             await ctx.invoke(self.connect_)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.send(embed=discord.Embed(description='failed to find any songs on youtube or soundcloud'))
         if spotify_url.match(query):
             if 'playlist' in query:
                 id = query.strip('https://open.spotify.com/playlist/')
@@ -400,6 +420,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if not player.is_playing:
             return await ctx.send('I am not currently playing anything!', delete_after=15)
 
@@ -410,6 +436,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if not player.paused:
             return await ctx.send('I am not currently paused!', delete_after=15)
 
@@ -421,6 +453,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if not player.is_playing and controller.auto_play_queue.empty() and controller.queue.empty():
             return await ctx.send('I am not currently playing anything!', delete_after=15)
         if times<1:
@@ -455,7 +492,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
-
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         vol = max(min(vol, 1000), 0)
         controller.volume = vol
 
@@ -579,6 +620,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if controller.auto_play:
             controller.auto_play = False
         if controller.loop:
@@ -597,6 +643,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def equalizer(self, ctx, equalizer: str,amount=1.0):
         """Equalizer for the player"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if not player.is_connected:
             return
 
@@ -619,6 +671,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         """Loop current playing song"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if controller.loop == True:
             controller.loop = False
             await ctx.send("Loop disabled!")
@@ -639,6 +696,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def autoplay(self, ctx):
         """Enable auto play"""
         controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if controller.auto_play == True:
             controller.auto_play = False
             controller.auto_play_queue._queue.clear()
@@ -651,6 +714,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def shuffle(self, ctx):
         """Shuffles the queue"""
         controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if controller.queue._queue:
             random.shuffle(controller.queue._queue)
             await ctx.message.add_reaction("\N{Twisted Rightwards Arrows}")
@@ -662,6 +731,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         """Clear queue"""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         controller.queue._queue.clear()
         if not controller.auto_play_queue.empty():
             controller.auto_play = False
@@ -693,8 +767,15 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
     async def remove(self, ctx,num: int = 1):
         """Removes the chosen song in queue"""
         controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         try:
             del controller.queue._queue[num-1]
+            await ctx.message.add_reaction('\N{White Heavy Check Mark}')
         except IndexError:
             await ctx.send(embed=discord.Embed(description="Could not remove"))
     @commands.command(aliases=['playlists','pl'])
@@ -816,12 +897,55 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
                     return await ctx.message.add_reaction('\N{Cross Mark}')
             else:
                 return await ctx.send(embed=discord.Embed(description='Invalid option'))
+    @commands.command(aliases=['wl'],hidden=True)
+    async def whitelist(self, ctx, mode: str = None, user: discord.Member= None):
+        if ctx.message.author.id != 263190106821623810:
+            return await ctx.message.add_reaction('\N{Cross Mark}')
+        if not mode:
+            await ctx.send(embed=discord.Embed(description="choose from add, remove, toggle"),delete_after=3)
+            return await ctx.message.delete()
+        else:
+            if mode.lower() == "add":
+                with open("whitelist.txt","r") as f:
+                    content = f.read()
+                with open("whitelist.txt","w") as f:
+                    if content != "":
+                        f.write(content+f"\n{user.id}")
+                    else:
+                        f.write(content+f"{user.id}")
+                await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                await asyncio.sleep(1)
+                return await ctx.message.delete()
+            if mode.lower() == "delete":
+                with open("whitelist.txt") as f:
+                    lines = f.readlines()
+                with open("whitelist.txt", "w") as f:
+                    f.writelines([item for item in lines[:-1]])
+                await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                await asyncio.sleep(1)
+                return await ctx.message.delete()
+            if mode.lower() == 'toggle':
+                controller = self.get_controller(ctx)
+                if controller.remote_control:
+                    controller.remote_control = False
+                    await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                    await asyncio.sleep(1)
+                    return await ctx.message.delete()
+                else:
+                    controller.remote_control = True
+                    await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                    await asyncio.sleep(1)
+                    return await ctx.message.delete()
     @commands.command(aliases=['back'])
     async def last(self, ctx, num = 0):
         """Plays last played song"""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
-
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot == False]
+            if any([x in whitelist for x in members]) and ctx.message.author.id not in whitelist :
+                return await ctx.message.add_reaction('\N{Cross Mark}')
         if controller.last_songs.qsize()<1:
             return
         if controller.last_songs.qsize() >= num:

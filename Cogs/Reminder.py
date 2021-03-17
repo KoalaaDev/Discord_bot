@@ -2,7 +2,6 @@ from discord.ext import commands
 import asyncio
 
 
-
 class Reminder(commands.Cog, description="Never forget anything again!"):
     def __init__(self, bot):
         self.bot = bot

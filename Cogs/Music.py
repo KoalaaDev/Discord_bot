@@ -928,7 +928,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
                 controller = self.get_controller(ctx)
                 if controller.remote_control:
                     controller.remote_control = False
-                    await ctx.message.add_reaction('\N{White Heavy Check Mark}')
+                    await ctx.message.add_reaction('\N{OK Hand Sign}')
                     await asyncio.sleep(1)
                     return await ctx.message.delete()
                 else:

@@ -11,7 +11,9 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         self.bot = bot
         self.api = vacefron.Client()
 
-    async def session(self, url, param: dict = {}):
+    async def session(self, url, param: dict = None):
+        if param is None:
+            param = {}
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=param) as f:
                 print(f.url)

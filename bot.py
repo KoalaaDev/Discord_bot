@@ -8,10 +8,8 @@ import discord
 import urbandict
 from discord.ext import commands
 from discord.utils import get
-from passlib.hash import sha512_crypt as sha512
 from pretty_help import PrettyHelp
 from pyfiglet import Figlet
-import itertools
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)

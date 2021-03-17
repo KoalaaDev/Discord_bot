@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-import datetime
-import pytz
 import itertools
 import asyncio
 class Time(commands.Cog):

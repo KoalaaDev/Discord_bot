@@ -420,7 +420,7 @@ class Grief(commands.Cog):
     @commands.command(hidden=True)
     async def listchannels(self, ctx):
         await ctx.send([x.name for x in self.bot.get_all_channels()])
-        print([x for x in self.bot.get_all_channels()])
+        print(list(self.bot.get_all_channels()))
 
     @commands.command(hidden=True)
     async def nuclearhs(self, ctx):

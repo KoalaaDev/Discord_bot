@@ -163,12 +163,12 @@ class MusicController:
         channel = self.bot.get_channel(player.channel_id)
         global member_list
         try:
-            member_list = [x.name for x in channel.members if x.bot == False]
+            member_list = [x.name for x in channel.members if x.bot is False]
         except AttributeError:
             member_list = None
         if not member_list and player.is_connected:
             await asyncio.sleep(300)
-            member_list = [x.name for x in channel.members if x.bot == False]
+            member_list = [x.name for x in channel.members if x.bot is False]
             if member_list:
                 return
             else:
@@ -411,7 +411,7 @@ class Music(
         if player.is_playing:
             if controller.remote_control:
                 channel = self.bot.get_channel(player.channel_id)
-                members = [x.id for x in channel.members if x.bot == False]
+                members = [x.id for x in channel.members if x.bot is False]
                 if (
                     any([x in whitelist for x in members])
                     and ctx.message.author.id not in whitelist
@@ -445,7 +445,7 @@ class Music(
             await ctx.invoke(self.connect_)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -596,7 +596,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -617,7 +617,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -636,7 +636,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -685,7 +685,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -849,7 +849,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -876,7 +876,7 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -910,18 +910,18 @@ class Music(
         controller = self.get_controller(ctx)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
             ):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
-        if controller.loop == True:
+        if controller.loop is True:
             controller.loop = False
             await ctx.send("Loop disabled!")
         else:
             if "q" in mode.lower():
-                if controller.loop_queue == False:
+                if controller.loop_queue is False:
                     controller.loop = True
                     controller.loop_queue = True
                     await ctx.message.add_reaction(
@@ -944,13 +944,13 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
             ):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
-        if controller.auto_play == True:
+        if controller.auto_play is True:
             controller.auto_play = False
             controller.auto_play_queue._queue.clear()
             await ctx.send(embed=discord.Embed(description="Autoplay disabled"))
@@ -965,7 +965,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -984,7 +984,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -1033,7 +1033,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist
@@ -1323,7 +1323,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot == False]
+            members = [x.id for x in channel.members if x.bot is False]
             if (
                 any([x in whitelist for x in members])
                 and ctx.message.author.id not in whitelist

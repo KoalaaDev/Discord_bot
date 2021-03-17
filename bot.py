@@ -12,11 +12,12 @@ from passlib.hash import sha512_crypt as sha512
 from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 import itertools
+
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
-    API_KEY = config['bot']['API_KEY']
-    COGS_CONFIG = config['bot']['LOAD_COGS']
+    API_KEY = config["bot"]["API_KEY"]
+    COGS_CONFIG = config["bot"]["LOAD_COGS"]
 
 intents.members = True
 intents.guilds = True
@@ -39,36 +40,54 @@ sponsor = [
 ]
 print(custom2_fig.renderText("Message of the day:"))
 print(custom_fig.renderText(random.choice(sponsor)))
+
+
 async def get_prefix(bot, message):
     with open("prefixes.yaml") as f:
         server_prefixes = yaml.safe_load(f)
         if not message.guild:
             return "~"
-        return server_prefixes.get(message.guild.id,"~")
+        return server_prefixes.get(message.guild.id, "~")
+
+
 client = commands.Bot(
     command_prefix=get_prefix,
     description="A bot with no restrictions!",
-    case_insensitive=True,intents=intents, help_command=PrettyHelp(no_category='Main')
+    case_insensitive=True,
+    intents=intents,
+    help_command=PrettyHelp(no_category="Main"),
 )
 
 
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
 print(f"\u001b[36m Starting HS Bot v3 at {d1} \u001b[0m")
-if COGS_CONFIG == 'all':
+if COGS_CONFIG == "all":
     Cogs_to_load = [
-        "Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
+        "Cogs." + cog.strip(".py")
+        for cog in os.listdir("Cogs/")
         if "py" in cog and "pycache" not in cog
     ]
-elif COGS_CONFIG == 'normal':
-    normal_blacklist = ["Grief",'Test','Time','Chess']
+elif COGS_CONFIG == "normal":
+    normal_blacklist = ["Grief", "Test", "Time", "Chess"]
     excluded = len(normal_blacklist)
-    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/") if "py" in cog and "pycache" not in cog and cog.strip(".py") not in normal_blacklist]
-elif COGS_CONFIG == 'disarmed':
-    disarmed_blacklist = ["Grief",'Test','Spying','Time']
+    Cogs_to_load = [
+        "Cogs." + cog.strip(".py")
+        for cog in os.listdir("Cogs/")
+        if "py" in cog
+        and "pycache" not in cog
+        and cog.strip(".py") not in normal_blacklist
+    ]
+elif COGS_CONFIG == "disarmed":
+    disarmed_blacklist = ["Grief", "Test", "Spying", "Time"]
     excluded = len(disarmed_blacklist)
-    Cogs_to_load = ["Cogs." + cog.strip(".py") for cog in os.listdir("Cogs/")
-    if "py" in cog and "pycache" not in cog and  cog.strip(".py") not in disarmed_blacklist]
+    Cogs_to_load = [
+        "Cogs." + cog.strip(".py")
+        for cog in os.listdir("Cogs/")
+        if "py" in cog
+        and "pycache" not in cog
+        and cog.strip(".py") not in disarmed_blacklist
+    ]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 
@@ -92,16 +111,26 @@ async def on_ready():
             print(f"ERROR {cogger}: \u001b[101m {e} \u001b[0m")
             COGS_FAILED += 1
     else:
-        print(f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED")
-    await client.change_presence(activity=discord.Activity(
-        type=discord.ActivityType.listening, name="help"))
+        print(
+            f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
+        )
+    await client.change_presence(
+        activity=discord.Activity(type=discord.ActivityType.listening, name="help")
+    )
     print("\u001b[33m Logged in as {0} ({0.id}) \u001b[0m".format(client.user))
-    print("\u001b[36m Connected to " + str(len(client.guilds)) +
-          " servers | Connected to " +
-          str(len(set(client.get_all_members()))) + " users | " +
-          "Connected to " + str(len(client.voice_clients)) +
-          " voice clients \u001b[0m")
-    print("\u001b[7m ------------------------------------------------------------------------------------- \u001b[0m")
+    print(
+        "\u001b[36m Connected to "
+        + str(len(client.guilds))
+        + " servers | Connected to "
+        + str(len(set(client.get_all_members())))
+        + " users | "
+        + "Connected to "
+        + str(len(client.voice_clients))
+        + " voice clients \u001b[0m"
+    )
+    print(
+        "\u001b[7m ------------------------------------------------------------------------------------- \u001b[0m"
+    )
 
 
 @client.event
@@ -110,12 +139,14 @@ async def on_message(message):
         if message.content.startswith(f"<@!{client.user.id}> "):
             prefix = " ".join(message.content.split()[1:])
             print("changing prefixes")
-            with open('prefixes.yaml', 'r') as f:
+            with open("prefixes.yaml", "r") as f:
                 prefixes = yaml.safe_load(f)
             prefixes[message.guild.id] = prefix
-            with open("prefixes.yaml","w") as f:
+            with open("prefixes.yaml", "w") as f:
                 yaml.dump(prefixes, f)
     await client.process_commands(message)
+
+
 @client.event
 async def on_guild_join(guild):
     print("\u001b[33m Joining server {0} \u001b[0m".format(guild.name))
@@ -125,11 +156,12 @@ async def on_guild_join(guild):
 async def on_guild_leave(guild):
     print("\u001b[33m Left server {0} \u001b[0m".format(guild.name))
     print(f"deleting prefixes for {guild.name}")
-    with open('prefixes.yaml', 'r') as f:
+    with open("prefixes.yaml", "r") as f:
         prefixes = yaml.safe_load(f)
-    prefixes.pop(guild.id,None)
-    with open("prefixes.yaml","w") as f:
+    prefixes.pop(guild.id, None)
+    with open("prefixes.yaml", "w") as f:
         yaml.dump(prefixes, f)
+
 
 @client.event
 async def on_disconnect():
@@ -145,24 +177,17 @@ async def on_resumed():
 
 # sorta good purpose
 @client.command(hidden=True)
-async def kick(ctx,
-               member: discord.Member,
-               days: int = 1,
-               reason="ur smol hs"):
+async def kick(ctx, member: discord.Member, days: int = 1, reason="ur smol hs"):
     await member.kick()
     await ctx.send(f"Kicked {member.name}")
-    print(
-        f"{member.name} has been kicked from \u001b[33m {ctx.guild.name} \u001b[0m"
-    )
+    print(f"{member.name} has been kicked from \u001b[33m {ctx.guild.name} \u001b[0m")
 
 
 @client.command(hidden=True)
 async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
     await member.ban(delete_message_days=days)
     await ctx.send("Banned {}".format(ctx.member))
-    print(
-        f"{member.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m"
-    )
+    print(f"{member.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m")
 
 
 # @client.command()
@@ -250,13 +275,14 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 #             break
 #             # ending the loop if user doesn't react after x seconds
 
-@client.command(description='Delete messages on mass')
+
+@client.command(description="Delete messages on mass")
 async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
     print("Clearing messages")
 
 
-@client.command(description='Latency to discord')
+@client.command(description="Latency to discord")
 async def ping(ctx):
     color = discord.Color(value=0x00FF00)
     em = discord.Embed(color=color, title="Pong! Your latency is:")
@@ -265,30 +291,30 @@ async def ping(ctx):
     await ctx.send(embed=em)
 
 
-@client.command(description='Get info of a user on the server')
+@client.command(description="Get info of a user on the server")
 async def info(ctx, user: discord.Member = None):
     if user is None:
         await ctx.send("Please input a user.")
     else:
         await ctx.send(
-            "The user's name is: {}".format(user.name) +
-            "\nThe user's ID is: {}".format(user.id) +
-            "\nThe user's current status is: {}".format(user.status) +
-            "\nThe user's highest role is: {}".format(user.top_role) +
-            "\nThe user joined at: {}".format(user.joined_at))
+            "The user's name is: {}".format(user.name)
+            + "\nThe user's ID is: {}".format(user.id)
+            + "\nThe user's current status is: {}".format(user.status)
+            + "\nThe user's highest role is: {}".format(user.top_role)
+            + "\nThe user joined at: {}".format(user.joined_at)
+        )
 
 
 @client.command(description="Invite link of bot")
 async def invite(ctx):
     embed = discord.Embed(
-        description=
-        f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot)",
+        description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot)",
         colour=discord.Colour(0xFF001D),
     )
     await ctx.send(embed=embed)
 
 
-@client.command(description='Echo your text')
+@client.command(description="Echo your text")
 async def echo(ctx, *, args):
     await ctx.message.delete()
     output = ""
@@ -298,12 +324,12 @@ async def echo(ctx, *, args):
         await ctx.send(output)
 
 
-@client.command(description='add numbers')
+@client.command(description="add numbers")
 async def add(ctx, left: str, right: str):
     await ctx.send(left + right)
 
 
-@client.command(description='multiply numbers')
+@client.command(description="multiply numbers")
 async def multiply(ctx, left: str, right: str):
     if left == "hs" and right == "hs":
         await ctx.send("hs2")
@@ -311,12 +337,12 @@ async def multiply(ctx, left: str, right: str):
         await ctx.send(int(left) * int(right))
 
 
-@client.command(description='divide numbers')
+@client.command(description="divide numbers")
 async def divide(ctx, left: int, right: int):
     await ctx.send(left / right)
 
 
-@client.command(description='Subtract numbers')
+@client.command(description="Subtract numbers")
 async def minus(ctx, left: int, right: int):
     await ctx.send(left - right)
 
@@ -332,18 +358,17 @@ async def roll(ctx, dice: str):
     await ctx.send(result)
 
 
-@client.command(
-    description="For when you wanna settle the score some other way")
+@client.command(description="For when you wanna settle the score some other way")
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:
         await ctx.send("I choose Koalaa cuz homo")
     elif "dan" in choices or "daniel" in choices or "Dan" in choices:
-        embed = discord.Embed(title="scott x daniel is real ship",
-                              colour=discord.Colour.dark_red())
+        embed = discord.Embed(
+            title="scott x daniel is real ship", colour=discord.Colour.dark_red()
+        )
         embed.set_image(
-            url=
-            "https://cdn.discordapp.com/attachments/512906616929124371/721064750284275782/dan_rape.jpg"
+            url="https://cdn.discordapp.com/attachments/512906616929124371/721064750284275782/dan_rape.jpg"
         )
         await ctx.send(embed=embed)
     elif "staff" in choices and "dwraxk" in choices:
@@ -351,17 +376,13 @@ async def choose(ctx, *choices: str):
         await asyncio.sleep(1)
         await ctx.send("dwraxk = rape howard")
     elif "scoot" in choices or "scott" in choices or "Scott" in choices:
-        await ctx.send(
-            "I love scott cuz he gay :ok_hand: :eggplant: :sweat_drops:")
+        await ctx.send("I love scott cuz he gay :ok_hand: :eggplant: :sweat_drops:")
     elif "HS" in choices or "hs" in choices or "Hs" in choices:
         await ctx.send("ʳᵉᵉᵉᵉᵉ")
     elif "hs" in choices and "koala" in choices:
         await ctx.send("hs")
     else:
         await ctx.send(random.choice(choices))
-
-
-
 
 
 @client.command()
@@ -378,7 +399,7 @@ async def slot(ctx):
 
     if a == b == c == d == e == f:
         await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")
-    elif (a == b and b==d) or (a == c and c==d) or (b == c):
+    elif (a == b and b == d) or (a == c and c == d) or (b == c):
         await ctx.send(f"{slotmachine} 2 in a row, you won! 🎉")
     else:
         await ctx.send(f"{slotmachine} No match, you lost 😢")
@@ -393,13 +414,11 @@ async def reversecard(ctx, *, text: str):
     await ctx.message.delete()
     embed = discord.Embed(colour=discord.Colour.dark_red())
     embed.set_image(
-        url=
-        "https://cdn.discordapp.com/attachments/662589204974403585/665222655309250600/no_u.jpg"
+        url="https://cdn.discordapp.com/attachments/662589204974403585/665222655309250600/no_u.jpg"
     )
     t_rev = text[::-1].replace("@", "@\u200B").replace("&", "&\u200B")
     await ctx.send(f"🔁 {t_rev} ")
     await ctx.send(embed=embed)
-
 
 
 @client.command()
@@ -521,13 +540,13 @@ async def idle(ctx):
     await client.change_presence(status=discord.Status.idle)
     print("[bot going away] Going AFK!")
 
+
 @client.command()
 async def invitelink(ctx, id):
     server = client.get_guild(id)
-    link = server.channels.create_invite(destination=server,
-                                             xkcd=True,
-                                             max_age=0,
-                                             max_uses=0)
+    link = server.channels.create_invite(
+        destination=server, xkcd=True, max_age=0, max_uses=0
+    )
     await ctx.send(link)
 
 

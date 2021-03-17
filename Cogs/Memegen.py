@@ -4,15 +4,19 @@ import aiohttp
 import discord
 import random
 import io
+
+
 class Meme(commands.Cog, description="Generate memes and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.api = vacefron.Client()
-    async def session(self,url,param:dict = {}):
+
+    async def session(self, url, param: dict = {}):
         async with aiohttp.ClientSession() as session:
-            async with session.get(url,params=param) as f:
+            async with session.get(url, params=param) as f:
                 print(f.url)
-                return discord.File(io.BytesIO(await f.read()), filename = "img.png")
+                return discord.File(io.BytesIO(await f.read()), filename="img.png")
+
     # @commands.command()
     # async def communism(self, ctx, picture:discord.Member  = None):
     #     pic_url = str(picture.avatar_url).replace("webp",'png')
@@ -148,24 +152,41 @@ class Meme(commands.Cog, description="Generate memes and more!"):
     #     img = await self.session(f"https://api.cool-img-api.ml/what?image={pic_url}")
     #     await ctx.send(file=img)
     @commands.command()
-    async def batman_slap(self, ctx, text, text2, batman:discord.Member =None, robin:discord.Member =None):
+    async def batman_slap(
+        self,
+        ctx,
+        text,
+        text2,
+        batman: discord.Member = None,
+        robin: discord.Member = None,
+    ):
         """Generates the meme"""
         if batman and robin:
-            img = await self.api.batman_slap(text, text2, batman=batman.avatar_url, robin=robin.avatar_url)
+            img = await self.api.batman_slap(
+                text, text2, batman=batman.avatar_url, robin=robin.avatar_url
+            )
             embed = discord.Embed()
             embed.set_image(url=img.url)
             await ctx.send(embed=embed)
 
     @commands.command()
-    async def distracted(self, ctx, boyfriend:discord.Member = None, girlfriend:discord.Member =None, woman:discord.Member =None):
+    async def distracted(
+        self,
+        ctx,
+        boyfriend: discord.Member = None,
+        girlfriend: discord.Member = None,
+        woman: discord.Member = None,
+    ):
         """Generates the meme"""
-        img = await self.api.distracted_bf(boyfriend.avatar_url, girlfriend.avatar_url, woman.avatar_url)
+        img = await self.api.distracted_bf(
+            boyfriend.avatar_url, girlfriend.avatar_url, woman.avatar_url
+        )
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def shame(self, ctx, user:discord.Member = None):
+    async def shame(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.dock_of_shame(user.avatar_url)
         embed = discord.Embed()
@@ -173,7 +194,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def table_flip(self, ctx, user:discord.Member = None):
+    async def table_flip(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.table_flip(user.avatar_url)
         embed = discord.Embed()
@@ -181,7 +202,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def first_time(self, ctx, user:discord.Member = None):
+    async def first_time(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.first_time(user.avatar_url)
         embed = discord.Embed()
@@ -189,7 +210,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def heaven(self, ctx, user:discord.Member = None):
+    async def heaven(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.heaven(user.avatar_url)
         embed = discord.Embed()
@@ -197,15 +218,15 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def npc(self, ctx, text1:str = None,text2:str = None):
+    async def npc(self, ctx, text1: str = None, text2: str = None):
         """Generates the meme"""
-        img = await self.api.npc(text1,text2)
+        img = await self.api.npc(text1, text2)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def stonks(self, ctx, user:discord.Member = None):
+    async def stonks(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.stonks(user.avatar_url)
         embed = discord.Embed()
@@ -213,7 +234,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def wolverine(self, ctx, user:discord.Member = None):
+    async def wolverine(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.wolverine(user.avatar_url)
         embed = discord.Embed()
@@ -221,7 +242,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def widen(self, ctx, user:discord.Member = None):
+    async def widen(self, ctx, user: discord.Member = None):
         """Widens your profile picture"""
         img = await self.api.wide(user.avatar_url)
         embed = discord.Embed()
@@ -229,7 +250,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def speedy(self, ctx, user:discord.Member = None):
+    async def speedy(self, ctx, user: discord.Member = None):
         """Generates the meme"""
         img = await self.api.iam_speed(user.avatar_url)
         embed = discord.Embed()
@@ -237,15 +258,17 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def milk(self, ctx, user:discord.Member = None, user2:discord.Member = None):
+    async def milk(
+        self, ctx, user: discord.Member = None, user2: discord.Member = None
+    ):
         """Generates the meme"""
-        img = await self.api.i_can_milk_you(user.avatar_url, user2 = user2.avatar_url)
+        img = await self.api.i_can_milk_you(user.avatar_url, user2=user2.avatar_url)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def car_reverse(self, ctx, *, text:str = None):
+    async def car_reverse(self, ctx, *, text: str = None):
         """Generates the meme"""
         img = await self.api.car_reverse(text)
         embed = discord.Embed()
@@ -253,7 +276,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def water(self, ctx, *, text:str = None):
+    async def water(self, ctx, *, text: str = None):
         """Generates the meme"""
         img = await self.api.water(text)
         embed = discord.Embed()
@@ -261,7 +284,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def emergency(self, ctx, *, text:str = None):
+    async def emergency(self, ctx, *, text: str = None):
         """Generates the meme"""
         img = await self.api.emergency_meeting(text)
         embed = discord.Embed()
@@ -269,16 +292,16 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def eject(self, ctx, member:discord.Member = None):
+    async def eject(self, ctx, member: discord.Member = None):
         """Generates the meme"""
-        imposter = random.choice([True,False])
-        img = await self.api.ejected(member.name, crewmate = "random", impostor = imposter)
+        imposter = random.choice([True, False])
+        img = await self.api.ejected(member.name, crewmate="random", impostor=imposter)
         embed = discord.Embed()
         embed.set_image(url=img.url)
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def rip(self, ctx, member:discord.Member = None):
+    async def rip(self, ctx, member: discord.Member = None):
         """Generates the meme"""
         img = await self.api.grave(member.avatar_url)
         embed = discord.Embed()
@@ -286,9 +309,13 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def changemymind(self, ctx, *, text:str = None):
+    async def changemymind(self, ctx, *, text: str = None):
         """Generates the meme"""
-        img = await self.session("https://api.cool-img-api.ml/changemymind",{'text':text})
+        img = await self.session(
+            "https://api.cool-img-api.ml/changemymind", {"text": text}
+        )
         await ctx.send(file=img)
+
+
 def setup(bot):
     bot.add_cog(Meme(bot))

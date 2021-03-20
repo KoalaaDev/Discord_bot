@@ -17,6 +17,7 @@ import yaml
 import spotify
 import pycountry
 import humanreadable as hr
+import async_timeout
 from lyricsgenius import Genius
 
 with open("whitelist.txt") as f:
@@ -85,7 +86,6 @@ class MusicController:
         self.remote_control = False
         self.bot.loop.create_task(self.controller_loop())
         self.check_autoplay_queue.start()
-        self.check_listen.start()
         self.check_last_songs.start()
         self.update_playlist.start()
         with open(config_file_path) as f:
@@ -157,33 +157,20 @@ class MusicController:
             song = await self.last_songs.get()
             del song
 
-    @tasks.loop(seconds=1.0)
+
     async def check_listen(self):
         player = self.bot.wavelink.get_player(self.guild_id)
         channel = self.bot.get_channel(player.channel_id)
-        global member_list
-        try:
-            member_list = [x.name for x in channel.members if x.bot is False]
-        except AttributeError:
-            member_list = None
-        if not member_list and player.is_connected:
-            await asyncio.sleep(300)
-            member_list = [x.name for x in channel.members if x.bot is False]
-            if member_list:
-                return
-            else:
-                embed = discord.Embed(title="Everyone left me alone..Disconecting!")
-                embed.set_footer(text="I'll see you on the next doorbanging adventure!")
-                if self.channel:
-                    await self.channel.send(embed=embed, delete_after=60)
-                self.queue._queue.clear()
-                await player.stop()
-                await player.disconnect()
-                if self.auto_play:
-                    self.auto_play = False
-                    self.auto_play_queue._queue.clear()
-                if self.loop:
-                    self.loop = False
+        embed = discord.Embed(title="No song playing..Disconecting!")
+        embed.set_footer(text="I'll see you on the next doorbanging adventure!")
+        if self.channel:
+            await self.channel.send(embed=embed, delete_after=60)
+        await player.stop()
+        await player.disconnect()
+        if self.auto_play:
+            self.auto_play = False
+        if self.loop:
+            self.loop = False
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -195,7 +182,11 @@ class MusicController:
             if self.current_track:
                 self.current_track = None
             self.next.clear()
-            song = await self.queue.get()
+            try:
+                with async_timeout.timeout(600):
+                    song = await self.queue.get()
+            except asyncio.TimeoutError:
+                return await self.check_listen()
             (
                 self.now_playing_uri,
                 self.now_playing_id,
@@ -373,6 +364,7 @@ class Music(
             controller.queue._queue.clear()
             await player.stop()
             await player.disconnect()
+            del self.controllers[member.guild.id]
         if controller.remote_control:
             if before.channel and after.channel:
                 if (
@@ -1368,12 +1360,13 @@ class Music(
         cpu = node.stats.cpu_cores
 
         fmt = (
-            f"**Doorbanger:** `v3.0.1`\n\n"
+            f"**{self.bot.user.name}:** `v3.3.1`\n\n"
             f"Connected to `{len(self.bot.wavelink.nodes)}` nodes.\n"
             f"Best available Node `{self.bot.wavelink.get_best_node().__repr__()}`\n"
             f"`{len(self.bot.wavelink.players)}` players are distributed on nodes.\n"
             f"`{node.stats.players}` players are distributed on server.\n"
-            f"`{node.stats.playing_players}` players are playing on server.\n\n"
+            f"`{node.stats.playing_players}` players are playing on server.\n"
+            f"`{len(self.controllers)}` controllers.\n\n"
             f"Server Memory: `{used}/{total}` | `({free} free)`\n"
             f"Server CPU: `{cpu}`\n\n"
             f"Server Uptime: `{datetime.timedelta(milliseconds=node.stats.uptime)}`"

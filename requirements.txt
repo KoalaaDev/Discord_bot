@@ -20,3 +20,4 @@ pytz
 pycountry
 discord-pretty-help==1.2.3
 humanreadable
+async-timeout

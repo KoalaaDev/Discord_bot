@@ -186,7 +186,11 @@ class MusicController:
                 with async_timeout.timeout(600):
                     song = await self.queue.get()
             except asyncio.TimeoutError:
-                return await self.check_listen()
+                print("TIMED OUT")
+                if not player.is_playing:
+                    return await self.check_listen()
+                else:
+                    continue
             (
                 self.now_playing_uri,
                 self.now_playing_id,

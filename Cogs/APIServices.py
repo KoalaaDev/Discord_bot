@@ -3,14 +3,18 @@ import aiohttp
 import discord
 import sys
 
+
 class API(commands.Cog, description="Random generator commands"):
     def __init__(self, bot):
         self.bot = bot
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.NSFWChannelRequired):
             try:
                 return await ctx.send(
-                    embed=discord.Embed(description="This command can only be used in NSFW channels!")
+                    embed=discord.Embed(
+                        description="This command can only be used in NSFW channels!"
+                    )
                 )
             except discord.HTTPException:
                 pass
@@ -18,6 +22,7 @@ class API(commands.Cog, description="Random generator commands"):
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
+
     @commands.command()
     async def cat(self, ctx):
         """Gives a random cat picture"""  # Alvin be like meow meow *while sucking staff*
@@ -82,6 +87,7 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["url"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
+
     @commands.is_nsfw()
     @commands.command()
     async def img(self, ctx, *, query):
@@ -106,6 +112,7 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["image"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
+
     @commands.is_nsfw()
     @commands.command()
     async def insult(self, ctx, lang="en"):

@@ -275,13 +275,13 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 #             # ending the loop if user doesn't react after x seconds
 
 
-@client.command(description="Delete messages on mass")
+@client.command(hidden=True, description="Delete messages on mass")
 async def purge(ctx, amount: int):
     await ctx.channel.purge(limit=amount)
     print("Clearing messages")
 
 
-@client.command(description="Latency to discord")
+@client.command(hidden=True, description="Latency to discord")
 async def ping(ctx):
     color = discord.Color(value=0x00FF00)
     em = discord.Embed(color=color, title="Pong! Your latency is:")
@@ -290,7 +290,7 @@ async def ping(ctx):
     await ctx.send(embed=em)
 
 
-@client.command(description="Get info of a user on the server")
+@client.command(hidden=True, description="Get info of a user on the server")
 async def info(ctx, user: discord.Member = None):
     if user is None:
         await ctx.send("Please input a user.")
@@ -304,7 +304,7 @@ async def info(ctx, user: discord.Member = None):
         )
 
 
-@client.command(description="Invite link of bot")
+@client.command(hidden=True, description="Invite link of bot")
 async def invite(ctx):
     embed = discord.Embed(
         description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot)",
@@ -313,7 +313,7 @@ async def invite(ctx):
     await ctx.send(embed=embed)
 
 
-@client.command(description="Echo your text")
+@client.command(hidden=True, description="Echo your text")
 async def echo(ctx, *, args):
     await ctx.message.delete()
     output = ""
@@ -323,30 +323,7 @@ async def echo(ctx, *, args):
         await ctx.send(output)
 
 
-@client.command(description="add numbers")
-async def add(ctx, left: str, right: str):
-    await ctx.send(left + right)
-
-
-@client.command(description="multiply numbers")
-async def multiply(ctx, left: str, right: str):
-    if left == "hs" and right == "hs":
-        await ctx.send("hs2")
-    else:
-        await ctx.send(int(left) * int(right))
-
-
-@client.command(description="divide numbers")
-async def divide(ctx, left: int, right: int):
-    await ctx.send(left / right)
-
-
-@client.command(description="Subtract numbers")
-async def minus(ctx, left: int, right: int):
-    await ctx.send(left - right)
-
-
-@client.command()
+@client.command(hidden=True)
 async def roll(ctx, dice: str):
     """Rolls a dice in NdN format."""
     try:
@@ -357,7 +334,7 @@ async def roll(ctx, dice: str):
     await ctx.send(result)
 
 
-@client.command(description="For when you wanna settle the score some other way")
+@client.command(hidden=True,description="For when you wanna settle the score some other way")
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:
@@ -384,7 +361,7 @@ async def choose(ctx, *choices: str):
         await ctx.send(random.choice(choices))
 
 
-@client.command()
+@client.command(hidden=True)
 async def slot(ctx):
     """ Roll the slot machine """
     emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
@@ -404,7 +381,7 @@ async def slot(ctx):
         await ctx.send(f"{slotmachine} No match, you lost 😢")
 
 
-@client.command()
+@client.command(hidden=True)
 async def reversecard(ctx, *, text: str):
     """!poow ,ffuts esreveR
     Everything you type after reverse will of course, be reversed
@@ -420,13 +397,13 @@ async def reversecard(ctx, *, text: str):
     await ctx.send(embed=embed)
 
 
-@client.command()
+@client.command(hidden=True)
 async def claps(ctx, *, message):
     """Adds clapping emojis to text"""
     await ctx.send(f":clap: {message} :clap:")
 
 
-@client.command()
+@client.command(hidden=True)
 async def dict(ctx, *, word: str):
     """Gets a term from urbandictionary"""
     urb = urbandict.define(word)
@@ -442,111 +419,8 @@ async def dict(ctx, *, word: str):
 async def allmembers(ctx):
     await ctx.message.delete()
     await ctx.send("Getting all members...", delete_after=19)
-    members = [member for member in sorted(set(client.get_all_members()))]
+    members = {member for member in sorted(set(client.get_all_members()))}
     print(members)
-
-
-@client.command(hidden=True)
-async def allguilds(ctx):
-    await ctx.message.delete()
-    await ctx.send("Getting all guilds...", delete_after=19)
-    guilds = [guild for guild in client.guilds]
-    print(guilds)
-    await ctx.send(guilds, delete_after=20)
-
-
-@client.command(hidden=True)
-async def changeregion(ctx, *, region):
-    await ctx.message.delete()
-    # region=['amsterdam','brazil','dubai','eu_central','india','hongkong','singapore','russia','us_west','us_south','us_central','us_east','sydney','southafrica','london','japan']
-    server = ctx.message.guild
-    try:
-        await server.edit(region=region)
-        print(f"changed region to {region}")
-    except Exception as e:
-        print(f"Fail to change regions: {e}")
-
-
-@client.command(hidden=True)
-async def unbanall(ctx):
-    for guild in client.guilds:
-        bans = await guild.bans()
-        for user in bans:
-            try:
-                await guild.unban(user[0].name)
-                ctx.send("Unbanning everyone...")
-                print(f"unbanned {user}")
-            except discord.NotFound:
-                print(f"did not find {user} in {guild}")
-
-
-@client.command(hidden=True)
-async def listbans(ctx):
-    for guild in client.guilds:
-        for member in guild.members:
-            members = get(await guild.bans(), user=member)
-            if members == "None":
-                pass
-            else:
-                print(f"{guild}'s ban list:", members)
-
-
-@client.command(hidden=True)
-async def unbanid(ctx, *, id: int):
-    if id is None:
-        await ctx.send("Please input id")
-    for guild in client.guilds:
-        try:
-            user = await client.fetch_user(id)
-            await guild.unban(user)
-            await ctx.send("unbanning user id from bot servers")
-            print(f"unbanned {ctx.message.author} from {guild}")
-        except discord.errors.NotFound:
-            print(f"could not find {ctx.message.author} in {guild}'s ban list")
-
-
-@client.command(hidden=True)
-async def inviteall(ctx):
-    for guild in client.guilds:
-        for channel in guild.channels:
-            try:
-                invitelinknew = await channel.create_invite(
-                    destination=channel,
-                    xkcd=True,
-                    max_age=0,
-                    max_uses=0,
-                    reason=f"Invite sent by {guild.owner}",
-                )
-                await ctx.send(invitelinknew)
-                print(invitelinknew)
-            except discord.errors.NotFound:
-                print(f"Could not find invite for {guild}")
-
-
-@client.command(hidden=True)
-async def load_jsk(ctx):
-    client.load_extension("jishaku")
-
-
-@client.command(hidden=True)
-async def offline(ctx):
-    await client.change_presence(status=discord.Status.invisible)
-    print("[bot going offline] Going under!")
-
-
-@client.command(hidden=True)
-async def idle(ctx):
-    await client.change_presence(status=discord.Status.idle)
-    print("[bot going away] Going AFK!")
-
-
-@client.command()
-async def invitelink(ctx, id):
-    server = client.get_guild(id)
-    link = server.channels.create_invite(
-        destination=server, xkcd=True, max_age=0, max_uses=0
-    )
-    await ctx.send(link)
 
 
 client.run(API_KEY)

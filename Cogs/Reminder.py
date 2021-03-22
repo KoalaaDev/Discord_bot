@@ -18,6 +18,7 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
+    @commands.cooldown(1,5,commands.BucketType.user)
     @commands.command()
     async def RemindMe(self, ctx, *, time):
         """Remind you of something, input a human readable time or seconds"""
@@ -37,6 +38,7 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
         await ctx.send(embed=discord.Embed(title=f"Reminder!",description=f"{member.mention} {msg.content}"))
+    @commands.cooldown(1,5,commands.BucketType.user)
     @commands.command()
     async def Remind(self, ctx,member: discord.Member, *, time):
         """Remind you of something, input a human readable time"""

@@ -71,6 +71,7 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["url"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
+
     @commands.is_nsfw()
     @commands.command()
     async def img(self, ctx, *, query):

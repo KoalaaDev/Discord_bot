@@ -389,11 +389,17 @@ class Music(
         if isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.send(
-                    "This command can not be used in Private Messages."
+                    embed=discord.Embed(description="This command can not be used in Private Messages.")
                 )
             except discord.HTTPException:
                 pass
-
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
@@ -417,9 +423,7 @@ class Music(
             try:
                 channel = ctx.author.voice.channel
             except AttributeError:
-                raise discord.DiscordException(
-                    "No channel to join. Please either specify a valid channel or join one."
-                )
+                return await ctx.send(embed=discord.Embed(description="No channel to join. Please either specify a valid channel or join one."),delete_after=5)
 
         embed1 = discord.Embed(description=f"Connecting to **`{channel.name}...`**")
         msg = await ctx.send(embed=embed1, delete_after=15)

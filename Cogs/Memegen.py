@@ -4,7 +4,7 @@ import aiohttp
 import discord
 import random
 import io
-
+import sys
 
 class Meme(commands.Cog, description="Generate memes and more!"):
     def __init__(self, bot):
@@ -18,7 +18,18 @@ class Meme(commands.Cog, description="Generate memes and more!"):
             async with session.get(url, params=param) as f:
                 print(f.url)
                 return discord.File(io.BytesIO(await f.read()), filename="img.png")
-
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
+        print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
     @commands.command()
     async def communism(self, ctx, User:discord.Member  = None):
         pic_url = str(User.avatar_url).replace("webp",'png')
@@ -57,99 +68,99 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         img = await self.session("https://api.cool-img-api.ml/scroll",{'text':text})
         await ctx.send(file=img)
     @commands.command()
-    async def alwayshasbeen(self, ctx, User: discord.Member = None):
+    async def alwayshasbeen(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/alwayshasbeen?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def amiajoke(self, ctx, User: discord.Member = None):
+    async def amiajoke(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/amiajoke?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def bad(self, ctx, User: discord.Member = None):
+    async def bad(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/bad?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def bed(self, ctx, User: discord.Member = None, User2: discord.Member = None):
+    async def bed(self, ctx, User: discord.Member, User2: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         pic2_url = str(User2.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/bed?image={pic_url}&image2={pic2_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def ship(self, ctx, User: discord.Member = None, User2: discord.Member = None):
+    async def ship(self, ctx, User: discord.Member, User2: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         pic2_url = str(User2.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/ship?user={pic_url}&user2={pic2_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def blur(self, ctx, User: discord.Member = None):
+    async def blur(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/blur?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def beautiful(self, ctx, User: discord.Member = None):
+    async def beautiful(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/beautiful?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def gay(self, ctx, User: discord.Member = None):
+    async def gay(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/gay?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def gun(self, ctx, User: discord.Member = None):
+    async def gun(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/gun?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def hitler(self, ctx, User: discord.Member = None):
+    async def hitler(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/hitler?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def invert(self, ctx, User: discord.Member = None):
+    async def invert(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/invert?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def jail(self, ctx, User: discord.Member = None):
+    async def jail(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/jail?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def jokeoverhead(self, ctx, User: discord.Member = None):
+    async def jokeoverhead(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/jokeoverhead?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def simp(self, ctx, User: discord.Member = None):
+    async def simp(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/simp?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def trash(self, ctx, User: discord.Member = None):
+    async def trash(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/trash?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def triggered(self, ctx, User: discord.Member = None):
+    async def triggered(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/triggered?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def wanted(self, ctx, User: discord.Member = None):
+    async def wanted(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/wanted?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def wasted(self, ctx, User: discord.Member = None):
+    async def wasted(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/wasted?image={pic_url}")
         await ctx.send(file=img)
     @commands.command()
-    async def what(self, ctx, User: discord.Member = None):
+    async def what(self, ctx, User: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         img = await self.session(f"https://api.cool-img-api.ml/what?image={pic_url}")
         await ctx.send(file=img)
@@ -159,8 +170,8 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         ctx,
         text,
         text2,
-        batman: discord.Member = None,
-        robin: discord.Member = None,
+        batman: discord.Member,
+        robin: discord.Member,
     ):
         """Generates the meme"""
         if batman and robin:
@@ -175,9 +186,9 @@ class Meme(commands.Cog, description="Generate memes and more!"):
     async def distracted(
         self,
         ctx,
-        boyfriend: discord.Member = None,
-        girlfriend: discord.Member = None,
-        woman: discord.Member = None,
+        boyfriend: discord.Member,
+        girlfriend: discord.Member,
+        woman: discord.Member,
     ):
         """Generates the meme"""
         img = await self.api.distracted_bf(
@@ -188,7 +199,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def shame(self, ctx, user: discord.Member = None):
+    async def shame(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.dock_of_shame(user.avatar_url)
         embed = discord.Embed()
@@ -196,7 +207,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def table_flip(self, ctx, user: discord.Member = None):
+    async def table_flip(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.table_flip(user.avatar_url)
         embed = discord.Embed()
@@ -204,7 +215,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def first_time(self, ctx, user: discord.Member = None):
+    async def first_time(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.first_time(user.avatar_url)
         embed = discord.Embed()
@@ -212,7 +223,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def heaven(self, ctx, user: discord.Member = None):
+    async def heaven(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.heaven(user.avatar_url)
         embed = discord.Embed()
@@ -228,7 +239,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def stonks(self, ctx, user: discord.Member = None):
+    async def stonks(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.stonks(user.avatar_url)
         embed = discord.Embed()
@@ -236,7 +247,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def wolverine(self, ctx, user: discord.Member = None):
+    async def wolverine(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.wolverine(user.avatar_url)
         embed = discord.Embed()
@@ -244,7 +255,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def widen(self, ctx, user: discord.Member = None):
+    async def widen(self, ctx, user: discord.Member):
         """Widens your profile User"""
         img = await self.api.wide(user.avatar_url)
         embed = discord.Embed()
@@ -252,7 +263,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def speedy(self, ctx, user: discord.Member = None):
+    async def speedy(self, ctx, user: discord.Member):
         """Generates the meme"""
         img = await self.api.iam_speed(user.avatar_url)
         embed = discord.Embed()
@@ -261,7 +272,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
 
     @commands.command()
     async def milk(
-        self, ctx, user: discord.Member = None, user2: discord.Member = None
+        self, ctx, user: discord.Member, user2: discord.Member
     ):
         """Generates the meme"""
         img = await self.api.i_can_milk_you(user.avatar_url, user2=user2.avatar_url)
@@ -294,7 +305,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def eject(self, ctx, member: discord.Member = None):
+    async def eject(self, ctx, member: discord.Member):
         """Generates the meme"""
         imposter = random.choice([True, False])
         img = await self.api.ejected(member.name, crewmate="random", impostor=imposter)
@@ -303,7 +314,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def rip(self, ctx, member: discord.Member = None):
+    async def rip(self, ctx, member: discord.Member):
         """Generates the meme"""
         img = await self.api.grave(member.avatar_url)
         embed = discord.Embed()

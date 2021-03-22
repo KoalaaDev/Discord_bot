@@ -334,7 +334,9 @@ async def roll(ctx, dice: str):
     await ctx.send(result)
 
 
-@client.command(hidden=True,description="For when you wanna settle the score some other way")
+@client.command(
+    hidden=True, description="For when you wanna settle the score some other way"
+)
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:

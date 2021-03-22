@@ -19,13 +19,17 @@ def parse(string: str):
         return string
 
 
-class Math(commands.Cog, description="Math related commands, use Calculate prefix to use math functions"):
+class Math(
+    commands.Cog,
+    description="Math related commands, use Calculate prefix to use math functions",
+):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(description="Subtract numbers")
     async def minus(ctx, left: int, right: int):
         await ctx.send(left - right)
+
     @commands.Cog.listener()
     async def on_message(self, message: str):
         if not message.author.bot:

@@ -1065,23 +1065,7 @@ class Music(
         )
         if mode == None:
             return await ctx.send(
-                embed=discord.Embed(
-                    description="Please select mode:"
-                    + "\n".join(
-                        [
-                            f"```{x}```"
-                            for x in [
-                                "list",
-                                "play",
-                                "region",
-                                "refresh",
-                                "save",
-                                "delete",
-                            ]
-                        ]
-                    )
-                )
-            )
+                embed=discord.Embed(description="Please select mode:"+ "\n".join([f"```{x}```"for x in ["list","play","region","refresh","save","delete",]])))
         else:
             if mode.lower() == "list":
                 if not query:
@@ -1182,41 +1166,40 @@ class Music(
             elif mode.lower() == "save":
                 if query:
                     with open(
-                        os.path.join(
-                            os.path.dirname(os.path.dirname(__file__)),
-                            "saved_playlists.yml",
-                        ),
-                        "r",
-                    ) as f:
+                        os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
                         saved_playlist = yaml.safe_load(f)
                     search = [x for x in Spotify_List if query in x[0]]
                     if search:
                         url = search[0][2]
                         description = search[0][1]
                         name = search[0][0]
+                    elif spotify_url.match(query):
+                        id = query.strip("https://open.spotify.com/playlist/")
+                        if "?" in id:
+                            id = id.split("?")[0]
+                        try:
+                            playlist = await spotify_client.get_playlist(id)
+                        except spotify.NotFound:
+                            return await ctx.send(
+                                embed=discord.Embed(description=f"Playlist could not be found")
+                            )
+                        except spotify.Forbidden:
+                            print("spotify rate limited!")
+                        url = playlist["external_urls"]["spotify"]
+                        description = playlist["description"]
+                        if description == "":
+                            description = "No description provided!"
+                        name = playlist["name"]
                     else:
                         search_results = await spotify_client.search(query, "playlist")
-                        url = search_results["playlists"]["items"][0]["external_urls"][
-                            "spotify"
-                        ]
-                        description = search_results["playlists"]["items"][0][
-                            "description"
-                        ]
+                        url = search_results["playlists"]["items"][0]["external_urls"]["spotify"]
+                        description = search_results["playlists"]["items"][0]["description"]
                         name = search_results["playlists"]["items"][0]["name"]
                     if not saved_playlist:
                         saved_playlist = {}
                     if saved_playlist.get(ctx.message.guild.id, None):
-                        saved_playlist[ctx.message.guild.id][name] = [
-                            description,
-                            f"{url}",
-                        ]
-                        with open(
-                            os.path.join(
-                                os.path.dirname(os.path.dirname(__file__)),
-                                "saved_playlists.yml",
-                            ),
-                            "w",
-                        ) as f:
+                        saved_playlist[ctx.message.guild.id][name] = [description,f"{url}",]
+                        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"w",) as f:
                             yaml.dump(saved_playlist, f)
                             await ctx.message.add_reaction("\N{White Heavy Check Mark}")
                     else:

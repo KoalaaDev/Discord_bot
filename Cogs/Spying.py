@@ -169,10 +169,6 @@ class Spying(commands.Cog, name="Spying logic"):
                         await self.text_message_channel.send(embed=Embedded)
                     except AttributeError:
                         pass
-                    print(
-                        f"<{st}> in text channel {message.channel} at {message.guild} | {message.author}: {message.content}",
-                        file=text_file,
-                    )
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -256,9 +252,12 @@ class Spying(commands.Cog, name="Spying logic"):
                             description=f"{before.name} from {before.guild}  is now playing {after.activity.name}",
                             colour=discord.Colour.orange(),
                         )
-                        playEmbedded.add_field(
+                        try:
+                            playEmbedded.add_field(
                             name="Match:", value=after.activity.details
-                        )
+                            )
+                        except AttributeError:
+                            pass
                         playEmbedded.set_image(url=after.activity.large_image_url)
                         playEmbedded.set_footer(
                             text=f"Activity Update Detector Service <{st}>"

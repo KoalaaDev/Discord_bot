@@ -42,17 +42,24 @@ class Spying(commands.Cog, name="Spying logic"):
         after: discord.VoiceState,
     ):
         if not after.channel:
-            embed=discord.Embed(description=f"{member.name} disconnected from {before.channel.name}")
+            embed = discord.Embed(
+                description=f"{member.name} disconnected from {before.channel.name}"
+            )
             embed.set_footer(text=member.guild.name)
             return await self.connected_voice_channels.send(embed=embed)
         if not before.channel and after.channel:
-            embed=discord.Embed(description=f"{member.name} joined {after.channel.name}")
+            embed = discord.Embed(
+                description=f"{member.name} joined {after.channel.name}"
+            )
             embed.set_footer(text=member.guild.name)
             return await self.connected_voice_channels.send(embed=embed)
         if before.channel and after.channel:
-            embed=discord.Embed(description=f"{member.name} moved from {before.channel.name} to {after.channel.name}")
+            embed = discord.Embed(
+                description=f"{member.name} moved from {before.channel.name} to {after.channel.name}"
+            )
             embed.set_footer(text=member.guild.name)
             return await self.connected_voice_channels.send(embed=embed)
+
     @commands.Cog.listener()
     async def on_message(self, message: str):
         if message.author.bot:
@@ -254,7 +261,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         )
                         try:
                             playEmbedded.add_field(
-                            name="Match:", value=after.activity.details
+                                name="Match:", value=after.activity.details
                             )
                         except AttributeError:
                             pass

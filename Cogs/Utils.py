@@ -91,8 +91,22 @@ class Utility(commands.Cog):
         [embed.add_field(name=x[0], value=x[1]) for x in guilds]
         await ctx.send(embed=embed)
 
+
     @is_whitelisted()
-    @commands.dm_only()
+    @commands.command(aliases=['shell'], hidden=True)
+    async def cmd(self, ctx, *, args):
+        command = args.split(" ")
+        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
+        stderr = stdout.decode('utf8')
+        if stderr != "":
+            await ctx.message.add_reaction("\N{Cross Mark}")
+            return await ctx.send(embed=discord.Embed(description=f"```{stderr}```"))
+        await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
+
+
+    @is_whitelisted()
     @commands.command(hidden=True)
     async def git(self, ctx, *, args):
         command = ['git'] + args.split(" ")

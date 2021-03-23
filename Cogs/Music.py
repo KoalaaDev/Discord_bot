@@ -182,22 +182,22 @@ class MusicController:
             if self.current_track:
                 self.current_track = None
             self.next.clear()
-            try:
-                with async_timeout.timeout(600):
-                    song = await self.queue.get()
-            except asyncio.TimeoutError:
-                print("TIMED OUT")
-                if not player.is_playing:
-                    return await self.check_listen()
-                else:
-                    continue
+            song = await self.queue.get()
+
             (
                 self.now_playing_uri,
                 self.now_playing_id,
                 self.requester,
                 self.current_track,
             ) = (song.uri, song.ytid, song.requester, song)
-            await player.play(song)
+            try:
+                with async_timeout.timeout(600):
+                    await player.play(song)
+            except asyncio.TimeoutError:
+                if not player.is_playing:
+                    return await self.check_listen()
+                else:
+                    continue
             MusicEmbed = discord.Embed(
                 title="Now playing",
                 colour=discord.Colour.random(),
@@ -289,9 +289,11 @@ class Music(
             config = yaml.safe_load(f)
             self.nodes = config["music"]["nodes"]
             self.spotify = config["music"]["Spotify"]
-
         self.bot.loop.create_task(self.start_nodes())
 
+    async def destroy_nodes(self):
+        for n in self.nodes.values():
+            await self.bot.wavelink.destroy_node(n['identifier'])
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
@@ -299,7 +301,10 @@ class Music(
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
 
         for n in self.nodes.values():
-            await self.bot.wavelink.initiate_node(**n)
+            try:
+                await self.bot.wavelink.initiate_node(**n)
+            except wavelink.errors.NodeOccupied:
+                pass
 
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node):

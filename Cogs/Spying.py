@@ -72,9 +72,7 @@ class Spying(commands.Cog, name="Spying logic"):
                         await self.bot_channel.send(embed=botEmbed)
                     except AttributeError:
                         pass
-                    print(
-                        f"[SPY COG] BOT {message.author} detected, Sent to appropriate channel"
-                    )
+
             else:
                 pass
         elif message.channel == self.text_message_channel or message.content.startswith(

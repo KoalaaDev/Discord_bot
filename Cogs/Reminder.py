@@ -55,7 +55,10 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
             return m.channel == ctx.channel and m.author == ctx.author
         msg = await self.bot.wait_for('message',check=check)
         await prompt.delete()
-
+        try:
+            await msg.delete()
+        except:
+            pass
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
         await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.name}",description=f"{member.mention} {msg.content}"))

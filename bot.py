@@ -13,6 +13,7 @@ from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
 from difflib import get_close_matches
+
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -96,6 +97,7 @@ print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 async def on_connect():
     print("\u001b[32m Successfully connected to discord! \u001b[0m")
 
+
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
@@ -104,7 +106,13 @@ async def on_command_error(ctx, error):
         # cmds = [cmd.name for cmd in bot.commands if not cmd.hidden] # use this to stop showing hidden commands as suggestions
         matches = get_close_matches(cmd, cmds)
         if len(matches) > 0:
-            await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
+            await ctx.send(
+                embed=discord.Embed(
+                    description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'
+                )
+            )
+
+
 @client.event
 async def on_ready():
     COGS_LOADED = 0
@@ -122,7 +130,7 @@ async def on_ready():
         print(
             f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
         )
-    watcher = Watcher(client, path='Cogs', debug=False)
+    watcher = Watcher(client, path="Cogs", debug=False)
     await watcher.start()
     await client.change_presence(
         activity=discord.Activity(type=discord.ActivityType.listening, name="help")
@@ -345,7 +353,9 @@ async def roll(ctx, dice: str):
     await ctx.send(result)
 
 
-@client.command(hidden=True,description="For when you wanna settle the score some other way")
+@client.command(
+    hidden=True, description="For when you wanna settle the score some other way"
+)
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:

@@ -12,6 +12,7 @@ from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
+from difflib import get_close_matches
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -95,7 +96,15 @@ print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 async def on_connect():
     print("\u001b[32m Successfully connected to discord! \u001b[0m")
 
-
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        cmd = ctx.invoked_with
+        cmds = [cmd.name for cmd in client.commands]
+        # cmds = [cmd.name for cmd in bot.commands if not cmd.hidden] # use this to stop showing hidden commands as suggestions
+        matches = get_close_matches(cmd, cmds)
+        if len(matches) > 0:
+            await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
 @client.event
 async def on_ready():
     COGS_LOADED = 0

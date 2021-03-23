@@ -11,7 +11,7 @@ from discord.utils import get
 from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 from cogwatch import Watcher
-
+from subprocess import Popen, PIPE
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)

@@ -169,7 +169,7 @@ class Watcher:
             self.cog_error(exc)
         else:
             logging.info(f"Cog Reloaded: {cog_dir}")
-
+            print(f"Cog Reloaded: {cog_dir}")
     @staticmethod
     def cog_error(exc: Exception):
         """Logs exceptions. TODO: Need thorough exception handling."""

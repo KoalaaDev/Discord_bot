@@ -5,22 +5,23 @@ import discord
 import sys
 import traceback
 
+
 class Reminder(commands.Cog, description="Never forget anything again!"):
     def __init__(self, bot):
         self.bot = bot
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, hr.error.UnitNotFoundError):
             try:
-                return await ctx.send(
-                    embed=discord.Embed(description="Improper Time")
-                )
+                return await ctx.send(embed=discord.Embed(description="Improper Time"))
             except discord.HTTPException:
                 pass
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
-    @commands.cooldown(1,5,commands.BucketType.user)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def RemindMe(self, ctx, *, time):
         """Remind you of something, input a human readable time or seconds"""
@@ -35,14 +36,20 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
 
         def check(m):
             return m.channel == ctx.channel and m.author == ctx.author
-        msg = await self.bot.wait_for('message',check=check)
+
+        msg = await self.bot.wait_for("message", check=check)
         await prompt.delete()
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
-        await ctx.send(embed=discord.Embed(title=f"Reminder!",description=f"{ctx.author.mention} {msg.content}"))
-    @commands.cooldown(1,5,commands.BucketType.user)
+        await ctx.send(
+            embed=discord.Embed(
+                title=f"Reminder!", description=f"{ctx.author.mention} {msg.content}"
+            )
+        )
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
-    async def Remind(self, ctx,member: discord.Member, *, time):
+    async def Remind(self, ctx, member: discord.Member, *, time):
         """Remind you of something, input a human readable time"""
         try:
             time = int(time)
@@ -55,11 +62,18 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
 
         def check(m):
             return m.channel == ctx.channel and m.author == ctx.author
-        msg = await self.bot.wait_for('message',check=check)
+
+        msg = await self.bot.wait_for("message", check=check)
         await prompt.delete()
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
-        await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.mention}!",description=f"{member.mention} {msg.content}"))
+        await ctx.send(
+            embed=discord.Embed(
+                title=f"Reminder by {ctx.author.mention}!",
+                description=f"{member.mention} {msg.content}",
+            )
+        )
+
 
 def setup(bot):
     bot.add_cog(Reminder(bot))

@@ -7,8 +7,10 @@ from pathlib import Path
 import yaml
 from discord.ext import commands
 from watchgod import Change, awatch
+
 normal_blacklist = ["Grief", "Test", "Time", "Chess"]
 disarmed_blacklist = ["Grief", "Test", "Spying", "Time"]
+
 
 class Watcher:
     """The core cogwatch class -- responsible for starting up watchers and managing cogs.
@@ -82,20 +84,26 @@ class Watcher:
                         change_path = change[1]
 
                         filename = self.get_cog_name(change_path)
-                        if self.mode == 'normal':
+                        if self.mode == "normal":
                             if filename in normal_blacklist:
                                 continue
                         elif self.mode == "disarmed":
                             if filename in disarmed_blacklist:
                                 continue
                         new_dir = self.get_dotted_cog_path(change_path)
-                        cog_dir = f"{new_dir}.{filename}" if new_dir else f"{self.path}.{filename}"
+                        cog_dir = (
+                            f"{new_dir}.{filename}"
+                            if new_dir
+                            else f"{self.path}.{filename}"
+                        )
 
                         if change_type == Change.deleted:
                             await self.unload(cog_dir)
                         elif change_type == Change.added:
                             await self.load(cog_dir)
-                        elif change_type == Change.modified and change_type != (Change.added or Change.deleted):
+                        elif change_type == Change.modified and change_type != (
+                            Change.added or Change.deleted
+                        ):
                             await self.reload(cog_dir)
 
             except FileNotFoundError:
@@ -138,7 +146,9 @@ class Watcher:
                 if self.loop is None:
                     self.loop = asyncio.get_event_loop()
 
-                logging.info(f"Watching for file changes in {Path.cwd() / self.path}...")
+                logging.info(
+                    f"Watching for file changes in {Path.cwd() / self.path}..."
+                )
                 self.loop.create_task(self._start())
 
     async def load(self, cog_dir: str):
@@ -170,6 +180,7 @@ class Watcher:
         else:
             logging.info(f"Cog Reloaded: {cog_dir}")
             print(f"Cog Reloaded: {cog_dir}")
+
     @staticmethod
     def cog_error(exc: Exception):
         """Logs exceptions. TODO: Need thorough exception handling."""
@@ -178,7 +189,9 @@ class Watcher:
 
     async def _preload(self):
         logging.info("Preloading...")
-        for cog in {(file.stem, file) for file in Path(Path.cwd() / self.path).rglob("*.py")}:
+        for cog in {
+            (file.stem, file) for file in Path(Path.cwd() / self.path).rglob("*.py")
+        }:
             new_dir = self.get_dotted_cog_path(cog[1])
             await self.load(".".join([new_dir, cog[0]]))
 

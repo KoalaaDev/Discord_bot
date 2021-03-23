@@ -1,4 +1,4 @@
-from discord.ext  import commands
+from discord.ext import commands
 import sys
 import traceback
 from subprocess import Popen, PIPE
@@ -6,10 +6,15 @@ import discord
 
 with open("whitelist.txt") as f:
     whitelist = [int(x.strip("\n")) for x in f.readlines()]
+
+
 def is_whitelisted():
     async def predicate(ctx):
         return ctx.author.id in whitelist or ctx.author.id == 263190106821623810
+
     return commands.check(predicate)
+
+
 class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,7 +23,9 @@ class Utility(commands.Cog):
         if isinstance(error, commands.PrivateMessageOnly):
             try:
                 return await ctx.send(
-                    embed=discord.Embed(description="This command can only be used in DMS!")
+                    embed=discord.Embed(
+                        description="This command can only be used in DMS!"
+                    )
                 )
             except discord.HTTPException:
                 pass
@@ -26,6 +33,7 @@ class Utility(commands.Cog):
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
+
     @is_whitelisted()
     @commands.dm_only()
     @commands.command(hidden=True)
@@ -46,6 +54,7 @@ class Utility(commands.Cog):
     async def offline(self, ctx):
         await self.bot.change_presence(status=discord.Status.invisible)
         await ctx.send("[bot going offline] Going under!")
+
     @is_whitelisted()
     @commands.dm_only()
     @commands.command(hidden=True)
@@ -77,7 +86,7 @@ class Utility(commands.Cog):
                 except discord.errors.NotFound:
                     print(f"Could not find invite for {guild}")
                 if invitelinknew:
-                        break
+                    break
             await ctx.send(invitelinknew)
 
     @is_whitelisted()
@@ -86,7 +95,7 @@ class Utility(commands.Cog):
     async def allguilds(self, ctx):
         guild_names = [guild.name for guild in self.bot.guilds]
         guild_id = [guild.id for guild in self.bot.guilds]
-        guilds = zip(guild_names,guild_id)
+        guilds = zip(guild_names, guild_id)
         embed = discord.Embed(title="Guilds")
         [embed.add_field(name=x[0], value=x[1]) for x in guilds]
         await ctx.send(embed=embed)
@@ -95,9 +104,13 @@ class Utility(commands.Cog):
     @commands.dm_only()
     @commands.command(hidden=True)
     async def git(self, ctx, *, args):
-        command = ['git'] + args.split(" ")
+        command = ["git"] + args.split(" ")
         process = Popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
-        await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
+        await ctx.send(
+            embed=discord.Embed(description=f"```{stdout.decode('utf8')}```")
+        )
+
+
 def setup(bot):
     bot.add_cog(Utility(bot))

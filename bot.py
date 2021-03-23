@@ -12,6 +12,7 @@ from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
+
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -113,7 +114,7 @@ async def on_ready():
         print(
             f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
         )
-    watcher = Watcher(client, path='Cogs', debug=False)
+    watcher = Watcher(client, path="Cogs", debug=False)
     await watcher.start()
     await client.change_presence(
         activity=discord.Activity(type=discord.ActivityType.listening, name="help")
@@ -336,7 +337,9 @@ async def roll(ctx, dice: str):
     await ctx.send(result)
 
 
-@client.command(hidden=True,description="For when you wanna settle the score some other way")
+@client.command(
+    hidden=True, description="For when you wanna settle the score some other way"
+)
 async def choose(ctx, *choices: str):
     """Chooses between multiple choices."""
     if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:

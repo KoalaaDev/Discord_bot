@@ -2,12 +2,14 @@ from discord.ext import commands
 import asyncio
 import humanreadable as hr
 import discord
+import sys
+import traceback
 
 class Reminder(commands.Cog, description="Never forget anything again!"):
     def __init__(self, bot):
         self.bot = bot
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, UnitNotFoundError):
+        if isinstance(error, hr.error.UnitNotFoundError):
             try:
                 return await ctx.send(
                     embed=discord.Embed(description="Improper Time")
@@ -37,7 +39,7 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
         await prompt.delete()
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
-        await ctx.send(embed=discord.Embed(title=f"Reminder!",description=f"{member.mention} {msg.content}"))
+        await ctx.send(embed=discord.Embed(title=f"Reminder!",description=f"{ctx.author.mention} {msg.content}"))
     @commands.cooldown(1,5,commands.BucketType.user)
     @commands.command()
     async def Remind(self, ctx,member: discord.Member, *, time):
@@ -55,13 +57,9 @@ class Reminder(commands.Cog, description="Never forget anything again!"):
             return m.channel == ctx.channel and m.author == ctx.author
         msg = await self.bot.wait_for('message',check=check)
         await prompt.delete()
-        try:
-            await msg.delete()
-        except:
-            pass
         await msg.add_reaction("\N{White Heavy Check Mark}")
         await asyncio.sleep(time)
-        await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.name}",description=f"{member.mention} {msg.content}"))
+        await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.mention}!",description=f"{member.mention} {msg.content}"))
 
 def setup(bot):
     bot.add_cog(Reminder(bot))

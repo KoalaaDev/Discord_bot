@@ -44,6 +44,7 @@ class API(commands.Cog, description="Random generator commands"):
                 elif data.get("nsfw") and ctx.message.channel.is_nsfw():
                     embed = discord.Embed(title=data.get("title"))
                     embed.set_image(url=data.get("image"))
+                    embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
                     await ctx.send(embed=embed)
                 elif not data.get("nsfw"):
                     embed = discord.Embed(title=data.get("title"))

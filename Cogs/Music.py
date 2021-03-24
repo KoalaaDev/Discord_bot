@@ -115,9 +115,11 @@ class MusicController:
 
     @tasks.loop(hours=1)
     async def update_playlist(self):
-        self.spotify_playlists = await spotify_client.featured_playlists(
-            country=self.spotify_region
-        )
+        spotify_playlists = await spotify_client.featured_playlists(country=self.spotify_region)
+        spotify_playlist_names = [x["name"] for x in spotify_playlists["playlists"]["items"]]
+        spotify_playlist_descriptions = [x["description"] for x in spotify_playlists["playlists"]["items"]]
+        spotify_playlist_urls = [x["external_urls"]["spotify"] for x in spotify_playlists["playlists"]["items"]]
+        self.spotify_playlists = zip(spotify_playlist_names, spotify_playlist_descriptions, spotify_playlist_urls)
         print(f"[{self.guild_id}] Updating Spotify playlists for {self.spotify_region}")
 
     @tasks.loop(seconds=2.0)
@@ -1050,212 +1052,174 @@ class Music(
         except IndexError:
             await ctx.send(embed=discord.Embed(description="Could not remove"))
 
-    @commands.command(aliases=["playlists", "pl"])
-    async def playlist(self, ctx, mode: str = None, *, query: str = None):
-        """Gives a list of playlist commands"""
+    @commands.group(aliases=["playlists", "pl"])
+    async def playlist(self, ctx):
+        """Add, play and delete playlists from Spotify!"""
+
+
+        if ctx.invoked_subcommand is None:
+            return await ctx.send(embed=discord.Embed(description="Please select:"+ "\n".join([f"```{x.name}```"for x in self.playlist.commands])))
+
+    @playlist.command()
+    async def list(self, ctx, *, query=None):
+        """Gets all the playlists from Spotify recommended and saved playlists"""
         controller = self.get_controller(ctx)
         await asyncio.sleep(1)
-        spotify_playlist_names = [
-            x["name"] for x in controller.spotify_playlists["playlists"]["items"]
-        ]
-        spotify_playlist_descriptions = [
-            x["description"] for x in controller.spotify_playlists["playlists"]["items"]
-        ]
-        spotify_playlist_urls = [
-            x["external_urls"]["spotify"]
-            for x in controller.spotify_playlists["playlists"]["items"]
-        ]
-        Spotify_List = zip(
-            spotify_playlist_names, spotify_playlist_descriptions, spotify_playlist_urls
-        )
-        if mode == None:
-            return await ctx.send(
-                embed=discord.Embed(description="Please select mode:"+ "\n".join([f"```{x}```"for x in ["list","play","region","refresh","save","delete",]])))
-        else:
-            if mode.lower() == "list":
-                if not query:
-                    Embed = discord.Embed(title="Featured Playlists")
-                    [
-                        Embed.add_field(name=x[0], value=x[1])
-                        for x in Spotify_List
-                        if x[1]
-                    ]
-                    Embed.set_footer(
-                        text=f"{pycountry.countries.get(alpha_2=controller.spotify_region).name}"
-                    )
-                    return await ctx.send(embed=Embed)
-                elif query.lower() in ["saved", "save", "stored"]:
-                    with open(
-                        os.path.join(
-                            os.path.dirname(os.path.dirname(__file__)),
-                            "saved_playlists.yml",
-                        ),
-                        "r",
-                    ) as f:
-                        saved_playlist = yaml.safe_load(f)
-                    playlists = saved_playlist.get(ctx.guild.id)
-                    if not playlists:
-                        return await ctx.send(
-                            embed=discord.Embed(description="No playlists saved yet")
-                        )
-                    Embed = discord.Embed(title="Saved Playlists")
-                    Spotify_List = zip(
-                        [x for x in playlists], [x for x in playlists.values()]
-                    )
-                    [
-                        Embed.add_field(name=x[0], value=x[1][0])
-                        for x in Spotify_List
-                        if x[1]
-                    ]
-                    Embed.set_footer(
-                        text=f"{pycountry.countries.get(alpha_2=controller.spotify_region).name}"
-                    )
-                    return await ctx.send(embed=Embed)
-            elif mode.lower() == "play":
-                play = self.bot.get_command("play")
-                with open(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)),
-                        "saved_playlists.yml",
-                    ),
-                    "r",
-                ) as f:
-                    saved_playlist = yaml.safe_load(f)
-                    playlists = saved_playlist.get(ctx.guild.id, None)
-                    if playlists:
-                        search = playlists.get(query, None)
-                        if search:
-                            search = search[1]
-                            return await play(ctx, query=search)
-                    else:
-                        search = None
-                if not search:
-                    search_results = [x for x in Spotify_List if query in x[0]]
-                    if search_results:
-                        return await play(ctx, query=search_results[0][2])
-                    else:
-                        search = None
-                if not search:
-                    search_results = await spotify_client.search(query, "playlist")
-                    if search_results:
-                        try:
-                            url = search_results["playlists"]["items"][0][
-                                "external_urls"
-                            ]["spotify"]
-                            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                            return await play(ctx, query=url)
-
-                        except IndexError:
-                            return await ctx.message.add_reaction("\N{Cross Mark}")
-                    else:
-                        return await ctx.send(
-                            embed=discord.Embed(description="Query not found")
-                        )
-
-            elif mode.lower() == "refresh" and not query:
-                print("FORCE REFRESH PLAYLIST")
+        if not query:
+            Embed = discord.Embed(title="Featured Playlists")
+            [Embed.add_field(name=x[0], value=x[1]) for x in controller.spotify_playlists if x[1]]
+            Embed.set_footer(text=f"{pycountry.countries.get(alpha_2=controller.spotify_region).name}")
+            return await ctx.send(embed=Embed)
+        elif query.lower() in ["saved", "save", "stored"]:
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
+                saved_playlist = yaml.safe_load(f)
+            playlists = saved_playlist.get(ctx.guild.id)
+            if not playlists:
+                return await ctx.send(embed=discord.Embed(description="No playlists saved yet"))
+            Embed = discord.Embed(title="Saved Playlists")
+            controller.spotify_playlists = zip([x for x in playlists], [x for x in playlists.values()])
+            [Embed.add_field(name=x[0], value=x[1][0]) for x in controller.spotify_playlists if x[1]]
+            Embed.set_footer(text=f"{pycountry.countries.get(alpha_2=controller.spotify_region).name}")
+            return await ctx.send(embed=Embed)
+    @playlist.command(aliases=['choose'])
+    async def pick(self, ctx, *, query):
+        """Plays a specified playlist if available"""
+        controller = self.get_controller(ctx)
+        await asyncio.sleep(1)
+        play = self.bot.get_command("play")
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
+            saved_playlist = yaml.safe_load(f)
+            playlists = saved_playlist.get(ctx.guild.id, None)
+            if playlists:
+                search = playlists.get(query, None)
+                if search:
+                    search = search[1]
+                    return await play(ctx, query=search)
+            else:
+                search = None
+        if not search:
+            search_results = [x for x in controller.spotify_playlists if query in x[0]]
+            if search_results:
+                return await play(ctx, query=search_results[0][2])
+            else:
+                search = None
+        if not search:
+            search_results = await spotify_client.search(query, "playlist")
+            if search_results:
                 try:
-                    controller.update_playlist.restart()
+                    url = search_results["playlists"]["items"][0][
+                        "external_urls"
+                    ]["spotify"]
                     await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                except Exception as e:
-                    await message.add_reaction("\N{Cross Mark}")
-            elif mode.lower() == "region":
-                if len(query) > 2:
-                    query = pycountry.countries.get(name=query).alpha_2
-                if query.upper() in spotify_countries:
-                    controller.spotify_region = query.upper()
-                    controller.update_playlist.restart()
-                    return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                else:
-                    return await ctx.message.add_reaction("\N{Cross Mark}")
-            elif mode.lower() == "save":
-                if query:
-                    with open(
-                        os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
-                        saved_playlist = yaml.safe_load(f)
-                    search = [x for x in Spotify_List if query in x[0]]
-                    if search:
-                        url = search[0][2]
-                        description = search[0][1]
-                        name = search[0][0]
-                    elif spotify_url.match(query):
-                        id = query.strip("https://open.spotify.com/playlist/")
-                        if "?" in id:
-                            id = id.split("?")[0]
-                        try:
-                            playlist = await spotify_client.get_playlist(id)
-                        except spotify.NotFound:
-                            return await ctx.send(
-                                embed=discord.Embed(description=f"Playlist could not be found")
-                            )
-                        except spotify.Forbidden:
-                            print("spotify rate limited!")
-                        url = playlist["external_urls"]["spotify"]
-                        description = playlist["description"]
-                        if description == "":
-                            description = "No description provided!"
-                        name = playlist["name"]
-                    else:
-                        search_results = await spotify_client.search(query, "playlist")
-                        url = search_results["playlists"]["items"][0]["external_urls"]["spotify"]
-                        description = search_results["playlists"]["items"][0]["description"]
-                        name = search_results["playlists"]["items"][0]["name"]
-                    if not saved_playlist:
-                        saved_playlist = {}
-                    if saved_playlist.get(ctx.message.guild.id, None):
-                        saved_playlist[ctx.message.guild.id][name] = [description,f"{url}",]
-                        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"w",) as f:
-                            yaml.dump(saved_playlist, f)
-                            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                    else:
-                        saved_playlist[ctx.message.guild.id] = {
-                            name: [description, f"{url}"]
-                        }
-                        with open(
-                            os.path.join(
-                                os.path.dirname(os.path.dirname(__file__)),
-                                "saved_playlists.yml",
-                            ),
-                            "w",
-                        ) as f:
-                            yaml.dump(saved_playlist, f)
-                            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                else:
-                    with open(
-                        os.path.join(
-                            os.path.dirname(os.path.dirname(__file__)),
-                            "saved_playlists.yml",
-                        ),
-                        "r",
-                    ) as f:
-                        saved_playlist = yaml.safe_load(f)
-                        guild_playlist = saved_playlist[ctx.message.guild.id]
-                        current_queue = list(controller.queue._queue)
-            elif mode.lower() == "delete":
-                with open(
-                    os.path.join(
-                        os.path.dirname(os.path.dirname(__file__)),
-                        "saved_playlists.yml",
-                    ),
-                    "r",
-                ) as f:
-                    saved_playlist = yaml.safe_load(f)
-                try:
-                    saved_playlist[ctx.message.guild.id].pop(query)
-                    with open(
-                        os.path.join(
-                            os.path.dirname(os.path.dirname(__file__)),
-                            "saved_playlists.yml",
-                        ),
-                        "w",
-                    ) as f:
-                        yaml.dump(saved_playlist, f)
-                    return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                except:
+                    return await play(ctx, query=url)
+
+                except IndexError:
                     return await ctx.message.add_reaction("\N{Cross Mark}")
             else:
-                return await ctx.send(embed=discord.Embed(description="Invalid option"))
-
+                return await ctx.send(
+                    embed=discord.Embed(description="Query not found")
+                )
+    @playlist.command()
+    async def refresh(self, ctx):
+        """Force refresh the daily playlist"""
+        controller = self.get_controller(ctx)
+        print("FORCE REFRESH PLAYLIST")
+        try:
+            controller.update_playlist.restart()
+            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        except Exception as e:
+            await message.add_reaction("\N{Cross Mark}")
+    @playlist.command()
+    async def region(self, ctx, *, query):
+        """Change spotify region for different regional featured playlists"""
+        controller = self.get_controller(ctx)
+        if len(query) > 2:
+            query = pycountry.countries.get(name=query).alpha_2
+        if query.upper() in spotify_countries:
+            controller.spotify_region = query.upper()
+            controller.update_playlist.restart()
+            return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        else:
+            return await ctx.message.add_reaction("\N{Cross Mark}")
+    @playlist.command()
+    async def save(self, ctx, *, query=None):
+        """Save a playlist"""
+        controller = self.get_controller(ctx)
+        if query:
+            with open(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
+                saved_playlist = yaml.safe_load(f)
+            search = [x for x in controller.spotify_playlists if query in x[0]]
+            if search:
+                url = search[0][2]
+                description = search[0][1]
+                name = search[0][0]
+            elif spotify_url.match(query):
+                id = query.strip("https://open.spotify.com/playlist/")
+                if "?" in id:
+                    id = id.split("?")[0]
+                try:
+                    playlist = await spotify_client.get_playlist(id)
+                except spotify.NotFound:
+                    return await ctx.send(
+                        embed=discord.Embed(description=f"Playlist could not be found")
+                    )
+                except spotify.Forbidden:
+                    print("spotify rate limited!")
+                url = playlist["external_urls"]["spotify"]
+                description = playlist["description"]
+                if description == "":
+                    description = "No description provided!"
+                name = playlist["name"]
+            else:
+                search_results = await spotify_client.search(query, "playlist")
+                url = search_results["playlists"]["items"][0]["external_urls"]["spotify"]
+                description = search_results["playlists"]["items"][0]["description"]
+                name = search_results["playlists"]["items"][0]["name"]
+            if not saved_playlist:
+                saved_playlist = {}
+            if saved_playlist.get(ctx.message.guild.id, None):
+                saved_playlist[ctx.message.guild.id][name] = [description,f"{url}",]
+                with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"w",) as f:
+                    yaml.dump(saved_playlist, f)
+                    await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+            else:
+                saved_playlist[ctx.message.guild.id] = {
+                    name: [description, f"{url}"]
+                }
+                with open(
+                    os.path.join(
+                        os.path.dirname(os.path.dirname(__file__)),
+                        "saved_playlists.yml",
+                    ),
+                    "w",
+                ) as f:
+                    yaml.dump(saved_playlist, f)
+                    await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        else:
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "saved_playlists.yml",
+                ),
+                "r",
+            ) as f:
+                saved_playlist = yaml.safe_load(f)
+                guild_playlist = saved_playlist[ctx.message.guild.id]
+                current_queue = list(controller.queue._queue)
+    @playlist.command()
+    async def delete(self, ctx, *, query):
+        """Delete a playlist"""
+        controller = self.get_controller(ctx)
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
+            saved_playlist = yaml.safe_load(f)
+        try:
+            saved_playlist[ctx.message.guild.id].pop(query)
+            with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"w",) as f:
+                yaml.dump(saved_playlist, f)
+            return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        except:
+            return await ctx.message.add_reaction("\N{Cross Mark}")
     @commands.command(aliases=["wl"], hidden=True)
     async def whitelist(
         self, ctx, mode: str = None, user: Union[discord.Member, str] = None

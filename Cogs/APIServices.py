@@ -18,15 +18,17 @@ class API(commands.Cog, description="Random generator commands"):
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
+    async def getJSON(self, url):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as f:
+                return await f.json()
     @commands.command()
     async def cat(self, ctx):
         """Gives a random cat picture"""  # Alvin be like meow meow *while sucking staff*
         if ctx.author.id == 451008924032827395:
             pic = "https://cdn.discordapp.com/attachments/541880222065098762/812999751339474954/alvin_lol.JPG"
         else:
-            async with aiohttp.ClientSession() as session:
-                async with session.get("https://aws.random.cat/meow") as f:
-                    pic = await f.json()
+            pic = await self.getJSON(f"https://aws.random.cat/meow")
         embed = discord.Embed(title="Random Cat", Colour=discord.Colour.purple())
         embed.set_image(url=pic["file"])
         embed.set_footer(text="Animal Img Gen Service")
@@ -34,84 +36,35 @@ class API(commands.Cog, description="Random generator commands"):
     @commands.command()
     async def reddit(self, ctx, subreddit):
         """Get a random post from a subreddit"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://api.iapetus11.me/reddit/gimme/{subreddit}") as f:
-                data = await f.json()
-            print(data)
-            if data.get("success"):
-                if data.get("nsfw") and not ctx.message.channel.is_nsfw():
-                    raise commands.NSFWChannelRequired(ctx.message.channel)
-                elif data.get("nsfw") and ctx.message.channel.is_nsfw():
-                    embed = discord.Embed(title=data.get("title"))
-                    embed.set_image(url=data.get("image"))
-                    embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
-                    await ctx.send(embed=embed)
-                elif not data.get("nsfw"):
-                    embed = discord.Embed(title=data.get("title"))
-                    embed.set_image(url=data.get("image"))
-                    embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
-                    await ctx.send(embed=embed)
-            else:
-                await ctx.send(embed=discord.Embed(description="No posts found!"))
-    @commands.command()
-    async def dog(self, ctx, breed=None):
-        """Gives a random dog picture"""  # lincoln is dog woof woof
-        if breed:
-            picture_json = requests.get(
-                f"https://dog.ceo/api/{breed}/image/random"
-            ).json()
-            if picture_json["status"] == "error":
-                dogList = "\n".join(
-                    [
-                        "affenpinscher",
-                        "african",
-                        "airedale",
-                        "akita",
-                        "appenzeller",
-                        "shepherd australian",
-                        "basenji",
-                        "beagle",
-                        "bluetick",
-                        "borzoi",
-                        "boxer",
-                        "brabancon",
-                        "briard",
-                        "buhund-norwegian",
-                        "bulldog-boston",
-                        "bulldog-english",
-                        "bulldog-french",
-                        "bullterrier-staffordshire",
-                        "cairn",
-                        "cattledog-australian",
-                        "chihuahua",
-                        "chow",
-                    ]
-                )
-                Errorembed = discord.Embed(
-                    title="This breed is not available",
-                    color=discord.Color.random(),
-                    description=f"Select the following breeds:```{dogList}```",
-                )
-                ctx.send(embed=Errorembed)
-            else:
-                pic = picture_json["message"]
+        data = await self.getJSON(f"https://api.iapetus11.me/reddit/gimme/{subreddit}")
+        if data.get("success"):
+            if data.get("nsfw") and not ctx.message.channel.is_nsfw():
+                raise commands.NSFWChannelRequired(ctx.message.channel)
+            elif data.get("nsfw") and ctx.message.channel.is_nsfw():
+                embed = discord.Embed(title=data.get("title"))
+                embed.set_image(url=data.get("image"))
+                embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
+                await ctx.send(embed=embed)
+            elif not data.get("nsfw"):
+                embed = discord.Embed(title=data.get("title"))
+                embed.set_image(url=data.get("image"))
+                embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
+                await ctx.send(embed=embed)
         else:
-            async with aiohttp.ClientSession() as session:
-                async with session.get("https://random.dog/woof.json") as f:
-                    pic = await f.json()
+            await ctx.send(embed=discord.Embed(description="No posts found!"))
+    @commands.command()
+    async def dog(self, ctx):
+        """Gives a random dog picture"""  # lincoln is dog woof woof
+        pic = await self.getJSON("https://some-random-api.ml/img/dog")
         embed = discord.Embed(title="Random Dog", Colour=discord.Colour.random())
-        embed.set_image(url=pic["url"])
+        embed.set_image(url=pic["link"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.is_nsfw()
     @commands.command()
     async def img(self, ctx, *, query):
         """Google searches your img (due to limitation only nsfw channels can use this)"""
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://normal-api.ml/image-search?query={query}&redirect=false"
-            ) as f:
-                pic = await f.json()
+        pic = await self.getJSON(f"https://normal-api.ml/image-search?query={query}&redirect=false")
         embed = discord.Embed(title=query, Colour=discord.Colour.random())
         embed.set_image(url=pic["image"])
         embed.set_footer(text="Img Gen Service")
@@ -164,7 +117,15 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["url"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
-
+    @commands.group()
+    async def fact(self, ctx):
+        a = 1
+        if ctx.invoked_subcommand is None:
+            return await ctx.send(embed=discord.Embed(description="Please select:"+ "\n".join([f"```{x.name}```"for x in self.playlist.commands])))
+    @fact.command()
+    async def koala(self, ctx):
+        fact = await self.getJSON("https://some-random-api.ml/facts/koala")
+        await ctx.send(embed=discord.Embed(description=fact.get("fact")))
 
 def setup(bot):
     bot.add_cog(API(bot))

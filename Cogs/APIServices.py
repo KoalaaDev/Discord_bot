@@ -2,7 +2,7 @@ from discord.ext import commands
 import aiohttp
 import discord
 import sys
-
+import traceback
 class API(commands.Cog, description="Random generator commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -10,7 +10,7 @@ class API(commands.Cog, description="Random generator commands"):
         if isinstance(error, commands.NSFWChannelRequired):
             try:
                 return await ctx.send(
-                    embed=discord.Embed(description="This command can only be used in NSFW channels!")
+                    embed=discord.Embed(description="This can only be used in NSFW channels!")
                 )
             except discord.HTTPException:
                 pass
@@ -31,7 +31,27 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["file"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
-
+    @commands.command()
+    async def reddit(self, ctx, subreddit):
+        """Get a random post from a subreddit"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://api.iapetus11.me/reddit/gimme/{subreddit}") as f:
+                data = await f.json()
+            print(data)
+            if data.get("success"):
+                if data.get("nsfw") and not ctx.message.channel.is_nsfw():
+                    raise commands.NSFWChannelRequired(ctx.message.channel)
+                elif data.get("nsfw") and ctx.message.channel.is_nsfw():
+                    embed = discord.Embed(title=data.get("title"))
+                    embed.set_image(url=data.get("image"))
+                    await ctx.send(embed=embed)
+                elif not data.get("nsfw"):
+                    embed = discord.Embed(title=data.get("title"))
+                    embed.set_image(url=data.get("image"))
+                    embed.set_footer(text=f"{data.get('upvotes')} ⬆️ | {data.get('downvotes')} ⬇️")
+                    await ctx.send(embed=embed)
+            else:
+                await ctx.send(embed=discord.Embed(description="No posts found!"))
     @commands.command()
     async def dog(self, ctx, breed=None):
         """Gives a random dog picture"""  # lincoln is dog woof woof

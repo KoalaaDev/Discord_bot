@@ -98,10 +98,6 @@ class Utility(commands.Cog):
         command = args.split(" ")
         process = Popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
-        stderr = stdout.decode('utf8')
-        if stderr != "":
-            await ctx.message.add_reaction("\N{Cross Mark}")
-            return await ctx.send(embed=discord.Embed(description=f"```{stderr}```"))
         await ctx.message.add_reaction("\N{White Heavy Check Mark}")
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
 

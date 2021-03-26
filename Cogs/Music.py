@@ -442,7 +442,7 @@ class Music(
         controller.channel = ctx.channel
 
     @commands.command(aliases=["p"])
-    async def play(self, ctx, *, query: str):
+    async def play(self, ctx, *, query: str = None):
         """Search for and add a song to the Queue."""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -462,6 +462,11 @@ class Music(
                         description="failed to find any songs on youtube or soundcloud"
                     )
                 )
+        if player.paused and not query:
+            return await ctx.invoke(self.resume)
+        elif not player.paused and not query:
+            raise commands.MissingRequiredArgument
+
         if spotify_url.match(query):
             if "playlist" in query:
                 id = query.strip("https://open.spotify.com/playlist/")

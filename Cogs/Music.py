@@ -402,9 +402,7 @@ class Music(
                 pass
         if isinstance(error, commands.MissingRequiredArgument):
             try:
-                return await ctx.send(
-                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
-                )
+                return await ctx.send(embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command."))
             except discord.HTTPException:
                 pass
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
@@ -465,7 +463,7 @@ class Music(
         if player.paused and not query:
             return await ctx.invoke(self.resume)
         elif not player.paused and not query:
-            raise commands.MissingRequiredArgument
+            return await ctx.send(embed=discord.Embed(description=f"Oops! Missing query, try run help on the command."))
 
         if spotify_url.match(query):
             if "playlist" in query:

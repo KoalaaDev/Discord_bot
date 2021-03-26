@@ -6,7 +6,7 @@ import re
 import sys
 import traceback
 import wavelink
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, menus
 from typing import Union
 import itertools
 import collections
@@ -19,7 +19,7 @@ import pycountry
 import humanreadable as hr
 import async_timeout
 from lyricsgenius import Genius
-
+from subprocess import Popen, PIPE
 with open("whitelist.txt") as f:
     whitelist = [int(x.strip("\n")) for x in f.readlines()]
 
@@ -40,9 +40,7 @@ spotify_url = re.compile(
     "https://open.spotify.com/(?P<type>track|playlist)/(?P<id>\w+)"
 )
 genius = Genius("4w6JWVchOkAqntnmro9NurDF11ljHGATRf-9m8yv8EQ8meU9HrrzEywcaooyRYdn")
-config_file_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "apiconfig.yml"
-)
+config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "apiconfig.yml")
 
 with open(config_file_path) as f:
     config = yaml.safe_load(f)
@@ -62,12 +60,141 @@ class Track(wavelink.Track):
 
         self.requester = kwargs.get("requester")
 
+class InteractiveEmbed(menus.Menu):
+    """The Players interactive controller menu class."""
+
+    def __init__(self, *, embed: discord.Embed, player: wavelink.Player):
+        super().__init__(timeout=None)
+
+        self.embed = embed
+        self.player = player
+    def update_context(self, payload: discord.RawReactionActionEvent):
+        """Update our context with the user who reacted."""
+        ctx = self.ctx
+        ctx.author = payload.member
+
+        return ctx
+    async def update(self, payload):
+        if self._can_remove_reactions:
+            if payload.event_type == 'REACTION_ADD':
+                message = self.bot.get_channel(payload.channel_id).get_partial_message(payload.message_id)
+                await message.remove_reaction(payload.emoji, payload.member)
+            elif payload.event_type == 'REACTION_REMOVE':
+                return
+        await super().update(payload)
+    def reaction_check(self, payload: discord.RawReactionActionEvent):
+        if payload.event_type == 'REACTION_REMOVE':
+            return False
+
+        if not payload.member:
+            return False
+        if payload.member.bot:
+            return False
+        if payload.message_id != self.message.id:
+            return False
+        if payload.member not in self.bot.get_channel(int(self.player.channel_id)).members:
+            return False
+
+        return payload.emoji in self.buttons
+
+    async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel) -> discord.Message:
+        return await channel.send(embed=self.embed)
+
+    @menus.button(emoji='\u25B6')
+    async def resume_command(self, payload: discord.RawReactionActionEvent):
+        """Resume button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('resume')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
+    @menus.button(emoji='\u23F8')
+    async def pause_command(self, payload: discord.RawReactionActionEvent):
+        """Pause button"""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('pause')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
+    @menus.button(emoji='\u23F9')
+    async def stop_command(self, payload: discord.RawReactionActionEvent):
+        """Stop button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('stop')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+        await self.message.delete()
+    @menus.button(emoji='\u23ED')
+    async def skip_command(self, payload: discord.RawReactionActionEvent):
+        """Skip button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('skip')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+        await self.message.delete()
+    @menus.button(emoji='\U0001F500')
+    async def shuffle_command(self, payload: discord.RawReactionActionEvent):
+        """Shuffle button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('shuffle')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
+    @menus.button(emoji='\u2795')
+    async def volup_command(self, payload: discord.RawReactionActionEvent):
+        """Volume up button"""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('vol_up')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
+    @menus.button(emoji='\u2796')
+    async def voldown_command(self, payload: discord.RawReactionActionEvent):
+        """Volume down button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('vol_down')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
+    @menus.button(emoji='\U0001F1F6')
+    async def queue_command(self, payload: discord.RawReactionActionEvent):
+        """Player queue button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('queue')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+    @menus.button(emoji='🅰️')
+    async def autoplay_command(self, payload: discord.RawReactionActionEvent):
+        """Player queue button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('autoplay')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
 
 class MusicController:
     def __init__(self, bot, guild_id):
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
+        self.context :commands.Context = None
         self.last_songs = asyncio.Queue(maxsize=11)
         self.now_playing_uri = None
         self.now_playing_id = None
@@ -90,9 +217,7 @@ class MusicController:
         self.update_playlist.start()
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
-            self.YoutubeAPIKEY = itertools.cycle(
-                [x for x in config["music"]["Youtube"].values()]
-            )
+            self.YoutubeAPIKEY = itertools.cycle([x for x in config["music"]["Youtube"].values()])
 
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
@@ -102,14 +227,7 @@ class MusicController:
             ) as video:
                 Videos = await video.json()
                 try:
-                    return list(
-                        set(
-                            [
-                                "https://www.youtube.com/watch?v=" + x["id"]["videoId"]
-                                for x in Videos["items"]
-                            ]
-                        )
-                    )
+                    return list(set(["https://www.youtube.com/watch?v=" + x["id"]["videoId"] for x in Videos["items"]]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
 
@@ -206,7 +324,9 @@ class MusicController:
                 description=f"[{song}]({self.now_playing_uri}) [{song.requester}]",
             )
             MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
-            self.now_playing = await self.channel.send(embed=MusicEmbed)
+            EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
+            await EmbeddedMessage.start(self.context)
+            self.now_playing = EmbeddedMessage.message
             await self.next.wait()
             await self.last_songs.put(song)
             if self.loop:
@@ -228,7 +348,9 @@ class MusicController:
                             MusicEmbed.set_footer(
                                 text=f"{self.bot.user.name} | {player.node.region}"
                             )
-                            self.now_playing = await self.channel.send(embed=MusicEmbed)
+                            EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
+                            await EmbeddedMessage.start(self.context)
+                            self.now_playing = EmbeddedMessage.message
                             list_of_songs = list(self.queue._queue)
                             await self.next.wait()
                     if self.now_playing:
@@ -243,20 +365,13 @@ class MusicController:
                     MusicEmbed.set_footer(
                         text=f"{self.bot.user.name} | {player.node.region}"
                     )
-                    self.now_playing = await self.channel.send(embed=MusicEmbed)
+                    EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
+                    await EmbeddedMessage.start(self.context)
+                    self.now_playing = EmbeddedMessage.message
                     self.current_track = song
                     await self.next.wait()
-            if (
-                self.auto_play
-                and not self.loop
-                and self.queue.empty()
-                and not self.auto_play_queue.empty()
-            ):
-                while (
-                    self.auto_play
-                    and self.queue.empty()
-                    and not self.auto_play_queue.empty()
-                ):
+            if (self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty()):
+                while (self.auto_play and self.queue.empty() and not self.auto_play_queue.empty()):
                     await self.now_playing.delete()
                     self.next.clear()
                     song = await self.auto_play_queue.get()
@@ -270,7 +385,9 @@ class MusicController:
                     MusicEmbed.set_footer(
                         text=f"{self.bot.user.name} | {player.node.region}"
                     )
-                    self.now_playing = await self.channel.send(embed=MusicEmbed)
+                    EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
+                    await EmbeddedMessage.start(self.context)
+                    self.now_playing = EmbeddedMessage.message
                     self.current_track = song
                     await player.play(song)
                     await self.next.wait()
@@ -346,6 +463,8 @@ class Music(
             controller = self.controllers[gid]
         except KeyError:
             controller = MusicController(self.bot, gid)
+            if isinstance(value, commands.Context):
+                controller.context = value
             self.controllers[gid] = controller
 
         return controller
@@ -704,9 +823,54 @@ class Music(
         vol = max(min(vol, 1000), 0)
         controller.volume = vol
 
-        await ctx.send(f"Setting the player volume to `{vol}`")
+        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
         await player.set_volume(vol)
+    @commands.command()
+    async def vol_up(self, ctx):
+        """Set the player volume upwards by 10."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot is False]
+            if (
+                any([x in whitelist for x in members])
+                and ctx.message.author.id not in whitelist
+            ):
+                return await ctx.message.add_reaction("\N{Cross Mark}")
+        vol = player.volume+10
+        if vol<100 and vol>90:
+            vol = 100
+        elif vol>100:
+            return await ctx.send(embed=discord.Embed(description="Max volume reached!"))
+        controller.volume = vol
 
+        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
+        await player.set_volume(vol)
+    @commands.command()
+    async def vol_down(self, ctx):
+        """Set the player volume downwards by 10."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            channel = self.bot.get_channel(player.channel_id)
+            members = [x.id for x in channel.members if x.bot is False]
+            if (
+                any([x in whitelist for x in members])
+                and ctx.message.author.id not in whitelist
+            ):
+                return await ctx.message.add_reaction("\N{Cross Mark}")
+        vol = player.volume-10
+        if vol<100 and vol>90:
+            vol = 100
+        elif vol>100:
+            return await ctx.send(embed=discord.Embed(description="Max volume reached!"))
+        controller.volume = vol
+
+        controller.volume = vol
+
+        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
+        await player.set_volume(vol)
     @commands.command(aliases=["np", "current", "nowplaying"])
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
@@ -1321,9 +1485,12 @@ class Music(
         total = humanize.naturalsize(node.stats.memory_allocated)
         free = humanize.naturalsize(node.stats.memory_free)
         cpu = node.stats.cpu_cores
-
+        command = ['git',"describe","--always"]
+        process = Popen(command, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = process.communicate()
+        stdout = stdout.decode("utf8")
         fmt = (
-            f"**{self.bot.user.name}:** `v3.3.1`\n\n"
+            f"**{self.bot.user.name} commit:** `{stdout}`\n\n"
             f"Connected to `{len(self.bot.wavelink.nodes)}` nodes.\n"
             f"Best available Node `{self.bot.wavelink.get_best_node().__repr__()}`\n"
             f"`{len(self.bot.wavelink.players)}` players are distributed on nodes.\n"

@@ -863,8 +863,8 @@ class Music(
         vol = player.volume-10
         if vol<100 and vol>90:
             vol = 100
-        elif vol>100:
-            return await ctx.send(embed=discord.Embed(description="Max volume reached!"))
+        elif vol<0:
+            return await ctx.send(embed=discord.Embed(description="Bot muted!"))
         controller.volume = vol
 
         controller.volume = vol

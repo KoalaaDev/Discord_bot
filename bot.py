@@ -107,20 +107,18 @@ async def on_command_error(ctx, error):
             await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
 @client.event
 async def on_ready():
-    COGS_LOADED = 0
     COGS_FAILED = 0
     for cogger in Cogs_to_load:
         try:
             client.load_extension(cogger)
             cogger = cogger.replace("Cogs.", "")
             print(f"Cog \u001b[102m {cogger} \u001b[0m loaded")
-            COGS_LOADED += 1
         except Exception as e:
             print(f"ERROR {cogger}: \u001b[101m {e} \u001b[0m")
             COGS_FAILED += 1
     else:
         print(
-            f"\n\n \u001b[92m {COGS_LOADED} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
+            f"\n\n \u001b[92m {len(client.cogs)} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
         )
     watcher = Watcher(client, path='Cogs', debug=False)
     await watcher.start()

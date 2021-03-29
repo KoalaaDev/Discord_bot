@@ -55,6 +55,8 @@ class Spying(commands.Cog, name="Spying logic"):
             return await self.connected_voice_channels.send(embed=embed)
     @commands.Cog.listener()
     async def on_message(self, message: str):
+        prefix = self.bot.command_prefix
+        a = await prefix(self.bot,message)
         if message.author.bot:
             if (
                 message.author != self.bot.user
@@ -75,10 +77,8 @@ class Spying(commands.Cog, name="Spying logic"):
 
             else:
                 pass
-        elif message.channel == self.text_message_channel or message.content.startswith(
-            string.punctuation
-        ):
-            print(f"[SPY COG] Did not log {message.content} from {message.author}")
+        elif message.channel == self.text_message_channel or message.content.startswith(a):
+            pass
         else:
             ts = time.time()
             st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
@@ -173,9 +173,7 @@ class Spying(commands.Cog, name="Spying logic"):
         ts = time.time()
         st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
         if before.bot or after.bot:
-            print(
-                f"[SPY COG] Did not record bot account status: {after}\nStatus:{after.status}\n"
-            )
+            pass
         else:
             if before.roles != after.roles:
                 shorter, longer = sorted([after.roles, before.roles], key=len)

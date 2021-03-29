@@ -8,6 +8,7 @@ import traceback
 import wavelink
 from discord.ext import commands, tasks, menus
 from typing import Union
+import typing
 import itertools
 import collections
 import random
@@ -139,7 +140,6 @@ class InteractiveEmbed(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
-        await self.message.delete()
     @menus.button(emoji='\U0001F500')
     async def shuffle_command(self, payload: discord.RawReactionActionEvent):
         """Shuffle button."""
@@ -218,7 +218,29 @@ class MusicController:
         with open(config_file_path) as f:
             config = yaml.safe_load(f)
             self.YoutubeAPIKEY = itertools.cycle([x for x in config["music"]["Youtube"].values()])
+    def build_embed(self) -> typing.Optional[discord.Embed]:
+        """Method which builds our players controller embed."""
+        player = self.bot.wavelink.get_player(self.guild_id)
+        track = player.current
+        if not track:
+            track = self.current_track
+        channel = player.bot.get_channel(int(player.channel_id))
+        qsize = self.queue.qsize()
+        aqsize = self.auto_play_queue.qsize()
+        embed = discord.Embed(title=f'Interactive {player.bot.user.name} | {channel.name}', colour=0xebb145)
+        embed.description = f'Now Playing:\n[{track.title}]({track.uri})\n\n'
+        embed.set_thumbnail(url=track.thumb)
 
+        embed.add_field(name='Duration', value=str(datetime.timedelta(milliseconds=int(track.length))))
+        if self.queue.empty() and self.auto_play:
+            embed.add_field(name='Auto Queue Length', value=str(aqsize))
+        else:
+            embed.add_field(name='Queue Length', value=str(qsize))
+        embed.add_field(name='Volume', value=f'**`{player.volume}%`**')
+        embed.add_field(name='Requested By', value=track.requester)
+        embed.add_field(name='Autoplay', value=f'**`{self.auto_play}`**')
+        embed.set_footer(text=f"{player.node.region}")
+        return embed
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
@@ -292,12 +314,27 @@ class MusicController:
         if self.loop:
             self.loop = False
 
+
+    async def is_position_fresh(self) -> bool:
+            """Method which checks whether the player controller should be remade or updated."""
+            try:
+                async for message in self.context.channel.history(limit=10):
+                    if message.id == self.now_playing.id:
+                        return True
+            except (discord.HTTPException, AttributeError):
+                print("False")
+                return False
+
+            return False
+
+
     async def controller_loop(self):
         await self.bot.wait_until_ready()
         player = self.bot.wavelink.get_player(self.guild_id)
         await player.set_volume(self.volume)
         while True:
-            if self.now_playing:
+            if self.now_playing and not await self.is_position_fresh():
+                print("Clearing interactive")
                 await self.now_playing.delete()
             if self.current_track:
                 self.current_track = None
@@ -324,9 +361,12 @@ class MusicController:
                 description=f"[{song}]({self.now_playing_uri}) [{song.requester}]",
             )
             MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
-            EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
-            await EmbeddedMessage.start(self.context)
-            self.now_playing = EmbeddedMessage.message
+            if not self.now_playing:
+                EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
+                await EmbeddedMessage.start(self.context)
+                self.now_playing = EmbeddedMessage.message
+            else:
+                await self.now_playing.edit(embed=self.build_embed())
             await self.next.wait()
             await self.last_songs.put(song)
             if self.loop:
@@ -336,21 +376,19 @@ class MusicController:
                             await self.queue.put(song)
                         list_of_songs = list(self.queue._queue)
                         for x in list_of_songs:
-                            if self.now_playing:
+                            if self.now_playing and not await self.is_position_fresh():
+                                print("Clearing interactive")
                                 await self.now_playing.delete()
                             self.next.clear()
                             await player.play(x)
-                            MusicEmbed = discord.Embed(
-                                title="Now playing",
-                                colour=discord.Colour.random(),
-                                description=f"[{x}]({x.ytid}) [{x.requester}]",
-                            )
-                            MusicEmbed.set_footer(
-                                text=f"{self.bot.user.name} | {player.node.region}"
-                            )
-                            EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
-                            await EmbeddedMessage.start(self.context)
-                            self.now_playing = EmbeddedMessage.message
+                            MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]",)
+                            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
+                            if not self.now_playing:
+                                EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
+                                await EmbeddedMessage.start(self.context)
+                                self.now_playing = EmbeddedMessage.message
+                            else:
+                                await self.now_playing.edit(embed=self.build_embed())
                             list_of_songs = list(self.queue._queue)
                             await self.next.wait()
                     if self.now_playing:
@@ -365,18 +403,27 @@ class MusicController:
                     MusicEmbed.set_footer(
                         text=f"{self.bot.user.name} | {player.node.region}"
                     )
-                    EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
-                    await EmbeddedMessage.start(self.context)
-                    self.now_playing = EmbeddedMessage.message
+                    if not self.now_playing:
+                        EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
+                        await EmbeddedMessage.start(self.context)
+                        self.now_playing = EmbeddedMessage.message
+                    else:
+                        await self.now_playing.edit(embed=self.build_embed())
                     self.current_track = song
                     await self.next.wait()
             if (self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty()):
                 while (self.auto_play and self.queue.empty() and not self.auto_play_queue.empty()):
-                    await self.now_playing.delete()
+                    if self.now_playing and not await self.is_position_fresh():
+                        print("Clearing interactive")
+                        await self.now_playing.delete()
                     self.next.clear()
                     song = await self.auto_play_queue.get()
-                    self.now_playing_uri = song.uri
-                    self.now_playing_id = song.ytid
+                    (
+                        self.now_playing_uri,
+                        self.now_playing_id,
+                        self.requester,
+                        self.current_track,
+                    ) = (song.uri, song.ytid, song.requester, song)
                     MusicEmbed = discord.Embed(
                         title="Now playing",
                         colour=discord.Colour.random(),
@@ -385,9 +432,12 @@ class MusicController:
                     MusicEmbed.set_footer(
                         text=f"{self.bot.user.name} | {player.node.region}"
                     )
-                    EmbeddedMessage = InteractiveEmbed(embed=MusicEmbed, player=player)
-                    await EmbeddedMessage.start(self.context)
-                    self.now_playing = EmbeddedMessage.message
+                    if not self.now_playing:
+                        EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
+                        await EmbeddedMessage.start(self.context)
+                        self.now_playing = EmbeddedMessage.message
+                    else:
+                        await self.now_playing.edit(embed=self.build_embed())
                     self.current_track = song
                     await player.play(song)
                     await self.next.wait()
@@ -435,7 +485,9 @@ class Music(
     ):
         controller = self.get_controller(event.player)
         controller.next.set()
-
+        if controller.queue.empty() and not controller.auto_play:
+            await controller.now_playing.delete()
+            controller.now_playing = None
     @wavelink.WavelinkMixin.listener()
     async def on_track_stuck(
         self, node: wavelink.node.Node, event: wavelink.events.TrackStuck
@@ -844,9 +896,8 @@ class Music(
         elif vol>100:
             return await ctx.send(embed=discord.Embed(description="Max volume reached!"))
         controller.volume = vol
-
-        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
         await player.set_volume(vol)
+        await controller.now_playing.edit(embed=controller.build_embed())
     @commands.command()
     async def vol_down(self, ctx):
         """Set the player volume downwards by 10."""
@@ -868,9 +919,8 @@ class Music(
         controller.volume = vol
 
         controller.volume = vol
-
-        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
         await player.set_volume(vol)
+        await controller.now_playing.edit(embed=controller.build_embed())
     @commands.command(aliases=["np", "current", "nowplaying"])
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
@@ -1127,10 +1177,10 @@ class Music(
         if controller.auto_play is True:
             controller.auto_play = False
             controller.auto_play_queue._queue.clear()
-            await ctx.send(embed=discord.Embed(description="Autoplay disabled"))
+            await controller.now_playing.edit(embed=controller.build_embed())
         else:
             controller.auto_play = True
-            await ctx.send(embed=discord.Embed(description="Autoplay enabled"))
+            await controller.now_playing.edit(embed=controller.build_embed())
 
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):
@@ -1257,13 +1307,13 @@ class Music(
         with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"saved_playlists.yml",),"r",) as f:
             saved_playlist = yaml.safe_load(f)
             playlists = saved_playlist.get(ctx.guild.id, None)
-            if playlists:
-                search = playlists.get(query, None)
-                if search:
-                    search = search[1]
-                    return await play(ctx, query=search)
-            else:
-                search = None
+        if playlists:
+            search = playlists.get(query, None)
+            if search:
+                search = search[1]
+                return await play(ctx, query=search)
+        else:
+            search = None
         if not search:
             search_results = [x for x in controller.spotify_playlists if query in x[0]]
             if search_results:
@@ -1271,7 +1321,7 @@ class Music(
             else:
                 search = None
         if not search:
-            search_results = await spotify_client.search(query, "playlist")
+            search_results = await spotify_client.search(query, "playlist",controller.spotify_region)
             if search_results:
                 try:
                     url = search_results["playlists"]["items"][0][

@@ -101,7 +101,11 @@ class Utility(commands.Cog):
         await ctx.message.add_reaction("\N{White Heavy Check Mark}")
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
 
-
+    @commands.command()
+    async def avatar(self, ctx, member: discord.Member):
+        embed = discord.Embed(title=member.name)
+        embed.set_thumbnail(member.avatar_url)
+        await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)
     async def git(self, ctx, *, args):

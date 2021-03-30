@@ -318,11 +318,10 @@ class MusicController:
     async def is_position_fresh(self) -> bool:
             """Method which checks whether the player controller should be remade or updated."""
             try:
-                async for message in self.context.channel.history(limit=10):
+                async for message in self.context.channel.history(limit=5):
                     if message.id == self.now_playing.id:
                         return True
             except (discord.HTTPException, AttributeError):
-                print("False")
                 return False
 
             return False
@@ -336,6 +335,7 @@ class MusicController:
             if self.now_playing and not await self.is_position_fresh():
                 print("Clearing interactive")
                 await self.now_playing.delete()
+                self.now_playing = None
             if self.current_track:
                 self.current_track = None
             self.next.clear()

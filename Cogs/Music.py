@@ -190,11 +190,11 @@ class InteractiveEmbed(menus.Menu):
         await self.bot.invoke(ctx)
 
 class MusicController:
-    def __init__(self, bot, guild_id):
+    def __init__(self, bot, guild_id,context: commands.Context):
         self.bot = bot
         self.guild_id = guild_id
         self.channel = None
-        self.context :commands.Context = None
+        self.context  = context
         self.last_songs = asyncio.Queue(maxsize=11)
         self.now_playing_uri = None
         self.now_playing_id = None
@@ -333,7 +333,6 @@ class MusicController:
         await player.set_volume(self.volume)
         while True:
             if self.now_playing and not await self.is_position_fresh():
-                print("Clearing interactive")
                 await self.now_playing.delete()
                 self.now_playing = None
             if self.current_track:
@@ -379,6 +378,7 @@ class MusicController:
                             if self.now_playing and not await self.is_position_fresh():
                                 print("Clearing interactive")
                                 await self.now_playing.delete()
+                                self.now_playing = None
                             self.next.clear()
                             await player.play(x)
                             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]",)
@@ -393,6 +393,7 @@ class MusicController:
                             await self.next.wait()
                     if self.now_playing:
                         await self.now_playing.delete()
+                        self.now_playing = None
                     self.next.clear()
                     await player.play(song)
                     MusicEmbed = discord.Embed(
@@ -416,6 +417,7 @@ class MusicController:
                     if self.now_playing and not await self.is_position_fresh():
                         print("Clearing interactive")
                         await self.now_playing.delete()
+                        self.now_playing = None
                     self.next.clear()
                     song = await self.auto_play_queue.get()
                     (
@@ -514,9 +516,7 @@ class Music(
         try:
             controller = self.controllers[gid]
         except KeyError:
-            controller = MusicController(self.bot, gid)
-            if isinstance(value, commands.Context):
-                controller.context = value
+            controller = MusicController(self.bot, gid,value)
             self.controllers[gid] = controller
 
         return controller

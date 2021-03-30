@@ -104,7 +104,7 @@ class Utility(commands.Cog):
     @commands.command()
     async def avatar(self, ctx, member: discord.Member):
         embed = discord.Embed(title=member.name)
-        embed.set_thumbnail(member.avatar_url)
+        embed.set_thumbnail(url=member.avatar_url)
         await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)

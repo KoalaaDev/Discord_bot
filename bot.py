@@ -56,6 +56,7 @@ client = commands.Bot(
     case_insensitive=True,
     intents=intents,
     help_command=PrettyHelp(no_category="Main"),
+    activity=discord.Activity(type=discord.ActivityType.listening, name="help")
 )
 
 
@@ -122,9 +123,6 @@ async def on_ready():
         )
     watcher = Watcher(client, path='Cogs', debug=False)
     await watcher.start()
-    await client.change_presence(
-        activity=discord.Activity(type=discord.ActivityType.listening, name="help")
-    )
     print("\u001b[33m Logged in as {0} ({0.id}) \u001b[0m".format(client.user))
     print(
         "\u001b[36m Connected to "

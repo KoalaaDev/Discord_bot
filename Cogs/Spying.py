@@ -63,17 +63,17 @@ class Spying(commands.Cog, name="Spying logic"):
                 and message.author.id != 799134976515375154
                 and message.author.id != 654581273028853770
             ):
-                if message.embeds:
-                    await self.bot_channel.send(embed=message.embeds[0])
-                else:
-                    botEmbed = discord.Embed(
-                        title=f"BOT {message.author}",
-                        description=f"```{message.content}```",
-                    )
-                    try:
-                        await self.bot_channel.send(embed=botEmbed)
-                    except AttributeError:
-                        pass
+                # if message.embeds:
+                #     await self.bot_channel.send(embed=message.embeds[0])
+                # else:
+                #     botEmbed = discord.Embed(
+                #         title=f"BOT {message.author}",
+                #         description=f"```{message.content}```",
+                #     )
+                    # try:
+                    #     await self.bot_channel.send(embed=botEmbed)
+                    # except AttributeError:
+                pass
 
             else:
                 pass

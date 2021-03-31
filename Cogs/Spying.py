@@ -81,7 +81,7 @@ class Spying(commands.Cog, name="Spying logic"):
             command_message = message.content.split(" ")
             command = command_message[0].strip(a)
             command_args = " ".join(command_message[1:])
-            embed = discord.Embed(title=f"Invoked commmand {command}",description=f"```{}```")
+            embed = discord.Embed(title=f"Invoked commmand {command}",description=f"```{command_args}```")
             embed.set_footer(
                 text=f"<{st[:-3]}> {message.channel} | {message.guild}"
             )

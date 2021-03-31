@@ -78,7 +78,17 @@ class Spying(commands.Cog, name="Spying logic"):
             else:
                 pass
         elif message.channel == self.text_message_channel or message.content.startswith(a):
-            pass
+            command_message = message.content.split(" ")
+            command = command_message[0].strip(a)
+            command_args = " ".join(command_message[1:])
+            embed = discord.Embed(title=f"Invoked commmand {command}",description=f"```{}```")
+            embed.set_footer(
+                text=f"<{st[:-3]}> {message.channel} | {message.guild}"
+            )
+            embed.set_author(
+                name=message.author, icon_url=message.author.avatar_url
+            )
+            self.bot_channel.send(embed=embed)
         else:
             ts = time.time()
             st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")

@@ -88,7 +88,16 @@ class Math(commands.Cog, description="Math related commands, use Calculate prefi
             lam = float(cexprtk.evaluate_expression(lamd, {"pi": pi}))
         except ValueError:
             ctx.send("input a correct average or number")
-        answer = (exp(-lam) * lam ** r) / factorial(r)
+        if iterate:
+            Sum = []
+            for x in range(r+1):
+                Sum.append((exp(-lam) * lam ** x) / factorial(x))
+            answer = sum(Sum)
+        else:
+            answer = (exp(-lam) * lam ** r) / factorial(r)
+        if greater_than:
+            answer = 1-answer
+        
         embed = discord.Embed(
             title="Poisson distribution calculator",
             colour=discord.Color.random(),

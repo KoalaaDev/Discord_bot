@@ -462,7 +462,7 @@ class Music(
             self.nodes = config["music"]["nodes"]
             self.spotify = config["music"]["Spotify"]
         self.bot.loop.create_task(self.start_nodes())
-
+        self.check_controllers.start()
     async def destroy_nodes(self):
         for n in self.nodes.values():
             await self.bot.wavelink.destroy_node(n['identifier'])
@@ -477,7 +477,18 @@ class Music(
                 await self.bot.wavelink.initiate_node(**n)
             except wavelink.errors.NodeOccupied:
                 pass
-
+    @tasks.loop(seconds=5)
+    async def check_controllers(self):
+        Deletion_list = []
+        for id, controller in self.controllers.items():
+            player = self.bot.wavelink.get_player(controller.guild_id)
+            if not player.is_playing and not player.is_connected:
+                print(f"stopping controller for {controller.guild_id}")
+                await player.stop()
+                await player.disconnect()
+                Deletion_list.append(id)
+        for id in Deletion_list:
+            del self.controllers[id]
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node):
         print(f"\u001b[97m Node {node.identifier} \u001b[92m ONLINE \u001b[97m")
@@ -488,7 +499,7 @@ class Music(
     ):
         controller = self.get_controller(event.player)
         controller.next.set()
-        if controller.queue.empty() and not controller.auto_play:
+        if controller.now_playing and controller.queue.empty() and not controller.auto_play:
             await controller.now_playing.delete()
             controller.now_playing = None
     @wavelink.WavelinkMixin.listener()
@@ -504,7 +515,7 @@ class Music(
         self, node: wavelink.node.Node, event: wavelink.events.TrackException
     ):
         print(
-            f"[{node.identifier}] An error has occured: \u001b[101m {event.error} \u001b[97m, Switching!"
+            f"[{node.identifier}] An error has occured:  {event.error}, Switching!"
         )
         await event.player.change_node()
 
@@ -522,40 +533,40 @@ class Music(
 
         return controller
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(
-        self,
-        member: discord.Member,
-        before: discord.VoiceState,
-        after: discord.VoiceState,
-    ):
-        player = self.bot.wavelink.get_player(member.guild.id)
-        controller = self.get_controller(player)
-        if (
-            (before.channel and not after.channel)
-            and member.bot
-            and member == self.bot.user
-        ):
-            if controller.remote_control:
-                return await player.connect(before.channel.id)
-            print("Player has been closed! Stopping!")
-            if controller.auto_play:
-                controller.auto_play = False
-                controller.auto_play_queue._queue.clear()
-            if controller.loop:
-                controller.loop = False
-            controller.queue._queue.clear()
-            await player.stop()
-            await player.disconnect()
-            del self.controllers[member.guild.id]
-        if controller.remote_control:
-            if before.channel and after.channel:
-                if (
-                    member == self.bot.user
-                    and any([x.id in whitelist for x in before.channel.members])
-                    and not any([x.id in whitelist for x in after.channel.members])
-                ):
-                    return await player.connect(before.channel.id)
+    # @commands.Cog.listener()
+    # async def on_voice_state_update(
+    #     self,
+    #     member: discord.Member,
+    #     before: discord.VoiceState,
+    #     after: discord.VoiceState,
+    # ):
+    #     player = self.bot.wavelink.get_player(member.guild.id)
+    #     controller = self.get_controller(player)
+    #     if (
+    #         (before.channel and not after.channel)
+    #         and member.bot
+    #         and member == self.bot.user
+    #     ):
+    #         if controller.remote_control:
+    #             return await player.connect(before.channel.id)
+    #         print("Player has been closed! Stopping!")
+    #         if controller.auto_play:
+    #             controller.auto_play = False
+    #             controller.auto_play_queue._queue.clear()
+    #         if controller.loop:
+    #             controller.loop = False
+    #         controller.queue._queue.clear()
+    #         await player.stop()
+    #         await player.disconnect()
+    #         del self.controllers[member.guild.id]
+    #     if controller.remote_control:
+    #         if before.channel and after.channel:
+    #             if (
+    #                 member == self.bot.user
+    #                 and any([x.id in whitelist for x in before.channel.members])
+    #                 and not any([x.id in whitelist for x in after.channel.members])
+    #             ):
+    #                 return await player.connect(before.channel.id)
 
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""

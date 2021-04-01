@@ -23,3 +23,5 @@ humanreadable
 async-timeout
 watchgod
 git+https://github.com/Rapptz/discord-ext-menus.git
+asyncdagpi
+statcord.py

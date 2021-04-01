@@ -5,6 +5,7 @@ import discord
 import cexprtk
 from discord.ext import commands
 from sympy import *
+import re
 
 x, y, z, t = symbols("x y z t")
 k, m, n = symbols("k m n", integer=True)
@@ -14,9 +15,10 @@ init_printing(use_latex=True)
 
 def parse(string: str):
     if "^" in string:
-        return string.replace("^", "**")
-    else:
-        return string
+        string.replace("^", "**")
+    if "(" in string:
+        string = re.sub(r"([a-z0-9])(\()",r"\1*\2", string)
+    return string
 
 
 class Math(commands.Cog, description="Math related commands, use Calculate prefix to use math functions"):
@@ -81,14 +83,14 @@ class Math(commands.Cog, description="Math related commands, use Calculate prefi
         await ctx.send(eqn)
 
     @commands.command()
-    async def poisson(self, ctx, lamd, times, iterate=False, greater_than=False):
+    async def poisson(self, ctx, lamda, times, Continuous=False, greater_than=False):
         """Gets poisson probability distribution"""
         try:
             r = int(times)
             lam = float(cexprtk.evaluate_expression(lamd, {"pi": pi}))
         except ValueError:
             ctx.send("input a correct average or number")
-        if iterate:
+        if Continuous:
             Sum = []
             for x in range(r+1):
                 Sum.append((exp(-lam) * lam ** x) / factorial(x))
@@ -97,7 +99,7 @@ class Math(commands.Cog, description="Math related commands, use Calculate prefi
             answer = (exp(-lam) * lam ** r) / factorial(r)
         if greater_than:
             answer = 1-answer
-        
+
         embed = discord.Embed(
             title="Poisson distribution calculator",
             colour=discord.Color.random(),
@@ -105,9 +107,9 @@ class Math(commands.Cog, description="Math related commands, use Calculate prefi
         )
         embed.add_field(name="Lambda", value=f"```{lam}```", inline=False)
         embed.add_field(name="r", value=f"```{r}```", inline=False)
-        embed.add_field(name="Iterate", value=f"```{iterate}```", inline=False)
+        embed.add_field(name="Continuous?", value=f"```{iterate}```", inline=False)
         embed.add_field(
-            name="Greater than", value=f"```{greater_than}```", inline=False
+            name="Greater than?", value=f"```{greater_than}```", inline=False
         )
         await ctx.send(embed=embed)
 

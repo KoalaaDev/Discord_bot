@@ -21,6 +21,7 @@ import humanreadable as hr
 import async_timeout
 from lyricsgenius import Genius
 from subprocess import Popen, PIPE
+import copy
 with open("whitelist.txt") as f:
     whitelist = [int(x.strip("\n")) for x in f.readlines()]
 
@@ -71,7 +72,7 @@ class InteractiveEmbed(menus.Menu):
         self.player = player
     def update_context(self, payload: discord.RawReactionActionEvent):
         """Update our context with the user who reacted."""
-        ctx = self.ctx
+        ctx = copy.copy(self.ctx)
         ctx.author = payload.member
 
         return ctx

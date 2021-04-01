@@ -6,6 +6,8 @@ from datetime import datetime
 import yaml
 import discord
 import urbandict
+import sys
+import traceback
 from discord.ext import commands
 from discord.utils import get
 from pretty_help import PrettyHelp
@@ -13,6 +15,7 @@ from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
 from difflib import get_close_matches
+from subprocess import Popen
 intents = discord.Intents.all()
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
@@ -106,6 +109,10 @@ async def on_command_error(ctx, error):
         matches = get_close_matches(cmd, cmds)
         if len(matches) > 0:
             await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
+    print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+    traceback.print_exception(
+        type(error), error, error.__traceback__, file=sys.stderr
+    )
 @client.event
 async def on_ready():
     COGS_FAILED = 0
@@ -297,20 +304,20 @@ async def ping(ctx):
     await ctx.send(embed=em)
 
 
-@client.command(hidden=True, description="Get info of a user on the server")
-async def info(ctx, user: discord.Member = None):
-    if user is None:
-        await ctx.send("Please input a user.")
-    else:
-        await ctx.send(
-            "The user's name is: {}".format(user.name)
-            + "\nThe user's ID is: {}".format(user.id)
-            + "\nThe user's current status is: {}".format(user.status)
-            + "\nThe user's highest role is: {}".format(user.top_role)
-            + "\nThe user joined at: {}".format(user.joined_at)
-        )
-
-
+@client.command(description="Get info of the bot")
+async def info(ctx):
+    """Get info of the bot"""
+    command = ['git',"describe","--always"]
+    process = Popen(command, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = process.communicate()
+    stdout = stdout.decode("utf8")
+    fmt = (
+        f"**{client.user.name} commit:** `{stdout}`\n\n"
+        f"Vote bot at [top.gg](https://top.gg/bot/799134976515375154/vote)/[discordbotlist.com](https://discordbotlist.com/bots/doorbanger/upvote).\n"
+        f"Support: Koalaa#6001 or skot#6579\n"
+    )
+    embed = discord.Embed(description=fmt)
+    await ctx.send(embed=embed)
 @client.command(hidden=True, description="Invite link of bot")
 async def invite(ctx):
     embed = discord.Embed(

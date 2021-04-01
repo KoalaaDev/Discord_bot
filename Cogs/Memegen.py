@@ -5,12 +5,14 @@ import discord
 import random
 import io
 import sys
+from asyncdagpi import Client, ImageFeatures
+
 
 class Meme(commands.Cog, description="Generate memes and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.api = vacefron.Client()
-
+        self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")
     async def session(self, url, param: dict = None):
         if param is None:
             param = {}

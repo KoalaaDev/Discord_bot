@@ -318,6 +318,7 @@ async def info(ctx):
     )
     embed = discord.Embed(description=fmt)
     await ctx.send(embed=embed)
+    process.stdout.close()
 @client.command(hidden=True, description="Invite link of bot")
 async def invite(ctx):
     embed = discord.Embed(

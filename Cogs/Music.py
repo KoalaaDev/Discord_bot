@@ -1564,7 +1564,7 @@ class Music(
             f"Server Uptime: `{datetime.timedelta(milliseconds=node.stats.uptime)}`"
         )
         await ctx.send(fmt)
-
+        process.stdout.close()
 
 def setup(bot):
     bot.add_cog(Music(bot))

@@ -296,27 +296,30 @@ class Spying(commands.Cog, name="Spying logic"):
                         except AttributeError:
                             pass
                     elif after.activity.type == discord.ActivityType.listening:
-                        listeningEmbedded = discord.Embed(
-                            title="Music Detector Service :musical_note:",
-                            description=f"{before.name} from {before.guild} is now listening to {after.activity.title}",
-                            colour=discord.Colour.green(),
-                        )
-                        listeningEmbedded.add_field(
-                            name="Started:", value=after.activity.start
-                        )
-                        listeningEmbedded.add_field(
-                            name="Duration", value=after.activity.duration
-                        )
-                        listeningEmbedded.add_field(
-                            name="Artist:", value=after.activity.artist.title()
-                        )
-                        listeningEmbedded.add_field(
-                            name="Album", value=after.activity.album
-                        )
-                        listeningEmbedded.set_footer(
-                            text=f"Activity Update Detector Service <{st}>"
-                        )
-                        listeningEmbedded.set_image(url=after.activity.album_cover_url)
+                        try:
+                            listeningEmbedded = discord.Embed(
+                                title="Music Detector Service :musical_note:",
+                                description=f"{before.name} from {before.guild} is now listening to {after.activity.name}",
+                                colour=discord.Colour.green(),
+                            )
+                            listeningEmbedded.add_field(
+                                name="Started:", value=after.activity.start
+                            )
+                            listeningEmbedded.add_field(
+                                name="Duration", value=after.activity.duration
+                            )
+                            listeningEmbedded.add_field(
+                                name="Artist:", value=after.activity.artist.title()
+                            )
+                            listeningEmbedded.add_field(
+                                name="Album", value=after.activity.album
+                            )
+                            listeningEmbedded.set_footer(
+                                text=f"Activity Update Detector Service <{st}>"
+                            )
+                            listeningEmbedded.set_image(url=after.activity.album_cover_url)
+                        except AttributeError:
+                            pass
                         try:
                             await self.member_update_channel.send(
                                 embed=listeningEmbedded

@@ -6,7 +6,7 @@ import cexprtk
 from discord.ext import commands
 from sympy import *
 import re
-
+multiply_detect = re.compile("\d[a-z]")
 x, y, z, t = symbols("x y z t")
 k, m, n = symbols("k m n", integer=True)
 f, g, h = symbols("f g h", cls=Function)
@@ -15,9 +15,11 @@ init_printing(use_latex=True)
 
 def parse(string: str):
     if "^" in string:
-        string.replace("^", "**")
+        string = string.replace("^", "**")
     if "(" in string:
         string = re.sub(r"([a-z0-9])(\()",r"\1*\2", string)
+    if multiply_detect.search(string):
+        string = re.sub(r"([0-9])([a-z])",r"\1*\2", string)
     return string
 
 

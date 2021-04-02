@@ -264,7 +264,8 @@ class Spying(commands.Cog, name="Spying logic"):
                             )
                         except AttributeError:
                             pass
-                        playEmbedded.set_image(url=after.activity.large_image_url)
+                        if not isinstance(after.activity,discord.Game):
+                            playEmbedded.set_image(url=after.activity.large_image_url)
                         playEmbedded.set_footer(
                             text=f"Activity Update Detector Service <{st}>"
                         )

@@ -5,7 +5,8 @@ import asyncio
 class Status(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.messages = [[discord.ActivityType.listening,"help"],[discord.ActivityType.listening,f"{len(self.bot.guilds)} Guilds | {len(set(self.bot.get_all_members()))} Members"]]
+        self.members = len(set(self.bot.get_all_members()))
+        self.messages = [[discord.ActivityType.listening,"help"],[discord.ActivityType.listening,f"{len(self.bot.guilds)} Guilds | {self.members} Members"]]
         self.activity_types = {"playing":discord.ActivityType.playing,
                                 "streaming":discord.ActivityType.streaming,
                                 "listening":discord.ActivityType.listening,
@@ -14,6 +15,7 @@ class Status(commands.Cog):
         self.Animated_Status.start()
     @tasks.loop()
     async def Animated_Status(self):
+        self.members = len(set(self.bot.get_all_members()))
         for i in self.messages:
             await self.bot.change_presence(activity=discord.Activity(type=i[0],name=i[1]))
             await asyncio.sleep(60)

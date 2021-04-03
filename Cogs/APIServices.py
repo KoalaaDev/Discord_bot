@@ -3,6 +3,7 @@ import aiohttp
 import discord
 import sys
 import traceback
+import random
 class API(commands.Cog, description="Random generator commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -25,13 +26,20 @@ class API(commands.Cog, description="Random generator commands"):
     @commands.command()
     async def cat(self, ctx):
         """Gives a random cat picture"""  # Alvin be like meow meow *while sucking staff*
-        if ctx.author.id == 451008924032827395:
-            pic = "https://cdn.discordapp.com/attachments/541880222065098762/812999751339474954/alvin_lol.JPG"
+        if ctx.author.id == 451008924032827395 or ctx.author.id == 351664300009586688 or ctx.author.id == 267250931144458257 or ctx.author.id == 263190106821623810 or ctx.author.id == 546667581189128194:
+            embed1 = "https://cdn.discordapp.com/attachments/541880222065098762/812999751339474954/alvin_lol.JPG"
+            embed2 = "https://media.discordapp.net/attachments/664404159340085248/827191995160068116/Homepage_Panel_form_946x577_TC2.png?width=775&height=473"
+            embed3 = "https://cdn.discordapp.com/attachments/664404159340085248/827599168922845204/image0.jpg"
+            embed4 = "https://cdn.discordapp.com/attachments/664404159340085248/827599283929743380/20210301_153915.jpg"
+            embed5 = "https://cdn.discordapp.com/attachments/664404159340085248/827599325827170334/IMG_20210325_153718.jpg"
+            embed6 = "https://cdn.discordapp.com/attachments/664404159340085248/827599353978945576/IMG_20210302_153549.jpg"
+            embed = discord.Embed(title="Random Cat", colour=discord.Colour.purple())
+            embed.set_image(url=random.choice([embed1, embed2, embed3, embed4, embed5, embed6]))
         else:
             pic = await self.getJSON(f"https://aws.random.cat/meow")
-        embed = discord.Embed(title="Random Cat", Colour=discord.Colour.purple())
-        embed.set_image(url=pic["file"])
-        embed.set_footer(text="Animal Img Gen Service")
+            embed = discord.Embed(title="Random Cat", Colour=discord.Colour.purple())
+            embed.set_image(url=pic["file"])
+            embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
     @commands.command()
     async def reddit(self, ctx, subreddit):

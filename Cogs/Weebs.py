@@ -30,7 +30,7 @@ class Anime(commands.Cog):
                     )
                     return
         embed = discord.Embed(
-            title="Here's a pic of Hatsune Miku!", color=discord.Color.random()
+            title="Here's a pic of Hatsune Miku!", color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])

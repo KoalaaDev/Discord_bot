@@ -40,7 +40,6 @@ class Anime(commands.Cog):
                     code=status
                 )
             )
-        embed.set_footer(text="From https://mikuapi.predeactor.net")
         await ctx.send(embed=embed)
 
 def setup(bot):

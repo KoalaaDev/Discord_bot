@@ -59,7 +59,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def neko(self, ctx: commands.Context):
-        """Generates random image of a Neko"""
+        """Generates random image of a Neko (may take awhile to load)"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://neko.weeb.services/") as response:
                 if response.status == 503:

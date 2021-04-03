@@ -2,19 +2,18 @@ from discord.ext import commands
 import random
 import discord
 import yaml
+import asyncio
 import os
 from discord.ext.commands.cooldowns import BucketType
-
+from asyncdagpi import Client
+import math
 
 class Fun(
     commands.Cog, description="Fun commands such as love calculator and coin flips"
 ):
     def __init__(self, bot):
         self.bot = bot
-        self.balances = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "bank.yml"
-        )
-
+        self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")
     @commands.command(hidden=True)
     async def jason(self, ctx):
         await ctx.message.delete()
@@ -59,44 +58,55 @@ class Fun(
         message = await ctx.send(f"Woohoo {gay} is confirmed gay!")
         emoji = get(client.emojis, name="pepelaugh")
         await message.add_reaction(emoji)
-
-    async def get_currency(self, MemberID):
-        with open(self.balances) as f:
-            balances = yaml.safe_load(f)
-            return balances.get(MemberID, None)
-
-    async def create_account(self, MemberID):
-        with open(self.balances, "r") as f:
-            balances = yaml.safe_load(f)
-        balances[MemberID] = 0
-        with open(self.balances, "w") as f:
-            balances = yaml.dump(balances, f)
-
-    async def write(self, MemberID, amount):
-        with open(self.balances) as f:
-            balances = yaml.safe_load(f)
-        balances[MemberID] = amount
-        with open(self.balances, "w") as f:  ##W = write R = read
-            balances = yaml.dump(balances, f)
-
-    @commands.command(hidden=True)
-    async def beg(self, ctx):
-        balance = await self.get_currency(ctx.author.id)
-        if not balance:
-            await self.create_account(ctx.author.id)
-            balance = await self.get_currency(ctx.author.id)
-        await self.write(ctx.author.id, random.randint(1, 100) + balance)
-        await ctx.send("UR A LINCOLN")
-
-    @commands.cooldown(1, 86400, BucketType.user)
-    @commands.command(hidden=True)
-    async def daily(self, ctx):
-        userbalance = await self.get_currency(ctx.author.id)
-        print(userbalance)
-        if not userbalance:
-            await self.create_account(ctx.author.id)
-            print("CREATING USER BALANCE")
-
-
+    async def hints(self, ctx: commands.Context, embed: discord.Embed, obj, message):
+        count = 1
+        hints = [["Type", ",".join(obj.dict["Data"]["Type"])],["Abilities",",".join(obj.abilities)], ["weight",obj.weight]]
+        await ctx.send("Wrong answer, you have 3 guesses left!",delete_after=5)
+        for i in hints:
+            embed.add_field(name=i[0], value=f"{i[1]}")
+            await message.edit(embed=embed)
+            def check(m):
+                return m.channel == ctx.channel and m.author == ctx.author
+            try:
+                guess = await self.bot.wait_for('message',check=check,timeout=15)
+            except asyncio.TimeoutError:
+                embed = discord.Embed(title="You didnt guess it on time :(")
+                embed.set_image(url=obj.answer)
+                return await ctx.send(embed=embed)
+            if guess.content.title() == obj.name:
+                return await guess.add_reaction("\N{White Heavy Check Mark}")
+            else:
+                guesses_left = len(hints)-count
+                if guesses_left == 1:
+                    await ctx.send(f"Wrong Pokemon, {guesses_left} guess remaining!",delete_after=5)
+                    continue
+                if guesses_left<1:
+                    pass
+                else:
+                    await ctx.send(f"Wrong Pokemon, {guesses_left} guesses remaining!",delete_after=5)
+                count+=1
+        else:
+            embed = discord.Embed(title="You didnt guess it right! :(")
+            embed.set_image(url=obj.answer)
+            return await ctx.send(embed=embed)
+    @commands.command(alias=['wtp'])
+    async def poke(self, ctx):
+        """Starts a pokemon guessing game!"""
+        pokemon = await self.dagpi.wtp()
+        embed = discord.Embed(title="Guess that Pokemon!")
+        embed.set_image(url=pokemon.question)
+        message = await ctx.send(embed=embed)
+        def check(m):
+            return m.channel == ctx.channel and m.author == ctx.author
+        try:
+            guess = await self.bot.wait_for('message',check=check,timeout=30)
+        except asyncio.TimeoutError:
+            embed = discord.Embed(title="You didnt guess it on time :(")
+            embed.set_image(url=pokemon.answer)
+            return await ctx.send(embed=embed)
+        if guess.content.title() == pokemon.name:
+            return await guess.add_reaction("\N{White Heavy Check Mark}")
+        else:
+            await self.hints(ctx, embed, pokemon, message)
 def setup(bot):
     bot.add_cog(Fun(bot))

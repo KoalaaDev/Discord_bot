@@ -17,12 +17,13 @@ from subprocess import Popen, PIPE
 from difflib import get_close_matches
 from subprocess import Popen
 intents = discord.Intents.all()
+intents.typing = False
+intents.presences = False
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
     API_KEY = config["bot"]["API_KEY"]
     COGS_CONFIG = config["bot"]["LOAD_COGS"]
 
-intents.members = True
 intents.guilds = True
 fonts = [
     "1943____",

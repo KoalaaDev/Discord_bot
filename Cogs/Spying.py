@@ -178,196 +178,196 @@ class Spying(commands.Cog, name="Spying logic"):
                     except AttributeError:
                         pass
 
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        ts = time.time()
-        st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
-        if before.bot or after.bot:
-            pass
-        else:
-            if before.roles != after.roles:
-                shorter, longer = sorted([after.roles, before.roles], key=len)
-                Embedded = discord.Embed(
-                    title="{after.guild.name}",
-                    description=f"{before.name}'s role has been changed from {before.role.name} to {after.role.name}",
-                )
-                Embedded.set_image(url=after.avatar_url)
-                Embedded.set_footer(text=f"Role Update Detector Service <{st}>")
-                try:
-                    await self.member_update_channel.send(embed=Embedded)
-                except AttributeError:
-                    pass
-            elif before.status != after.status:
-                if after.status == discord.Status.dnd:
-                    dndEmbedded = discord.Embed(
-                        title="Status indicator: :red_circle: ",
-                        description=f"{before.name} from {before.guild} has been set to Do Not Disturb ",
-                        colour=discord.Colour(0xFCEC00),
-                    )
-                    dndEmbedded.set_footer(
-                        text=f"Status Update Detector Service <{st}>"
-                    )
-                    dndEmbedded.set_image(url=after.avatar_url)
-                    try:
-                        await self.member_update_channel.send(embed=dndEmbedded)
-                    except AttributeError:
-                        pass
-                if after.status == discord.Status.online:
-                    Embedded = discord.Embed(
-                        title="Status indicator: :green_circle:  ",
-                        description=f"{before.name} from {before.guild} is now Online ",
-                        colour=discord.Colour(0xFCEC00),
-                    )
-                    Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
-                    Embedded.set_image(url=after.avatar_url)
-                    try:
-                        await self.member_update_channel.send(embed=Embedded)
-                    except AttributeError:
-                        pass
-                if after.status == discord.Status.idle:
-                    Embedded = discord.Embed(
-                        title="Status indicator: :orange_circle:  ",
-                        description=f"{before.name} from {before.guild} went Away/AFK ",
-                        colour=discord.Colour(0xFCEC00),
-                    )
-                    Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
-                    Embedded.set_image(url=after.avatar_url)
-                    try:
-                        await self.member_update_channel.send(embed=Embedded)
-                    except AttributeError:
-                        pass
-                if after.status == discord.Status.offline:
-                    Embedded = discord.Embed(
-                        title="Status indicator: :black_circle:",
-                        description=f"{before.name} from {before.guild} has gone Offline ",
-                        colour=discord.Colour(0xFCEC00),
-                    )
-                    Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
-                    Embedded.set_image(url=after.avatar_url)
-                    try:
-                        await self.member_update_channel.send(embed=Embedded)
-                    except AttributeError:
-                        pass
-            elif before.activity != after.activity:
-                if before.activity == None or after.activity == None:
-                    pass
-                else:
-                    if after.activity.type == discord.ActivityType.playing:
-                        playEmbedded = discord.Embed(
-                            title=":video_game: Game Detector Service :video_game: ",
-                            description=f"{before.name} from {before.guild}  is now playing {after.activity.name}",
-                            colour=discord.Colour.orange(),
-                        )
-                        try:
-                            playEmbedded.add_field(
-                            name="Match:", value=after.activity.details
-                            )
-                        except AttributeError:
-                            pass
-                        if not isinstance(after.activity,discord.Game):
-                            playEmbedded.set_image(url=after.activity.large_image_url)
-                        playEmbedded.set_footer(
-                            text=f"Activity Update Detector Service <{st}>"
-                        )
-                        try:
-                            await self.member_update_channel.send(embed=playEmbedded)
-                        except:
-                            pass
-
-                    elif after.activity.type == discord.ActivityType.streaming:
-                        streamingEmbedded = discord.Embed(
-                            title="Streamer Detector Service",
-                            description=f"{before.name} from {before.guild} is now streaming {after.activity.name}",
-                            colour=discord.Colour.orange(),
-                        )
-                        streamingEmbedded.add_field(
-                            name="Details:", value=after.activity.details
-                        )
-                        streamingEmbedded.add_field(
-                            name="Url", value=after.activity.url, inline=False
-                        )
-                        streamingEmbedded.set_footer(
-                            text=f"Activity Update Detector Service <{st}>"
-                        )
-                        try:
-                            await self.member_update_channel.send(
-                                embed=streamingEmbedded
-                            )
-                        except AttributeError:
-                            pass
-                    elif after.activity.type == discord.ActivityType.listening:
-                        try:
-                            listeningEmbedded = discord.Embed(
-                                title="Music Detector Service :musical_note:",
-                                description=f"{before.name} from {before.guild} is now listening to {after.activity.name}",
-                                colour=discord.Colour.green(),
-                            )
-                            listeningEmbedded.add_field(
-                                name="Started:", value=after.activity.start
-                            )
-                            listeningEmbedded.add_field(
-                                name="Duration", value=after.activity.duration
-                            )
-                            listeningEmbedded.add_field(
-                                name="Artist:", value=after.activity.artist.title()
-                            )
-                            listeningEmbedded.add_field(
-                                name="Album", value=after.activity.album
-                            )
-                            listeningEmbedded.set_footer(
-                                text=f"Activity Update Detector Service <{st}>"
-                            )
-                            listeningEmbedded.set_image(url=after.activity.album_cover_url)
-                        except AttributeError:
-                            pass
-                        try:
-                            await self.member_update_channel.send(
-                                embed=listeningEmbedded
-                            )
-                        except AttributeError:
-                            pass
-                    elif after.activity.type == discord.ActivityType.watching:
-                        watchingEmbedded = discord.Embed(
-                            title="Activity Update Detector Service",
-                            description=f"{before.name} from {before.guild} is now watching {after.activity.name}",
-                            colour=discord.Colour.orange(),
-                        )
-                        watchingEmbedded.add_field(
-                            name="Details:", value=after.activity.details
-                        )
-                        watchingEmbedded.set_footer(
-                            text=f"Activity Update Detector Service <{st}>"
-                        )
-                        try:
-                            await self.member_update_channel.send(
-                                embed=watchingEmbedded
-                            )
-                        except AttributeError:
-                            pass
-                    elif after.activity.type == discord.ActivityType.custom:
-                        customEmbedded = discord.Embed(
-                            title="Custom Status Update Detector Service",
-                            description=f"{before.name} from {before.guild} changed/added custom status to ```{after.activity.name}```",
-                            colour=discord.Colour.blue(),
-                        )
-                        customEmbedded.set_footer(text=f"{st}")
-                        try:
-                            await self.member_update_channel.send(embed=customEmbedded)
-                        except AttributeError:
-                            pass
-                    elif after.activity.type is None:
-                        pass
-            elif before.display_name != after.display_name:
-                Embedded = discord.Embed(
-                    title="Name Update Detector Service",
-                    description=f"{before.name} was renamed from {before.display_name} to {after.display_name} at {before.guild} ",
-                    colour=discord.Colour.green(),
-                )
-                Embedded.set_footer(text=st)
-                try:
-                    await self.member_update_channel.send(embed=Embedded)
-                except AttributeError:
-                    pass
+    # @commands.Cog.listener()
+    # async def on_member_update(self, before, after):
+    #     ts = time.time()
+    #     st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+    #     if before.bot or after.bot:
+    #         pass
+    #     else:
+    #         if before.roles != after.roles:
+    #             shorter, longer = sorted([after.roles, before.roles], key=len)
+    #             Embedded = discord.Embed(
+    #                 title="{after.guild.name}",
+    #                 description=f"{before.name}'s role has been changed from {before.role.name} to {after.role.name}",
+    #             )
+    #             Embedded.set_image(url=after.avatar_url)
+    #             Embedded.set_footer(text=f"Role Update Detector Service <{st}>")
+    #             try:
+    #                 await self.member_update_channel.send(embed=Embedded)
+    #             except AttributeError:
+    #                 pass
+    #         elif before.status != after.status:
+    #             if after.status == discord.Status.dnd:
+    #                 dndEmbedded = discord.Embed(
+    #                     title="Status indicator: :red_circle: ",
+    #                     description=f"{before.name} from {before.guild} has been set to Do Not Disturb ",
+    #                     colour=discord.Colour(0xFCEC00),
+    #                 )
+    #                 dndEmbedded.set_footer(
+    #                     text=f"Status Update Detector Service <{st}>"
+    #                 )
+    #                 dndEmbedded.set_image(url=after.avatar_url)
+    #                 try:
+    #                     await self.member_update_channel.send(embed=dndEmbedded)
+    #                 except AttributeError:
+    #                     pass
+    #             if after.status == discord.Status.online:
+    #                 Embedded = discord.Embed(
+    #                     title="Status indicator: :green_circle:  ",
+    #                     description=f"{before.name} from {before.guild} is now Online ",
+    #                     colour=discord.Colour(0xFCEC00),
+    #                 )
+    #                 Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
+    #                 Embedded.set_image(url=after.avatar_url)
+    #                 try:
+    #                     await self.member_update_channel.send(embed=Embedded)
+    #                 except AttributeError:
+    #                     pass
+    #             if after.status == discord.Status.idle:
+    #                 Embedded = discord.Embed(
+    #                     title="Status indicator: :orange_circle:  ",
+    #                     description=f"{before.name} from {before.guild} went Away/AFK ",
+    #                     colour=discord.Colour(0xFCEC00),
+    #                 )
+    #                 Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
+    #                 Embedded.set_image(url=after.avatar_url)
+    #                 try:
+    #                     await self.member_update_channel.send(embed=Embedded)
+    #                 except AttributeError:
+    #                     pass
+    #             if after.status == discord.Status.offline:
+    #                 Embedded = discord.Embed(
+    #                     title="Status indicator: :black_circle:",
+    #                     description=f"{before.name} from {before.guild} has gone Offline ",
+    #                     colour=discord.Colour(0xFCEC00),
+    #                 )
+    #                 Embedded.set_footer(text=f"Status Update Detector Service <{st}>")
+    #                 Embedded.set_image(url=after.avatar_url)
+    #                 try:
+    #                     await self.member_update_channel.send(embed=Embedded)
+    #                 except AttributeError:
+    #                     pass
+    #         elif before.activity != after.activity:
+    #             if before.activity == None or after.activity == None:
+    #                 pass
+    #             else:
+    #                 if after.activity.type == discord.ActivityType.playing:
+    #                     playEmbedded = discord.Embed(
+    #                         title=":video_game: Game Detector Service :video_game: ",
+    #                         description=f"{before.name} from {before.guild}  is now playing {after.activity.name}",
+    #                         colour=discord.Colour.orange(),
+    #                     )
+    #                     try:
+    #                         playEmbedded.add_field(
+    #                         name="Match:", value=after.activity.details
+    #                         )
+    #                     except AttributeError:
+    #                         pass
+    #                     if not isinstance(after.activity,discord.Game):
+    #                         playEmbedded.set_image(url=after.activity.large_image_url)
+    #                     playEmbedded.set_footer(
+    #                         text=f"Activity Update Detector Service <{st}>"
+    #                     )
+    #                     try:
+    #                         await self.member_update_channel.send(embed=playEmbedded)
+    #                     except:
+    #                         pass
+    #
+    #                 elif after.activity.type == discord.ActivityType.streaming:
+    #                     streamingEmbedded = discord.Embed(
+    #                         title="Streamer Detector Service",
+    #                         description=f"{before.name} from {before.guild} is now streaming {after.activity.name}",
+    #                         colour=discord.Colour.orange(),
+    #                     )
+    #                     streamingEmbedded.add_field(
+    #                         name="Details:", value=after.activity.details
+    #                     )
+    #                     streamingEmbedded.add_field(
+    #                         name="Url", value=after.activity.url, inline=False
+    #                     )
+    #                     streamingEmbedded.set_footer(
+    #                         text=f"Activity Update Detector Service <{st}>"
+    #                     )
+    #                     try:
+    #                         await self.member_update_channel.send(
+    #                             embed=streamingEmbedded
+    #                         )
+    #                     except AttributeError:
+    #                         pass
+    #                 elif after.activity.type == discord.ActivityType.listening:
+    #                     try:
+    #                         listeningEmbedded = discord.Embed(
+    #                             title="Music Detector Service :musical_note:",
+    #                             description=f"{before.name} from {before.guild} is now listening to {after.activity.name}",
+    #                             colour=discord.Colour.green(),
+    #                         )
+    #                         listeningEmbedded.add_field(
+    #                             name="Started:", value=after.activity.start
+    #                         )
+    #                         listeningEmbedded.add_field(
+    #                             name="Duration", value=after.activity.duration
+    #                         )
+    #                         listeningEmbedded.add_field(
+    #                             name="Artist:", value=after.activity.artist.title()
+    #                         )
+    #                         listeningEmbedded.add_field(
+    #                             name="Album", value=after.activity.album
+    #                         )
+    #                         listeningEmbedded.set_footer(
+    #                             text=f"Activity Update Detector Service <{st}>"
+    #                         )
+    #                         listeningEmbedded.set_image(url=after.activity.album_cover_url)
+    #                     except AttributeError:
+    #                         pass
+    #                     try:
+    #                         await self.member_update_channel.send(
+    #                             embed=listeningEmbedded
+    #                         )
+    #                     except AttributeError:
+    #                         pass
+    #                 elif after.activity.type == discord.ActivityType.watching:
+    #                     watchingEmbedded = discord.Embed(
+    #                         title="Activity Update Detector Service",
+    #                         description=f"{before.name} from {before.guild} is now watching {after.activity.name}",
+    #                         colour=discord.Colour.orange(),
+    #                     )
+    #                     watchingEmbedded.add_field(
+    #                         name="Details:", value=after.activity.details
+    #                     )
+    #                     watchingEmbedded.set_footer(
+    #                         text=f"Activity Update Detector Service <{st}>"
+    #                     )
+    #                     try:
+    #                         await self.member_update_channel.send(
+    #                             embed=watchingEmbedded
+    #                         )
+    #                     except AttributeError:
+    #                         pass
+    #                 elif after.activity.type == discord.ActivityType.custom:
+    #                     customEmbedded = discord.Embed(
+    #                         title="Custom Status Update Detector Service",
+    #                         description=f"{before.name} from {before.guild} changed/added custom status to ```{after.activity.name}```",
+    #                         colour=discord.Colour.blue(),
+    #                     )
+    #                     customEmbedded.set_footer(text=f"{st}")
+    #                     try:
+    #                         await self.member_update_channel.send(embed=customEmbedded)
+    #                     except AttributeError:
+    #                         pass
+    #                 elif after.activity.type is None:
+    #                     pass
+    #         elif before.display_name != after.display_name:
+    #             Embedded = discord.Embed(
+    #                 title="Name Update Detector Service",
+    #                 description=f"{before.name} was renamed from {before.display_name} to {after.display_name} at {before.guild} ",
+    #                 colour=discord.Colour.green(),
+    #             )
+    #             Embedded.set_footer(text=st)
+    #             try:
+    #                 await self.member_update_channel.send(embed=Embedded)
+    #             except AttributeError:
+    #                 pass
 
     @commands.Cog.listener()
     async def on_guild_update(self, before, after):

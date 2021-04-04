@@ -125,15 +125,6 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["url"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
-    @commands.group()
-    async def fact(self, ctx):
-        a = 1
-        if ctx.invoked_subcommand is None:
-            return await ctx.send(embed=discord.Embed(description="Please select:"+ "\n".join([f"```{x.name}```"for x in self.playlist.commands])))
-    @fact.command()
-    async def koala(self, ctx):
-        fact = await self.getJSON("https://some-random-api.ml/facts/koala")
-        await ctx.send(embed=discord.Embed(description=fact.get("fact")))
 
 def setup(bot):
     bot.add_cog(API(bot))

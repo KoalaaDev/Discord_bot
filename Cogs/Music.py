@@ -567,13 +567,19 @@ class Music(
     #                 and not any([x.id in whitelist for x in after.channel.members])
     #             ):
     #                 return await player.connect(before.channel.id)
-
+    async def cog_before_invoke(self, ctx: commands.Context):
+        controller = self.get_controller(ctx)
+        player = self.bot.wavelink.get_player(controller.guild_id)
+        if not player.is_playing and not controller.queue.empty() and not player.current and player.is_connected:
+            message = await ctx.send(embed=discord.Embed(description="Music player got stuck! Attempting to resume!"))
+            await ctx.invoke(self.stop)
+            await ctx.invoke(self.connect_)
+            await message.edit(embed=discord.Embed(description="Try play your song again, if it does not work contact devs!"), delete_after=10)
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
             raise commands.NoPrivateMessage
         return True
-
     async def cog_command_error(self, ctx, error):
         """A local error handler for all errors arising from commands in this cog."""
         if isinstance(error, commands.NoPrivateMessage):

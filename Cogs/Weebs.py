@@ -183,7 +183,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def drunk(self, ctx: commands.Context):
-        """Generates random gif of a drunk anime girl"""
+        """Generates random gif of a drunk anime character"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/drunk?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
                 if response.status == 503:
@@ -199,10 +199,10 @@ class Anime(commands.Cog):
                     )
                     return
         embed = discord.Embed(
-            title="Here's a gif of a drunk anime girl!", color=discord.Color.blue()
+            title="Here's a gif of a drunk anime character!", color=discord.Color.blue()
         )
         try:
-            embed.set_image(url=url["url"])
+            embed.set_image(url=url["message"])
         except KeyError:
             await ctx.send(
                 "I received an incorrect format from the API\nStatus code: {code}".format(

@@ -88,7 +88,7 @@ class Spying(commands.Cog, name="Spying logic"):
             embed.set_author(
                 name=message.author, icon_url=message.author.avatar_url
             )
-            await self.bot_channel.send(embed=embed)
+            return await self.bot_channel.send(embed=embed)
         else:
             ts = time.time()
             st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")

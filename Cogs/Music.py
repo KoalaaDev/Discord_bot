@@ -1293,7 +1293,7 @@ class Music(
 
 
         if ctx.invoked_subcommand is None:
-            return await ctx.send(embed=discord.Embed(description="Please select:"+ "\n".join([f"```{x.name}```"for x in self.playlist.commands])))
+            return await ctx.send(embed=discord.Embed(description="Please select:"+ "\n".join([f"```{x.name}```" for x in self.playlist.commands])))
 
     @playlist.command()
     async def list(self, ctx, *, query=None):

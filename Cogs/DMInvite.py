@@ -15,13 +15,12 @@ class DmInvite(commands.Cog):
         self.link = "https://discord.com/oauth2/authorize?client_id=799134976515375154&permissions=3172417&scope=bot"
         self.embedToggle = True
         self.InviteToggle = True
-    @commands.group()
     @is_whitelisted()
+    @commands.group()
     async def dminvite(self, ctx):
         """Group Commands for DM Invites."""
-
-    @dminvite.command()
     @is_whitelisted()
+    @dminvite.command()
     async def settings(self, ctx):
         """DM Invite Settings."""
         embed = discord.Embed(title="DM Invite Settings", color=discord.Color.red())
@@ -33,8 +32,8 @@ class DmInvite(commands.Cog):
         embed.add_field(name="Permissions Value", value=await self.bot._config.invite_perm())
         await ctx.send(embed=embed)
 
-    @dminvite.command()
     @is_whitelisted()
+    @dminvite.command()
     async def toggle(self, ctx, toggle: bool = None):
         """Turn DM responding on/off."""
         if toggle:
@@ -46,8 +45,8 @@ class DmInvite(commands.Cog):
             self.embedToggle = True
             await ctx.send("{} will auto-respond to invites sent in DMs.".format(self.bot.name))
 
-    @dminvite.command()
     @is_whitelisted()
+    @dminvite.command()
     async def embeds(self, ctx, toggle: bool = None):
         """Toggle whether the message is an embed or not."""
         if toggle:
@@ -58,9 +57,8 @@ class DmInvite(commands.Cog):
             await ctx.send(
                 "Responses will now be sent as an embed. You can now use other markdown such as link masking etc."
             )
-
-    @dminvite.command()
     @is_whitelisted()
+    @dminvite.command()
     async def message(self, ctx, *, message: str):
         """Set the message that the bot will respond with.
 

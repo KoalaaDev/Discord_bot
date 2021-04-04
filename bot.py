@@ -5,7 +5,6 @@ import urllib.parse
 from datetime import datetime
 import yaml
 import discord
-import urbandict
 import sys
 import traceback
 from discord.ext import commands
@@ -15,7 +14,7 @@ from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
 from difflib import get_close_matches
-from subprocess import Popen
+
 intents = discord.Intents.all()
 intents.typing = False
 intents.presences = False
@@ -290,153 +289,7 @@ async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
 #             # ending the loop if user doesn't react after x seconds
 
 
-@client.command(hidden=True, description="Delete messages on mass")
-async def purge(ctx, amount: int):
-    await ctx.channel.purge(limit=amount)
-    print("Clearing messages")
 
-
-@client.command(hidden=True, description="Latency to discord")
-async def ping(ctx):
-    color = discord.Color(value=0x00FF00)
-    em = discord.Embed(color=color, title="Pong! Your latency is:")
-    em.description = f"{client.latency * 1000:.4f} ms"
-    em.set_footer(text="Psst...A heartbeat is 27 ms!")
-    await ctx.send(embed=em)
-
-
-@client.command(description="Get info of the bot")
-async def info(ctx):
-    """Get info of the bot"""
-    command = ['git',"describe","--always"]
-    process = Popen(command, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = process.communicate()
-    stdout = stdout.decode("utf8")
-    fmt = (
-        f"**{client.user.name} commit:** `{stdout}`\n\n"
-        f"Vote bot at [top.gg](https://top.gg/bot/799134976515375154/vote)/[discordbotlist.com](https://discordbotlist.com/bots/doorbanger/upvote).\n"
-        f"Support: Koalaa#6001 or skot#6579\n"
-    )
-    embed = discord.Embed(description=fmt)
-    await ctx.send(embed=embed)
-    process.stdout.close()
-@client.command(hidden=True, description="Invite link of bot")
-async def invite(ctx):
-    embed = discord.Embed(
-        description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot)",
-        colour=discord.Colour(0xFF001D),
-    )
-    await ctx.send(embed=embed)
-
-
-@client.command(hidden=True, description="Echo your text")
-async def echo(ctx, *, args):
-    await ctx.message.delete()
-    output = ""
-    for word in args:
-        output += word
-        output += ""
-        await ctx.send(output)
-
-
-@client.command(hidden=True)
-async def roll(ctx, dice: str):
-    """Rolls a dice in NdN format."""
-    try:
-        rolls, limit = map(int, dice.split("d"))
-    except Exception:
-        await ctx.send("Format has to be in NdN!")
-    result = ", ".join(str(random.randint(1, limit)) for r in range(rolls))
-    await ctx.send(result)
-
-
-@client.command(hidden=True,description="For when you wanna settle the score some other way")
-async def choose(ctx, *choices: str):
-    """Chooses between multiple choices."""
-    if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:
-        await ctx.send("I choose Koalaa cuz homo")
-    elif "dan" in choices or "daniel" in choices or "Dan" in choices:
-        embed = discord.Embed(
-            title="scott x daniel is real ship", colour=discord.Colour.dark_red()
-        )
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/512906616929124371/721064750284275782/dan_rape.jpg"
-        )
-        await ctx.send(embed=embed)
-    elif "staff" in choices and "dwraxk" in choices:
-        await ctx.send("staff = rape koala")
-        await asyncio.sleep(1)
-        await ctx.send("dwraxk = rape howard")
-    elif "scoot" in choices or "scott" in choices or "Scott" in choices:
-        await ctx.send("I love scott cuz he gay :ok_hand: :eggplant: :sweat_drops:")
-    elif "HS" in choices or "hs" in choices or "Hs" in choices:
-        await ctx.send("ʳᵉᵉᵉᵉᵉ")
-    elif "hs" in choices and "koala" in choices:
-        await ctx.send("hs")
-    else:
-        await ctx.send(random.choice(choices))
-
-
-@client.command(hidden=True)
-async def slot(ctx):
-    """ Roll the slot machine """
-    emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
-    a = random.choice(emojis)
-    b = random.choice(emojis)
-    c = random.choice(emojis)
-    d = random.choice(emojis)
-    e = random.choice(emojis)
-    f = random.choice(emojis)
-    slotmachine = f"**[ {a} {b} {c} {d} {e} {f}]\n{ctx.author.name}**,"
-
-    if a == b == c == d == e == f:
-        await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")
-    elif (a == b and b == d) or (a == c and c == d) or (b == c):
-        await ctx.send(f"{slotmachine} 2 in a row, you won! 🎉")
-    else:
-        await ctx.send(f"{slotmachine} No match, you lost 😢")
-
-
-@client.command(hidden=True)
-async def reversecard(ctx, *, text: str):
-    """!poow ,ffuts esreveR
-    Everything you type after reverse will of course, be reversed
-
-    """
-    await ctx.message.delete()
-    embed = discord.Embed(colour=discord.Colour.dark_red())
-    embed.set_image(
-        url="https://cdn.discordapp.com/attachments/662589204974403585/665222655309250600/no_u.jpg"
-    )
-    t_rev = text[::-1].replace("@", "@\u200B").replace("&", "&\u200B")
-    await ctx.send(f"🔁 {t_rev} ")
-    await ctx.send(embed=embed)
-
-
-@client.command(hidden=True)
-async def claps(ctx, *, message):
-    """Adds clapping emojis to text"""
-    await ctx.send(f":clap: {message} :clap:")
-
-
-@client.command(hidden=True)
-async def dict(ctx, *, word: str):
-    """Gets a term from urbandictionary"""
-    urb = urbandict.define(word)
-    if "There aren't any definitions" in urb[0]["def"]:
-        await ctx.send("No definitions found")
-    msg = "**{0}**\n".format(word)
-    msg += "`Definition:` {0}\n".format(urb[0]["def"].replace("\n", ""))
-    msg += "`Example:` {0}".format(urb[0]["example"].replace("\n", ""))
-    await ctx.send(msg)
-
-
-@client.command(hidden=True)
-async def allmembers(ctx):
-    await ctx.message.delete()
-    await ctx.send("Getting all members...", delete_after=19)
-    members = {member for member in sorted(set(client.get_all_members()))}
-    print(members)
 
 
 client.run(API_KEY)

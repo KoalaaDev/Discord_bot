@@ -23,6 +23,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
                 embed = discord.Embed()
                 embed.set_image(url="attachment://img.png")
                 return embed, file
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             try:

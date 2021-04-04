@@ -9,7 +9,7 @@ from asyncdagpi import Client
 import math
 
 class Fun(
-    commands.Cog, description="Fun commands such as love calculator and coin flips"
+    commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
 ):
     def __init__(self, bot):
         self.bot = bot
@@ -58,7 +58,7 @@ class Fun(
         message = await ctx.send(f"Woohoo {gay} is confirmed gay!")
         emoji = get(client.emojis, name="pepelaugh")
         await message.add_reaction(emoji)
-    async def hints(self, ctx: commands.Context, embed: discord.Embed, obj, message):
+    async def pokemonhints(self, ctx: commands.Context, embed: discord.Embed, obj, message):
         count = 1
         hints = [["Type", ",".join(obj.dict["Data"]["Type"])],["Abilities",",".join(obj.abilities)], ["weight",obj.weight]]
         await ctx.send("Wrong answer, you have 3 guesses left!",delete_after=5)
@@ -107,6 +107,6 @@ class Fun(
         if guess.content.title() == pokemon.name:
             return await guess.add_reaction("\N{White Heavy Check Mark}")
         else:
-            await self.hints(ctx, embed, pokemon, message)
+            await self.pokemonhints(ctx, embed, pokemon, message)
 def setup(bot):
     bot.add_cog(Fun(bot))

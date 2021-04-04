@@ -630,7 +630,7 @@ class Music(
 
     @commands.command(aliases=["p"])
     async def play(self, ctx, *, query: str = None):
-        """Search for and add a song to the Queue."""
+        """Search for songs on Youtube, Spotify and soundcloud."""
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
 
@@ -828,9 +828,9 @@ class Music(
         await ctx.message.add_reaction("\N{Black Right-Pointing Triangle}")
         await player.set_pause(False)
 
-    @commands.command(aliases=["s"])
+    @commands.command(aliases=["s","next"])
     async def skip(self, ctx, times: int = 1):
-        """Skip the currently playing song."""
+        """Skip the currently playing song or if specified how many songs."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
@@ -879,7 +879,7 @@ class Music(
 
     @commands.command(aliases=["vol"])
     async def volume(self, ctx, *, vol: int):
-        """Set the player volume."""
+        """Set the music player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
@@ -895,7 +895,7 @@ class Music(
 
         await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
         await player.set_volume(vol)
-    @commands.command()
+    @commands.command(hidden=True)
     async def vol_up(self, ctx):
         """Set the player volume upwards by 10."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -916,7 +916,7 @@ class Music(
         controller.volume = vol
         await player.set_volume(vol)
         await controller.now_playing.edit(embed=controller.build_embed())
-    @commands.command()
+    @commands.command(hidden=True)
     async def vol_down(self, ctx):
         """Set the player volume downwards by 10."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -941,7 +941,7 @@ class Music(
         await controller.now_playing.edit(embed=controller.build_embed())
     @commands.command(aliases=["np", "current", "nowplaying"])
     async def now_playing(self, ctx):
-        """Retrieve the currently playing song."""
+        """Displays the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         pbar = ""
 

@@ -182,7 +182,7 @@ class Anime(commands.Cog):
 
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
-    async def tsundere(self, ctx: commands.Context):
+    async def drunk(self, ctx: commands.Context):
         """Generates random gif of a drunk anime girl"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/drunk?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:

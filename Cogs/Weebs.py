@@ -55,7 +55,7 @@ class Anime(commands.Cog):
                 )
             )
         await ctx.send(embed=embed)
-
+####picture
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def neko(self, ctx: commands.Context):
@@ -86,6 +86,37 @@ class Anime(commands.Cog):
                 )
             )
         await ctx.send(file=file,embed=embed)
+####Text
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def cuddle(self, ctx: commands.Context):
+        """Generates random image of anime girls cuddling"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.willz.repl.co/anime/cuddle?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
+                if response.status == 503:
+                    await ctx.send("The API is actually in maintenance, please retry later.")
+                    return
+                try:
+                    status = response.status
+                    url = await response.json()
+                except aiohttp.ContentTypeError:
+                    await ctx.send(
+                        "API unavailable. Status code: {code}\nIt may be due of a "
+                        "maintenance.".format(code=status)
+                    )
+                    return
+        embed = discord.Embed(
+            title="Here's a pic of anime girls cuddling!", color=discord.Color.blue()
+        )
+        try:
+            embed.set_image(url=url["url"])
+        except KeyError:
+            await ctx.send(
+                "I received an incorrect format from the API\nStatus code: {code}".format(
+                    code=status
+                )
+            )
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Anime(bot))

@@ -215,7 +215,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def fuck(self, ctx: commands.Context):
-        """Anime fuck"""
+        """Shows an anime girl being fucked"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/fuck?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
                 if response.status == 503:
@@ -247,7 +247,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def cum(self, ctx: commands.Context):
-        """Anime cum"""
+        """Shows an anime girl doing being creampied"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/cum?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
                 if response.status == 503:
@@ -279,7 +279,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def anal(self, ctx: commands.Context):
-        """Anime anal"""
+        """Shows an anime girl doing anal"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/anal?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
                 if response.status == 503:

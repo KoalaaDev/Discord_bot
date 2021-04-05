@@ -1,6 +1,6 @@
 from discord.ext import commands
 from subprocess import Popen
-
+import discord
 
 class Main(commands.Cog,name="General", description="Basic commands"):
     def __init__(self, bot):

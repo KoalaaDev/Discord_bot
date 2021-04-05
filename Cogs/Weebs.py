@@ -23,7 +23,7 @@ class Anime(commands.Cog):
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
-        )#NSFW stuff commands.is_nsfw()
+        )#NSFW stuff @commands.is_nsfw()
 
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
@@ -203,6 +203,102 @@ class Anime(commands.Cog):
         )
         try:
             embed.set_image(url=url["message"])
+        except KeyError:
+            await ctx.send(
+                "I received an incorrect format from the API\nStatus code: {code}".format(
+                    code=status
+                )
+            )
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def fuck(self, ctx: commands.Context):
+        """Anime fuck"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.willz.repl.co/anime/fuck?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
+                if response.status == 503:
+                    await ctx.send("The API is actually in maintenance, please retry later.")
+                    return
+                try:
+                    status = response.status
+                    url = await response.json()
+                except aiohttp.ContentTypeError:
+                    await ctx.send(
+                        "API unavailable. Status code: {code}\nIt may be due of a "
+                        "maintenance.".format(code=status)
+                    )
+                    return
+        embed = discord.Embed(
+            title="Anime fuck", color=discord.Color.blue()
+        )
+        try:
+            embed.set_image(url=url["gif"])
+        except KeyError:
+            await ctx.send(
+                "I received an incorrect format from the API\nStatus code: {code}".format(
+                    code=status
+                )
+            )
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def cum(self, ctx: commands.Context):
+        """Anime cum"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.willz.repl.co/anime/cum?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
+                if response.status == 503:
+                    await ctx.send("The API is actually in maintenance, please retry later.")
+                    return
+                try:
+                    status = response.status
+                    url = await response.json()
+                except aiohttp.ContentTypeError:
+                    await ctx.send(
+                        "API unavailable. Status code: {code}\nIt may be due of a "
+                        "maintenance.".format(code=status)
+                    )
+                    return
+        embed = discord.Embed(
+            title="Anime cum", color=discord.Color.blue()
+        )
+        try:
+            embed.set_image(url=url["url"])
+        except KeyError:
+            await ctx.send(
+                "I received an incorrect format from the API\nStatus code: {code}".format(
+                    code=status
+                )
+            )
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def anal(self, ctx: commands.Context):
+        """Anime anal"""
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.willz.repl.co/anime/anal?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
+                if response.status == 503:
+                    await ctx.send("The API is actually in maintenance, please retry later.")
+                    return
+                try:
+                    status = response.status
+                    url = await response.json()
+                except aiohttp.ContentTypeError:
+                    await ctx.send(
+                        "API unavailable. Status code: {code}\nIt may be due of a "
+                        "maintenance.".format(code=status)
+                    )
+                    return
+        embed = discord.Embed(
+            title="Anime anal", color=discord.Color.blue()
+        )
+        try:
+            embed.set_image(url=url["url"])
         except KeyError:
             await ctx.send(
                 "I received an incorrect format from the API\nStatus code: {code}".format(

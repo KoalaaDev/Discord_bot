@@ -103,12 +103,14 @@ async def on_connect():
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
+        if ctx.guild.id == 336642139381301249:
+            return
         cmd = ctx.invoked_with
         cmds = [cmd.name for cmd in client.commands]
         # cmds = [cmd.name for cmd in bot.commands if not cmd.hidden] # use this to stop showing hidden commands as suggestions
         matches = get_close_matches(cmd, cmds)
         if len(matches) > 0:
-            await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
+            return await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
     print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
     traceback.print_exception(
         type(error), error, error.__traceback__, file=sys.stderr

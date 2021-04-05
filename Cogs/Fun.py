@@ -93,7 +93,7 @@ class Fun(
     async def poke(self, ctx):
         """Starts a pokemon guessing game!"""
         pokemon = await self.dagpi.wtp()
-        embed = discord.Embed(title=f"{ctx.author.mention} Guess that Pokemon!")
+        embed = discord.Embed(title=f"Hey {ctx.author.name}, Guess that Pokemon!")
         embed.set_image(url=pokemon.question)
         message = await ctx.send(embed=embed)
         def check(m):

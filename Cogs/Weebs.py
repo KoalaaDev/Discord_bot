@@ -247,7 +247,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def cum(self, ctx: commands.Context):
-        """Shows an anime girl doing being creampied"""
+        """Shows an anime girl being creampied"""
         async with aiohttp.ClientSession() as session:
             async with session.get("https://api.willz.repl.co/anime/cum?key=R7SDV-EfV2V-7FWZC-UIUvQ") as response:
                 if response.status == 503:

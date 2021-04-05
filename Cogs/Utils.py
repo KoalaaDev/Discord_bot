@@ -22,6 +22,13 @@ class Utility(commands.Cog):
                 )
             except discord.HTTPException:
                 pass
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
@@ -102,7 +109,9 @@ class Utility(commands.Cog):
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
 
     @commands.command()
-    async def avatar(self, ctx, member: discord.Member):
+    async def avatar(self, ctx, member: discord.Member = None):
+        if not member:
+            member = ctx.author
         embed = discord.Embed(title=member.name)
         embed.set_thumbnail(url=member.avatar_url)
         await ctx.send(embed=embed)

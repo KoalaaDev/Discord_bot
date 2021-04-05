@@ -46,31 +46,31 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         embed, img = await self.session("https://api.cool-img-api.ml/meme")
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def achievement(self, ctx, *, text:str = None):
+    async def achievement(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/achievement",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def calling(self, ctx, *, text:str = None):
+    async def calling(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/calling",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def captcha(self, ctx, *, text:str = None):
+    async def captcha(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/captcha",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def challenge(self, ctx, *, text:str = None):
+    async def challenge(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/challenge",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def clyde(self, ctx, *, text:str = None):
+    async def clyde(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/clyde",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def facts(self, ctx, *, text:str = None):
+    async def facts(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/facts",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def scroll(self, ctx, *, text:str = None):
+    async def scroll(self, ctx, *, text:str):
         img = await self.session("https://api.cool-img-api.ml/scroll",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()

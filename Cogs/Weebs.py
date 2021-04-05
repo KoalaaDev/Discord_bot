@@ -20,11 +20,22 @@ class Anime(commands.Cog):
                 )
             except discord.HTTPException:
                 pass
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
         print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )#NSFW stuff @commands.is_nsfw()
-
+    @commands.command()
+    async def anime(self, ctx, command):
+        """You can either use anime (command) or use the command directly!"""
+        cmd = self.bot.get_command(command)
+        await cmd(ctx)
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def miku(self, ctx: commands.Context):

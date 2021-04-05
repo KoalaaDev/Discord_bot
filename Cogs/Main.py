@@ -6,13 +6,13 @@ class Main(commands.Cog,name="General", description="Basic commands"):
     def __init__(self, bot):
         self.bot = bot
     @commands.command(hidden=True, description="Delete messages on mass")
-    async def purge(ctx, amount: int):
+    async def purge(self, ctx, amount: int):
         await ctx.channel.purge(limit=amount)
         print("Clearing messages")
 
 
     @commands.command(hidden=True, description="Latency to discord")
-    async def ping(ctx):
+    async def ping(self, ctx):
         """"Latency to discord"""
         color = discord.Color(value=0x00FF00)
         em = discord.Embed(color=color, title="Bot ping to discord is:")
@@ -22,7 +22,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(description="Get info of the bot")
-    async def info(ctx):
+    async def info(self, ctx):
         """Get info of the bot"""
         command = ['git',"describe","--always"]
         process = Popen(command, stdout=PIPE, stderr=PIPE)
@@ -37,7 +37,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
         await ctx.send(embed=embed)
         process.stdout.close()
     @commands.command(description="Invite link of bot")
-    async def invite(ctx):
+    async def invite(self, ctx):
         """Get an invite link for the bot to invite it to other servers!"""
         embed = discord.Embed(
             description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?self.bot_id={self.bot.user.id}&permissions=3172417&scope=bot)",
@@ -47,7 +47,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True)
-    async def roll(ctx, dice: str):
+    async def roll(self, ctx, dice: str):
         """Rolls a dice in NdN format."""
         try:
             rolls, limit = map(int, dice.split("d"))
@@ -58,7 +58,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True,description="For when you wanna settle the score some other way")
-    async def choose(ctx, *choices: str):
+    async def choose(self, ctx, *choices: str):
         """Chooses between multiple choices."""
         if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:
             await ctx.send("I choose Koalaa cuz homo")
@@ -85,7 +85,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True)
-    async def slot(ctx):
+    async def slot(self, ctx):
         """ Roll the slot machine """
         emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
         a = random.choice(emojis)
@@ -105,7 +105,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True)
-    async def reversecard(ctx, *, text: str):
+    async def reversecard(self, ctx, *, text: str):
         """!poow ,ffuts esreveR
         Everything you type after reverse will of course, be reversed
 
@@ -121,13 +121,13 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True)
-    async def claps(ctx, *, message):
+    async def claps(self, ctx, *, message):
         """Adds clapping emojis to text"""
         await ctx.send(f":clap: {message} :clap:")
 
 
     @commands.command(hidden=True)
-    async def allmembers(ctx):
+    async def allmembers(self, ctx):
         await ctx.message.delete()
         await ctx.send("Getting all members...", delete_after=19)
         members = {member for member in sorted(set(self.bot.get_all_members()))}

@@ -90,6 +90,7 @@ class Fun(
             embed.set_image(url=obj.answer)
             return await ctx.send(embed=embed)
     @commands.command(alias=['wtp'])
+    @commands.max_concurrency(1, per=BucketType.user, wait=False)
     async def poke(self, ctx):
         """Starts a pokemon guessing game!"""
         pokemon = await self.dagpi.wtp()
@@ -108,5 +109,9 @@ class Fun(
             return await guess.add_reaction("\N{White Heavy Check Mark}")
         else:
             await self.pokemonhints(ctx, embed, pokemon, message)
-def setup(bot):
+    @poke.error
+    async def poll_handler(self, ctx, error):
+    if isinstance(error, commands.MaxConcurrencyReached):
+         await ctx.send(embed=discord.Embed(description="Woah slow down there! Finish your game first!"))
+"def setup(bot):
     bot.add_cog(Fun(bot))

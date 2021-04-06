@@ -113,5 +113,5 @@ class Fun(
     async def poll_handler(self, ctx, error):
     if isinstance(error, commands.MaxConcurrencyReached):
          await ctx.send(embed=discord.Embed(description="Woah slow down there! Finish your game first!"))
-"def setup(bot):
+def setup(bot):
     bot.add_cog(Fun(bot))

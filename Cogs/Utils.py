@@ -91,14 +91,27 @@ class Utility(commands.Cog):
     @commands.dm_only()
     @commands.command(hidden=True)
     async def allguilds(self, ctx):
-        guild_names = [guild.name for guild in self.bot.guilds]
-        guild_id = [guild.id for guild in self.bot.guilds]
-        guilds = zip(guild_names,guild_id)
-        embed = discord.Embed(title="Guilds")
-        [embed.add_field(name=x[0], value=x[1]) for x in guilds]
-        await ctx.send(embed=embed)
-
-
+        guilds = self.bot.guilds
+        if len(guilds)<26:
+            embed = discord.Embed(title="Guilds")
+            for x in guilds:
+                embed.add_field(name=x.name,value=x.id)
+            return await ctx.send(embed=embed)
+        else:
+            embeds = []
+            for x in range(len(guilds)):
+                if x%25 == 0 or x==0:
+                    embed = discord.Embed(title="Guilds")
+                    print("putting embed")
+                guild = guilds[x]
+                embed.add_field(name=guild.name,value=guild.id)
+                print("Adding field")
+                if x%25 == 0 or x==0:
+                    embeds.append(embed)
+            else:
+                print(embeds)
+            for embed in embeds:
+                await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(aliases=['shell'], hidden=True)
     async def cmd(self, ctx, *, args):

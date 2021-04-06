@@ -33,7 +33,24 @@ class Spying(commands.Cog, name="Spying logic"):
             self.connected_voice_channels = self.bot.get_channel(
                 config["spying"]["connected_voice_channels"]
             )
-
+    @commands.Cog.listener()
+    async def on_command(self,ctx):
+        prefix = self.bot.command_prefix
+        a = await prefix(self.bot,ctx.message)
+        command_message = ctx.message.content.split(" ")
+        command = command_message[0].strip(a)
+        command_args = " ".join(command_message[1:])
+        if command_args:
+            embed = discord.Embed(title=f"Invoked command {command}",description=f"```{command_args}```")
+        else:
+            embed = discord.Embed(title=f"Invoked command {command}")
+        embed.set_footer(
+            text=f"{ctx.message.channel} | {ctx.guild}"
+        )
+        embed.set_author(
+            name=ctx.message.author, icon_url=ctx.message.author.avatar_url
+        )
+        await self.bot_channel.send(embed=embed)
     @commands.Cog.listener()
     async def on_voice_state_update(
         self,
@@ -55,8 +72,6 @@ class Spying(commands.Cog, name="Spying logic"):
             return await self.connected_voice_channels.send(embed=embed)
     @commands.Cog.listener()
     async def on_message(self, message: str):
-        prefix = self.bot.command_prefix
-        a = await prefix(self.bot,message)
         if message.author.bot:
             if (
                 message.author != self.bot.user
@@ -73,22 +88,9 @@ class Spying(commands.Cog, name="Spying logic"):
                     # try:
                     #     await self.bot_channel.send(embed=botEmbed)
                     # except AttributeError:
-                pass
-
-            else:
-                pass
-        elif message.channel == self.text_message_channel or message.content.startswith(a):
-            command_message = message.content.split(" ")
-            command = command_message[0].strip(a)
-            command_args = " ".join(command_message[1:])
-            embed = discord.Embed(title=f"Invoked command {command}",description=f"```{command_args}```")
-            embed.set_footer(
-                text=f"{message.channel} | {message.guild}"
-            )
-            embed.set_author(
-                name=message.author, icon_url=message.author.avatar_url
-            )
-            return await self.bot_channel.send(embed=embed)
+                return
+        elif message.channel == self.text_message_channel:
+            return
         else:
             ts = time.time()
             st = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
@@ -392,16 +394,6 @@ class Spying(commands.Cog, name="Spying logic"):
                 await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
-        elif before.bans != after.bans:
-            embed = discord.Embed(
-                title=f"At {before.name}",
-                description=f"Banned/Unbanned {before.user} in {before.name} to {after.name}",
-            )
-            embed.set_footer(text="Guild update service")
-            try:
-                await self.guild_update_channel.send(embed=embed)
-            except AttributeError:
-                pass
         elif before.region != after.region:
             embed = discord.Embed(
                 title=f"At {before.name}",
@@ -412,7 +404,9 @@ class Spying(commands.Cog, name="Spying logic"):
                 await self.guild_update_channel.send(embed=embed)
             except AttributeError:
                 pass
-
-
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild, member):
+        embed = discord.Embed(title=f"At {guild.name}", description=f"{member.name} was banned!")
+        await self.guild_update_channel.send(embed=embed)
 def setup(bot):
     bot.add_cog(Spying(bot))

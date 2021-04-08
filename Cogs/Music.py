@@ -239,7 +239,8 @@ class MusicController:
             embed.add_field(name='Queue Length', value=str(qsize))
         embed.add_field(name='Volume', value=f'**`{player.volume}%`**')
         embed.add_field(name='Requested By', value=track.requester)
-        embed.add_field(name='Autoplay', value=f'**`{self.auto_play}`**')
+        if self.auto_play:
+            embed.add_field(name='Autoplay', value=f'**`{self.auto_play}`**')
         embed.set_footer(text=f"{player.node.region}")
         return embed
     async def YoutubeSuggestion(self):
@@ -574,7 +575,7 @@ class Music(
             message = await ctx.send(embed=discord.Embed(description="Music player got stuck! Attempting to resume!"))
             await ctx.invoke(self.stop)
             await ctx.invoke(self.connect_)
-            await message.edit(embed=discord.Embed(description="Try play your song again, if it does not work contact devs!"), delete_after=10)
+            await message.edit(embed=discord.Embed(description="Resuming song again, if it does not play contact devs!"), delete_after=10)
     async def cog_check(self, ctx):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:

@@ -6,6 +6,8 @@ import cexprtk
 from discord.ext import commands
 from sympy import *
 import re
+import wolframalpha
+import discord
 multiply_detect = re.compile("\d[a-z]")
 x, y, z, t = symbols("x y z t")
 k, m, n = symbols("k m n", integer=True)
@@ -23,37 +25,41 @@ def parse(string: str):
     return string
 
 
-class Math(commands.Cog, description="Math related commands, use Calculate prefix to use math functions"):
+class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
-
+        self.wolframalpha = wolframalpha.Client("6T2WHE-KY7PYXYRQ9")
     @commands.command(description="Subtract numbers")
     async def minus(ctx, left: int, right: int):
         await ctx.send(left - right)
-    @commands.Cog.listener()
-    async def on_message(self, message: str):
-        if not message.author.bot:
-            if message.content.startswith(
-                string.punctuation
-            ) is False and message.content.lower().startswith("calculate"):
-                try:
-                    x = cexprtk.evaluate_expression(
-                        message.content.strip("calculate"), {"pi": pi}
-                    )
-                    await message.add_reaction("\N{White Heavy Check Mark}")
-                    await message.channel.send(x)
-                except Exception:
-                    await message.add_reaction("\N{Cross Mark}")
-                    print(
-                        f"[MATH COG] Encountered exception with {message.content}: {Exception}"
-                    )
-            else:
-                pass
+    @commands.command()
+    async def math(self,ctx, message: str):
+        """Does some math for you!"""
+        try:
+            x = cexprtk.evaluate_expression(message, {"pi": pi})
+            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+            await ctx.send(x)
+        except Exception:
+            await ctx.message.add_reaction("\N{Cross Mark}")
+            print(
+                f"[MATH COG] Encountered exception with {message.content}: {Exception}"
+            )
+
 
     @commands.command()
     async def solve(self, ctx, *, equation):
         """Solves linear equations"""
-        eqn = solve(parse(equation))
+        parsed_eqn = parse(equation)
+        try:
+            eqn = solve(parsed_eqn)
+        except SyntaxError:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("http://api.wolframalpha.com/v2/query", params={param}) as f:
+                    print(f.url)
+                    file = discord.File(io.BytesIO(await f.read()), filename="img.png")
+                    embed = discord.Embed()
+                    embed.set_image(url="attachment://img.png")
+
         await ctx.send(eqn)
 
     @commands.command(
@@ -114,7 +120,11 @@ class Math(commands.Cog, description="Math related commands, use Calculate prefi
             name="Greater than?", value=f"```{greater_than}```", inline=False
         )
         await ctx.send(embed=embed)
-
-
+    @commands.command()
+    async def inverse(self, ctx, eqn):
+        eqn = parse(eqn)
+        eqn =solve(f"{eqn} - y",x)
+        print(eqn)
+        await ctx.send(eqn)
 def setup(bot):
     bot.add_cog(Math(bot))

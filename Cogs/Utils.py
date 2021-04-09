@@ -102,14 +102,10 @@ class Utility(commands.Cog):
             for x in range(len(guilds)):
                 if x%25 == 0 or x==0:
                     embed = discord.Embed(title="Guilds")
-                    print("putting embed")
                 guild = guilds[x]
                 embed.add_field(name=guild.name,value=guild.id)
-                print("Adding field")
                 if x%25 == 0 or x==0:
                     embeds.append(embed)
-            else:
-                print(embeds)
             for embed in embeds:
                 await ctx.send(embed=embed)
     @is_whitelisted()

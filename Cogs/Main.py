@@ -58,7 +58,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True,description="For when you wanna settle the score some other way")
-    async def choose(self, ctx, *choices: str):
+    async def choose(self, ctx, *, choices: str):
         """Chooses between multiple choices."""
         if "koala" in choices or "Koalaa" in choices or "koalaa" in choices:
             await ctx.send("I choose Koalaa cuz homo")

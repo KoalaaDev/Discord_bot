@@ -5,6 +5,7 @@ import discord
 import random
 import io
 import sys
+import traceback
 from asyncdagpi import Client, ImageFeatures
 
 
@@ -23,7 +24,14 @@ class Meme(commands.Cog, description="Generate memes and more!"):
                 embed = discord.Embed()
                 embed.set_image(url="attachment://img.png")
                 return embed, file
-
+    async def dagpiSession(self, effect, member, **kwargs):
+        url = str(member.avatar_url_as(format=None, static_format="png", size=1024))
+        img = await self.dagpi.image_process(effect, url, **kwargs)
+        print(img.format)
+        file = discord.File(fp=img.image,filename=f"image.{img.format}")
+        embed = discord.Embed()
+        embed.set_image(url=f"attachment://image.{img.format}")
+        return file, embed
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             try:
@@ -37,16 +45,68 @@ class Meme(commands.Cog, description="Generate memes and more!"):
             type(error), error, error.__traceback__, file=sys.stderr
         )
     @commands.command()
-    async def communism(self, ctx, User:discord.Member  = None):
-        pic_url = str(User.avatar_url).replace("webp",'png')
-        embed, img = await self.session(f"https://api.cool-img-api.ml/communist?image={pic_url}")
+    async def pixel(self, ctx, User:discord.Member):
+        """Pixelates someone's profile picture"""
+        pic, e = await self.dagpiSession(ImageFeatures.pixel(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def obama(self, ctx, User:discord.Member):
+        """Gives someone an award awarded by himself"""
+        pic, e = await self.dagpiSession(ImageFeatures.obama(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def satan(self, ctx, User:discord.Member):
+        """Makes someone satan"""
+        pic, e = await self.dagpiSession(ImageFeatures.satan(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def bad(self, ctx, User:discord.Member):
+        """Bad bad bad"""
+        pic, e = await self.dagpiSession(ImageFeatures.bad(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def sith(self, ctx, User:discord.Member):
+        """Makes someone a sith lord"""
+        pic, e = await self.dagpiSession(ImageFeatures.sith(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def fedora(self, ctx, User:discord.Member):
+        """*Tips fedora"""
+        pic, e = await self.dagpiSession(ImageFeatures.fedora(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def whyareyougay(self, ctx, User:discord.Member, User2:discord.Member):
+        """wHy aRe U gAy"""
+        pic, e = await self.dagpiSession(ImageFeatures.why_are_you_gay(),User, url2=str(User2.avatar_url_as(format=None, static_format="png", size=1024)))
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def five_guys_one_girl(self, ctx, User:discord.Member, User2:discord.Member):
+        """Difficult to explain..."""
+        pic, e = await self.dagpiSession(ImageFeatures.five_guys_one_girl(),User, url2=str(User2.avatar_url_as(format=None, static_format="png", size=1024)))
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def angel(self, ctx, User:discord.Member):
+        """Turns someone to an angel"""
+        pic, e = await self.dagpiSession(ImageFeatures.angel(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command(aliases=['ussr'])
+    async def communism(self, ctx, User:discord.Member):
+        """For mother russia"""
+        img, embed = await self.dagpiSession(ImageFeatures.communism(),User)
+        await ctx.send(file=img, embed=embed)
+    @commands.command()
+    async def usa(self, ctx, User:discord.Member):
+        """American patriotism"""
+        img, embed = await self.dagpiSession(ImageFeatures.america(),User)
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def meme(self, ctx):
+        """Gets a random meme"""
         embed, img = await self.session("https://api.cool-img-api.ml/meme")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def achievement(self, ctx, *, text:str):
+        """Generates a minecraft achievement with the given text"""
         img = await self.session("https://api.cool-img-api.ml/achievement",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
@@ -55,6 +115,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def captcha(self, ctx, *, text:str):
+        """Generates a Google Captcha with the given text"""
         img = await self.session("https://api.cool-img-api.ml/captcha",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
@@ -84,11 +145,6 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         embed, img = await self.session(f"https://api.cool-img-api.ml/amiajoke?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
-    async def bad(self, ctx, User: discord.Member):
-        pic_url = str(User.avatar_url).replace("webp",'png')
-        embed, img = await self.session(f"https://api.cool-img-api.ml/bad?image={pic_url}")
-        await ctx.send(file=img, embed=embed)
-    @commands.command()
     async def bed(self, ctx, User: discord.Member, User2: discord.Member):
         pic_url = str(User.avatar_url).replace("webp",'png')
         pic2_url = str(User2.avatar_url).replace("webp",'png')
@@ -112,26 +168,31 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def gay(self, ctx, User: discord.Member):
+        """Adds pride flag to someone's profile picture"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/gay?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def gun(self, ctx, User: discord.Member):
+        """Makes someone point a gun at you"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/gun?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def hitler(self, ctx, User: discord.Member):
+        """As bad as hitler meme"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/hitler?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def invert(self, ctx, User: discord.Member):
+        """Inverts a user picture"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/invert?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def jail(self, ctx, User: discord.Member):
+        """Jails a user"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/jail?image={pic_url}")
         await ctx.send(file=img, embed=embed)
@@ -142,26 +203,31 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def simp(self, ctx, User: discord.Member):
+        """Adds the simp stamp over someone"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/simp?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def trash(self, ctx, User: discord.Member):
+        """Makes someone look like trash"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/trash?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def triggered(self, ctx, User: discord.Member):
+        """Add the triggered text over a user"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/triggered?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def wanted(self, ctx, User: discord.Member):
+        """Makes someone a wanted criminal"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/wanted?image={pic_url}")
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def wasted(self, ctx, User: discord.Member):
+        """Adds GTA Wasted to a user"""
         pic_url = str(User.avatar_url).replace("webp",'png')
         embed, img = await self.session(f"https://api.cool-img-api.ml/wasted?image={pic_url}")
         await ctx.send(file=img, embed=embed)

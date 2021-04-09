@@ -40,7 +40,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
     async def invite(self, ctx):
         """Get an invite link for the bot to invite it to other servers!"""
         embed = discord.Embed(
-            description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?self.bot_id={self.bot.user.id}&permissions=3172417&scope=bot)",
+            description=f"[Invite me here](https://discordapp.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=3172417&scope=bot)",
             colour=discord.Colour(0xFF001D),
         )
         await ctx.send(embed=embed)

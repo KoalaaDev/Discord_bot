@@ -116,7 +116,7 @@ class Anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
                     embed = discord.Embed(
-                        title="Here's a gif of anime girls cuddling!", color=discord.Color.blue()
+                        title="Here's a pic of a Neko!", color=discord.Color.blue()
                     )
                     try:
                         embed.set_image(url=url["url"])

@@ -134,6 +134,23 @@ class Fun(
             embed.set_image(url=logo.answer)
             return await ctx.send(embed=embed)
     @commands.command()
-    async def 
+    async def pickup(self, ctx):
+        """Get a pickup line to pickup girls!"""
+        pickup = await self.dagpi.pickup_line()
+        embed = discord.Embed(title=pickup.line)
+        embed.set_footer(text=f"Category: {pickup.category}")
+        await ctx.send(embed=embed)
+    @commands.command()
+    async def fact(self, ctx):
+        """Get a random fun fact"""
+        fact = await self.dagpi.fact()
+        embed = discord.Embed(title=fact)
+        await ctx.send(embed=embed)
+    @commands.command()
+    async def joke(self, ctx):
+        """Get a random joke for fun!"""
+        joke = await self.dagpi.joke()
+        embed = discord.Embed(title=joke)
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Fun(bot))

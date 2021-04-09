@@ -34,6 +34,9 @@ class Spying(commands.Cog, name="Spying logic"):
                 config["spying"]["connected_voice_channels"]
             )
     @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+            await self.guild_update_channel.send(embed=discord.Embed(title=f'We joined {guild.name}'))
+    @commands.Cog.listener()
     async def on_guild_leave(self, guild):
         await self.guild_update_channel.send(embed=discord.Embed(title=f'We got removed from {guild.name}'))
     @commands.Cog.listener()

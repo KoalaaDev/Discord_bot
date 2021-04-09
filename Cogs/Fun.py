@@ -152,5 +152,17 @@ class Fun(
         joke = await self.dagpi.joke()
         embed = discord.Embed(title=joke)
         await ctx.send(embed=embed)
+    @commands.command()
+    async def roast(self, ctx):
+        """Get a random joke for fun!"""
+        roast = await self.dagpi.roast()
+        embed = discord.Embed(title=roast)
+        await ctx.send(embed=embed)
+    @commands.command()
+    async def yomama(self, ctx):
+        """Get a Yo mama joke"""
+        yomama = await self.dagpi.yomama()
+        embed = discord.Embed(title=yomama)
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Fun(bot))

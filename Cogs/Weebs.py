@@ -5,13 +5,14 @@ from discord.ext import commands
 import sys
 import traceback
 import io
+from asyncdagpi import Client
 BASE_URL = "https://mikuapi.predeactor.net"
 
 
 class Anime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+        self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.NSFWChannelRequired):
             try:
@@ -396,5 +397,18 @@ class Anime(commands.Cog):
             )
         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def waifu(self, ctx):
+        """Generates a random waifu"""
+        waifu = await self.dagpi.waifu()
+        embed = discord.Embed(title=waifu["name"],description=waifu["description"])
+        if waifu['age']:
+            embed.add_field(name="age",value=waifu['age'])
+        if waifu.get("birthday_year"):
+            embed.add_field(name="Date of birth",value=" ".join([waifu["birthday_day"],waifu["birthday_month"],waifu["birthday_year"]]))
+        embed.set_image(url=waifu['display_picture'])
+        embed.set_footer(text=f"{waifu.get('likes')} ⬆️ | {waifu.get('like_rank')} rank")
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Anime(bot))

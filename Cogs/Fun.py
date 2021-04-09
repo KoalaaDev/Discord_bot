@@ -14,6 +14,9 @@ class Fun(
     def __init__(self, bot):
         self.bot = bot
         self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.send(embed=discord.Embed(description="Woah slow down there! Finish your game first!"))
     @commands.command(hidden=True)
     async def jason(self, ctx):
         await ctx.message.delete()
@@ -58,9 +61,8 @@ class Fun(
         message = await ctx.send(f"Woohoo {gay} is confirmed gay!")
         emoji = get(client.emojis, name="pepelaugh")
         await message.add_reaction(emoji)
-    async def pokemonhints(self, ctx: commands.Context, embed: discord.Embed, obj, message):
+    async def hints(self, ctx: commands.Context, embed: discord.Embed, obj, message, theme, hints):
         count = 1
-        hints = [["Type", ",".join(obj.dict["Data"]["Type"])],["Abilities",",".join(obj.abilities)], ["weight",obj.weight]]
         await ctx.send("Wrong answer, you have 3 guesses left!",delete_after=5)
         for i in hints:
             embed.add_field(name=i[0], value=f"{i[1]}")
@@ -78,19 +80,19 @@ class Fun(
             else:
                 guesses_left = len(hints)-count
                 if guesses_left == 1:
-                    await ctx.send(f"Wrong Pokemon, {guesses_left} guess remaining!",delete_after=5)
-                    continue
+                    await ctx.send(f"Wrong {theme}, {guesses_left} guess remaining!",delete_after=5)
                 if guesses_left<1:
                     pass
                 else:
-                    await ctx.send(f"Wrong Pokemon, {guesses_left} guesses remaining!",delete_after=5)
+                    await ctx.send(f"Wrong {theme}, {guesses_left} guesses remaining!",delete_after=5)
                 count+=1
         else:
             embed = discord.Embed(title="You didnt guess it right! :(")
             embed.set_image(url=obj.answer)
             return await ctx.send(embed=embed)
-    @commands.command(alias=['wtp'])
+
     @commands.max_concurrency(1, per=BucketType.user, wait=False)
+    @commands.command(aliases=['wtp'])
     async def poke(self, ctx):
         """Starts a pokemon guessing game!"""
         pokemon = await self.dagpi.wtp()
@@ -108,10 +110,30 @@ class Fun(
         if guess.content.title() == pokemon.name:
             return await guess.add_reaction("\N{White Heavy Check Mark}")
         else:
-            await self.pokemonhints(ctx, embed, pokemon, message)
-    @poke.error
-    async def poll_handler(self, ctx, error):
-        if isinstance(error, commands.MaxConcurrencyReached):
-             await ctx.send(embed=discord.Embed(description="Woah slow down there! Finish your game first!"))
+            await self.hints(ctx, embed, pokemon, message, "Pokemon", [["Type", ",".join(pokemon.dict["Data"]["Type"])],["Abilities",",".join(pokemon.abilities)], ["weight",pokemon.weight]])
+    @commands.max_concurrency(1, per=BucketType.user, wait=False)
+    @commands.command()
+    async def logo(self, ctx):
+        """Guess the logo"""
+        logo = await self.dagpi.logo()
+        embed = discord.Embed(title=f"Hey {ctx.author.name}, Guess that Logo!", description=f"```{logo.hint}```")
+        embed.set_image(url=logo.question)
+        message = await ctx.send(embed=embed)
+        def check(m):
+            return m.channel == ctx.channel and m.author == ctx.author
+        try:
+            guess = await self.bot.wait_for('message',check=check,timeout=30)
+        except asyncio.TimeoutError:
+            embed = discord.Embed(title="You didnt guess it on time :(")
+            embed.set_image(url=logo.answer)
+            return await ctx.send(embed=embed)
+        if guess.content.lower() == logo.brand.lower():
+            return await guess.add_reaction("\N{White Heavy Check Mark}")
+        else:
+            embed = discord.Embed(title="You didnt guess it right! :(",description=f"```{logo.brand}```")
+            embed.set_image(url=logo.answer)
+            return await ctx.send(embed=embed)
+    @commands.command()
+    async def 
 def setup(bot):
     bot.add_cog(Fun(bot))

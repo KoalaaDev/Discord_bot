@@ -75,6 +75,31 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         pic, e = await self.dagpiSession(ImageFeatures.fedora(),User)
         await ctx.send(file=pic,embed=e)
     @commands.command()
+    async def delete(self, ctx, User:discord.Member):
+        """DELETED"""
+        pic, e = await self.dagpiSession(ImageFeatures.delete(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def shatter(self, ctx, User:discord.Member):
+        """Shatter someone"""
+        pic, e = await self.dagpiSession(ImageFeatures.shatter(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def deepfry(self, ctx, User:discord.Member):
+        """Deepfries a profile picture!"""
+        pic, e = await self.dagpiSession(ImageFeatures.deepfry(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def ascii(self, ctx, User:discord.Member):
+        """ascii-fy a profile picture!"""
+        pic, e = await self.dagpiSession(ImageFeatures.ascii(),User)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
+    async def pride(self, ctx, flag, User2:discord.Member):
+        """REPRESENT YOURSELF"""
+        pic, e = await self.dagpiSession(ImageFeatures.pride(),User2, flag=flag)
+        await ctx.send(file=pic,embed=e)
+    @commands.command()
     async def whyareyougay(self, ctx, User:discord.Member, User2:discord.Member):
         """wHy aRe U gAy"""
         pic, e = await self.dagpiSession(ImageFeatures.why_are_you_gay(),User, url2=str(User2.avatar_url_as(format=None, static_format="png", size=1024)))

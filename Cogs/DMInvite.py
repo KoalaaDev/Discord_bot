@@ -16,7 +16,7 @@ class DmInvite(commands.Cog):
         self.embedToggle = True
         self.InviteToggle = True
     @is_whitelisted()
-    @commands.group()
+    @commands.group(hidden=True)
     async def dminvite(self, ctx):
         """Group Commands for DM Invites."""
     @is_whitelisted()

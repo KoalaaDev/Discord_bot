@@ -6,7 +6,6 @@ import cexprtk
 from discord.ext import commands
 from sympy import *
 import re
-import wolframalpha
 import discord
 multiply_detect = re.compile("\d[a-z]")
 x, y, z, t = symbols("x y z t")

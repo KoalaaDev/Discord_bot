@@ -27,7 +27,6 @@ def parse(string: str):
 class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
-        self.wolframalpha = wolframalpha.Client("6T2WHE-KY7PYXYRQ9")
     @commands.command(description="Subtract numbers")
     async def minus(ctx, left: int, right: int):
         await ctx.send(left - right)

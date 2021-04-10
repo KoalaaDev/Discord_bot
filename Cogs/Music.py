@@ -301,22 +301,6 @@ class MusicController:
             song = await self.last_songs.get()
             del song
 
-
-    async def check_listen(self):
-        player = self.bot.wavelink.get_player(self.guild_id)
-        channel = self.bot.get_channel(player.channel_id)
-        embed = discord.Embed(title="No song playing..Disconecting!")
-        embed.set_footer(text="I'll see you on the next doorbanging adventure!")
-        if self.channel:
-            await self.channel.send(embed=embed, delete_after=60)
-        await player.stop()
-        await player.disconnect()
-        if self.auto_play:
-            self.auto_play = False
-        if self.loop:
-            self.loop = False
-
-
     async def is_position_fresh(self) -> bool:
             """Method which checks whether the player controller should be remade or updated."""
             try:
@@ -348,14 +332,7 @@ class MusicController:
                 self.requester,
                 self.current_track,
             ) = (song.uri, song.ytid, song.requester, song)
-            try:
-                with async_timeout.timeout(600):
-                    await player.play(song)
-            except asyncio.TimeoutError:
-                if not player.is_playing:
-                    return await self.check_listen()
-                else:
-                    continue
+            await player.play(song)
             MusicEmbed = discord.Embed(
                 title="Now playing",
                 colour=discord.Colour.random(),
@@ -478,7 +455,7 @@ class Music(
                 await self.bot.wavelink.initiate_node(**n)
             except wavelink.errors.NodeOccupied:
                 pass
-    @tasks.loop(seconds=1)
+    @tasks.loop(seconds=10)
     async def check_controllers(self):
         Deletion_list = []
         for id, controller in self.controllers.items():

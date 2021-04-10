@@ -5,6 +5,7 @@ from discord.ext import commands
 import sys
 import traceback
 import io
+import asyncio
 from asyncdagpi import Client
 BASE_URL = "https://mikuapi.predeactor.net"
 
@@ -410,5 +411,41 @@ class Anime(commands.Cog):
         embed.set_image(url=waifu['display_picture'])
         embed.set_footer(text=f"{waifu.get('likes')} ⬆️ | {waifu.get('like_rank')} rank")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def manga(self, ctx, *, query):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://crunchy-bot.live/api/manga/details?terms={query}") as response:
+                if response.status == 503:
+                    return await ctx.send("The API is actually in maintenance, please retry later.")
+                try:
+                    status = response.status
+                    url = await response.json()
+                except aiohttp.ContentTypeError:
+                        return await ctx.send(
+                            "API unavailable. Status code: {code}\nIt may be due of a "
+                            "maintenance.".format(code=status)
+                        )
+        for search in url:
+            embed = discord.Embed(
+                title=search['english'],description=search['description'], color=discord.Color.blue()
+            )
+            embed.add_field(name="Type", value=search['type'])
+            if search['volumes'] != "Unknown":
+                embed.add_field(name="Volumes", value=search['volumes'])
+            if search['chapters'] != "Unknown":
+                embed.add_field(name="Chapters", value=search['chapters'])
+            embed.add_field(name="Status", value=search['status'])
+            embed.add_field(name="Published", value=search['published'])
+            embed.add_field(name="Genres", value=search['genres'])
+            embed.add_field(name="Authors", value=search['authors'])
+            embed.add_field(name="Popularity", value=search['popularity'])
+            embed.add_field(name="Characters and actor", value=", ".join([x['character'] for x in search['characters_and_actor']]))
+            embed.set_footer(text=f"{search['favorites']}❤️| {search['ranked']}| {search['score']} Score")
+            await ctx.send(embed=embed)
+            await asyncio.sleep(1)
+
+
 def setup(bot):
     bot.add_cog(Anime(bot))

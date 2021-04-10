@@ -4,7 +4,8 @@ import discord
 
 import re
 import random
-
+import sys
+import traceback
 
 class Board:
     def __init__(self, player1, player2):
@@ -144,7 +145,18 @@ class TicTacToe(commands.Cog):
 
         # Return whoever is x's so that we know who is going first
         return self.boards[server_id].challengers["x"]
-
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
+        print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
     @commands.group(aliases=["tic", "tac", "toe"], invoke_without_command=True)
     @commands.guild_only()
     @commands.bot_has_permissions(send_messages=True)
@@ -165,7 +177,7 @@ class TicTacToe(commands.Cog):
         # Now just make sure the person can play, this will fail if o's are up and x tries to play
         # Or if someone else entirely tries to play
         if not board.can_play(player):
-            await ctx.send("You cannot play right now!")
+            await ctx.send(embed=discord.Embed(title="You cannot play right now!"))
             return
 
         # Search for the positions in the option given, the actual match doesn't matter, just need to check if it exists
@@ -177,14 +189,14 @@ class TicTacToe(commands.Cog):
 
         # Just a bit of logic to ensure nothing that doesn't make sense is given
         if top and bottom:
-            await ctx.send("That is not a valid location! Use some logic, come on!")
+            await ctx.send(embed=discord.Embed(title="That is not a valid location! Use some logic, come on!"))
             return
         if left and right:
-            await ctx.send("That is not a valid location! Use some logic, come on!")
+            await ctx.send(embed=discord.Embed(title="That is not a valid location! Use some logic, come on!"))
             return
         # Make sure at least something was given
         if not top and not bottom and not left and not right and not middle:
-            await ctx.send("Please provide a valid location to play!")
+            await ctx.send(embed=discord.Embed(title="Please provide a valid location to play!"))
             return
 
         x = 0
@@ -217,7 +229,7 @@ class TicTacToe(commands.Cog):
         # board.update will handle which letter is placed
         # If it returns false however, then someone has already played in that spot and nothing was updated
         if not board.update(x, y):
-            await ctx.send("Someone has already played there!")
+            await ctx.send(embed=discord.Embed(title="Someone has already played there!"))
             return
         # Next check if there's a winner
         winner = board.check()
@@ -229,11 +241,7 @@ class TicTacToe(commands.Cog):
                 if board.challengers["x"] != winner
                 else board.challengers["o"]
             )
-            await ctx.send(
-                "{} has won this game of TicTacToe, better luck next time {}".format(
-                    winner.display_name, loser.display_name
-                )
-            )
+            await ctx.send(embed=discord.Embed(description="{} has won this game of TicTacToe, better luck next time {}".format(winner.mention, loser.mention)))
             # This game has ended, delete it so another one can be made
             try:
                 del self.boards[ctx.message.guild.id]
@@ -242,7 +250,7 @@ class TicTacToe(commands.Cog):
         else:
             # If no one has won, make sure the game is not full. If it has, delete the board and say it was a tie
             if board.full():
-                await ctx.send("This game has ended in a tie!")
+                await ctx.send(embed=discord.Embed(title="This game has ended in a tie!"))
                 try:
                     del self.boards[ctx.message.guild.id]
                 except KeyError:
@@ -254,10 +262,10 @@ class TicTacToe(commands.Cog):
                     if board.X_turn
                     else board.challengers.get("o")
                 )
-                fmt = str(board) + "\n{} It is now your turn to play!".format(
-                    player_turn.display_name
+                fmt = str(board) + "\n***{} It is now your turn to play!***".format(
+                    player_turn.mention
                 )
-                await ctx.send(fmt)
+                await ctx.send(embed=discord.Embed(description=fmt))
 
     @tictactoe.command(name="start", aliases=["challenge", "create"])
     @commands.guild_only()
@@ -268,26 +276,20 @@ class TicTacToe(commands.Cog):
         # For simplicities sake, only allow one game on a server at a time.
         # Things can easily get confusing (on the server's end) if we allow more than one
         if self.boards.get(ctx.message.guild.id) is not None:
-            await ctx.send(
-                "Sorry but only one Tic-Tac-Toe game can be running per server!"
-            )
+            await ctx.send(embed=discord.Embed(title="Sorry but only one Tic-Tac-Toe game can be running per server!"))
             return
         # Make sure we're not being challenged, I always win anyway
         if player2 == ctx.message.guild.me:
-            await ctx.send(
-                "You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it."
-            )
+            await ctx.send(embed=discord.Embed(title="You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it."))
             return
         if player2 == player1:
-            await ctx.send(
-                "You can't play yourself, I won't allow it. Go find some friends"
-            )
+            await ctx.send(embed=discord.Embed(title="You can't play yourself, I won't allow it. Go find some friends"))
             return
 
         # Create the board and return who has been decided to go first
         x_player = self.create(ctx.message.guild.id, player1, player2)
         fmt = "A tictactoe game has just started between {} and {}\n".format(
-            player1.display_name, player2.display_name
+            player1.mention, player2.mention
         )
         # Print the board too just because
         fmt += str(self.boards[ctx.message.guild.id])
@@ -295,12 +297,12 @@ class TicTacToe(commands.Cog):
         # We don't need to do anything weird with assigning x_player to something
         # it is already a member object, just use it
         fmt += (
-            "I have decided at random, and {} is going to be x's this game. It is your turn first! "
+            "I have decided at random, and {} is going to be ```x``` this game. It is your turn first! "
             "Use the {}tictactoe command, and a position, to choose where you want to play".format(
-                x_player.display_name, ctx.prefix
+                x_player.mention, ctx.prefix
             )
         )
-        await ctx.send(fmt)
+        await ctx.send(embed=discord.Embed(description=fmt))
 
     @tictactoe.command(name="delete", aliases=["stop", "remove", "end"])
     @commands.guild_only()
@@ -313,13 +315,11 @@ class TicTacToe(commands.Cog):
         EXAMPLE: ~tictactoe stop
         RESULT: No more tictactoe!"""
         if self.boards.get(ctx.message.guild.id) is None:
-            await ctx.send("There are no tictactoe games running on this server!")
+            await ctx.send(embed=discord.Embed(title="There are no tictactoe games running on this server!"))
             return
 
         del self.boards[ctx.message.guild.id]
-        await ctx.send(
-            "I have just stopped the game of TicTacToe, a new should be able to be started now!"
-        )
+        await ctx.send(embed=discord.Embed(title="I have just stopped the game of TicTacToe, a new should be able to be started now!"))
 
 
 def setup(bot):

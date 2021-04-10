@@ -46,14 +46,6 @@ class Fun(
 
         await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
 
-
-
-    @commands.command(hidden=True)
-    async def woohoo(self, ctx):
-        gay = random.choice(["Koalaa", "Skot", "Alvin"])
-        message = await ctx.send(f"Woohoo {gay} is confirmed gay!")
-        emoji = get(client.emojis, name="pepelaugh")
-        await message.add_reaction(emoji)
     async def hints(self, ctx: commands.Context, embed: discord.Embed, obj, message, theme, hints):
         count = 1
         await ctx.send("Wrong answer, you have 3 guesses left!",delete_after=5)

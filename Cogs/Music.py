@@ -478,18 +478,25 @@ class Music(
                 await self.bot.wavelink.initiate_node(**n)
             except wavelink.errors.NodeOccupied:
                 pass
-    @tasks.loop(seconds=5)
+    @tasks.loop(seconds=1)
     async def check_controllers(self):
         Deletion_list = []
         for id, controller in self.controllers.items():
             player = self.bot.wavelink.get_player(controller.guild_id)
-            if not player.is_playing and not player.is_connected:
+            if player.channel_id:
+                channel = self.bot.get_channel(player.channel_id)
+                members = [x for x in channel.members if x.bot == False]
+            else:
+                members = None
+            if not player.is_playing and not player.is_connected and controller.queue.empty():
                 print(f"stopping controller for {controller.guild_id}")
-                await player.stop()
-                await player.disconnect()
-                Deletion_list.append(id)
-        for id in Deletion_list:
-            del self.controllers[id]
+                Deletion_list.append(controller)
+            if player.is_connected and not members:
+                print(f"There is noone in the channel! Stopping controller for {controller.guild_id}")
+                Deletion_list.append(controller)
+        for controller in Deletion_list:
+            ctx = controller.context
+            await ctx.invoke(self.stop)
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node):
         print(f"\u001b[97m Node {node.identifier} \u001b[92m ONLINE \u001b[97m")

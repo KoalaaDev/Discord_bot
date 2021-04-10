@@ -164,5 +164,17 @@ class Fun(
         yomama = await self.dagpi.yomama()
         embed = discord.Embed(title=yomama)
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def coinflip(self, ctx):
+        determine_flip = [1, 0]
+        if random.choice(determine_flip) == 1:
+            embed = discord.Embed(title="Coinflip", description=f"{ctx.author.mention} Flipped coin, you got **Heads**!")
+            await ctx.send(embed=embed)
+
+        else:
+            embed = discord.Embed(title="Coinflip", description=f"{ctx.author.mention} Flipped coin, you got **Tails**!")
+            await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Fun(bot))

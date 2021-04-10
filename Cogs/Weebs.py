@@ -415,6 +415,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def manga(self, ctx, *, query):
+        """Searches a manga"""
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://crunchy-bot.live/api/manga/details?terms={query}") as response:
                 if response.status == 503:

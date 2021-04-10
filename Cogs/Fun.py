@@ -46,14 +46,7 @@ class Fun(
 
         await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
 
-    @commands.command()
-    async def pepeflip(self, ctx):
-        """Sends good luck with a crying or smiling pepe"""
-        emoji1 = self.bot.get_emoji(799506321442996235)
-        emoji2 = self.bot.get_emoji(742346196990951505)
-        lmao = random.choice([emoji1, emoji2])
-        bruh = await ctx.send("Good Luck!")
-        await bruh.add_reaction(lmao)
+
 
     @commands.command(hidden=True)
     async def woohoo(self, ctx):
@@ -167,6 +160,7 @@ class Fun(
 
     @commands.command()
     async def coinflip(self, ctx):
+        """Does a coinflip"""
         determine_flip = [1, 0]
         if random.choice(determine_flip) == 1:
             embed = discord.Embed(title="Coinflip", description=f"{ctx.author.mention} Flipped coin, you got **Heads**!")

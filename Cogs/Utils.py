@@ -11,7 +11,7 @@ def is_whitelisted():
         GetUser = await database.fetchrow("SELECT user_id FROM test WHERE user_id = $1", ctx.author.id)
         return True if GetUser else False
     return commands.check(predicate)
-class Utility(commands.Cog):
+class Utility(commands.Cog, description="Get people's avatar and more utility commands!"):
     def __init__(self, bot):
         self.bot = bot
 

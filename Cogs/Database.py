@@ -8,9 +8,11 @@ class Database(commands.Cog):
     @is_whitelisted()
     @commands.command(hidden=True)
     async def addUser(self, ctx, member: discord.Member):
-        await self.bot.db.execute("INSERT INTO test (user_id,username) VALUES ($1, $2)", member.id, member.name)
-
-
+        user = await self.bot.db.fetchrow("SELECT user_id FROM test WHERE user_id=$1", member.id)
+        if not user:
+            await self.bot.db.execute("INSERT INTO test (user_id,username) VALUES ($1, $2)", member.id, member.name)
+        else:
+            await ctx.send("User already exists")
     @is_whitelisted()
     @commands.command(hidden=True)
     async def removeuser(self, ctx, member: discord.Member):

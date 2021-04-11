@@ -445,7 +445,7 @@ class Music(
             await self.bot.wavelink.destroy_node(n['identifier'])
 
     async def is_whitelisted(self, userID):
-        GetUser = await self.bot.db.execute("SELECT user_id FROM test WHERE user_id = $1", userID)
+        GetUser = await self.bot.db.fetchrow("SELECT user_id FROM test WHERE user_id = $1", userID)
         return True if GetUser else False
     async def start_nodes(self):
         await self.bot.wait_until_ready()

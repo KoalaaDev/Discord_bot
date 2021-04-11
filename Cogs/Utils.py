@@ -8,7 +8,7 @@ import asyncpg
 def is_whitelisted():
     async def predicate(ctx):
         database = await asyncpg.create_pool(database="Users",host="34.87.22.215", user="postgres", password="doorbanger")
-        GetUser = await database.execute("SELECT user_id FROM test WHERE user_id = $1", ctx.author.id)
+        GetUser = await database.fetchrow("SELECT user_id FROM test WHERE user_id = $1", ctx.author.id)
         return True if GetUser else False
     return commands.check(predicate)
 class Utility(commands.Cog):

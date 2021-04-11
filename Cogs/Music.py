@@ -22,8 +22,7 @@ import async_timeout
 from lyricsgenius import Genius
 from subprocess import Popen, PIPE
 import copy
-with open("whitelist.txt") as f:
-    whitelist = [int(x.strip("\n")) for x in f.readlines()]
+
 
 RURL = re.compile("https?:\/\/(?:www\.)?.+")
 spotify_countries = ['AD','AE','AG','AL','AM','AR','AT','AU','AZ','BA','BB','BD','BE','BF',
@@ -444,6 +443,10 @@ class Music(
     async def destroy_nodes(self):
         for n in self.nodes.values():
             await self.bot.wavelink.destroy_node(n['identifier'])
+
+    async def is_whitelisted(self, userID):
+        GetUser = await self.bot.db.execute("SELECT user_id FROM test WHERE user_id = $1", userID)
+        return True if GetUser else False
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
@@ -455,6 +458,7 @@ class Music(
                 await self.bot.wavelink.initiate_node(**n)
             except wavelink.errors.NodeOccupied:
                 pass
+
     @tasks.loop(seconds=10)
     async def check_controllers(self):
         Deletion_list = []
@@ -591,12 +595,7 @@ class Music(
         controller = self.get_controller(ctx)
         if player.is_playing:
             if controller.remote_control:
-                channel = self.bot.get_channel(player.channel_id)
-                members = [x.id for x in channel.members if x.bot is False]
-                if (
-                    any([x in whitelist for x in members])
-                    and ctx.message.author.id not in whitelist
-                ):
+                if not await self.is_whitelisted(ctx.author.id):
                     return await ctx.message.add_reaction("\N{Cross Mark}")
         if not channel:
             try:
@@ -625,13 +624,10 @@ class Music(
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
             members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.send(
                     embed=discord.Embed(
-                        description="failed to find any songs on youtube or soundcloud"
+                        description="Music controller is locked by owner!"
                     )
                 )
         if player.paused and not query:
@@ -779,12 +775,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if not player.is_playing:
             return await ctx.send(
@@ -800,12 +791,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if not player.paused:
             return await ctx.send("I am not currently paused!", delete_after=15)
@@ -819,12 +805,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if (
             not player.is_playing
@@ -868,12 +849,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         vol = max(min(vol, 1000), 0)
         controller.volume = vol
@@ -886,12 +862,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         vol = player.volume+10
         if vol<100 and vol>90:
@@ -907,12 +878,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         vol = player.volume-10
         if vol<100 and vol>90:
@@ -1075,12 +1041,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if controller.auto_play:
             controller.auto_play = False
@@ -1102,12 +1063,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if not player.is_connected:
             return
@@ -1136,12 +1092,7 @@ class Music(
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if controller.loop is True:
             controller.loop = False
@@ -1170,12 +1121,7 @@ class Music(
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if controller.auto_play is True:
             controller.auto_play = False
@@ -1191,12 +1137,7 @@ class Music(
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if controller.queue._queue:
             random.shuffle(controller.queue._queue)
@@ -1210,12 +1151,7 @@ class Music(
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         controller.queue._queue.clear()
         if not controller.auto_play_queue.empty():
@@ -1259,12 +1195,7 @@ class Music(
         controller = self.get_controller(ctx)
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if controller.remote_control:
-            channel = self.bot.get_channel(player.channel_id)
-            members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         try:
             del controller.queue._queue[num - 1]
@@ -1441,52 +1372,20 @@ class Music(
         except:
             return await ctx.message.add_reaction("\N{Cross Mark}")
     @commands.command(aliases=["wl"], hidden=True)
-    async def whitelist(
-        self, ctx, mode: str = None, user: Union[discord.Member, str] = None
-    ):
-        if (
-            ctx.message.author.id != 263190106821623810
-            or ctx.message.author.id not in whitelist
-        ):
+    async def whitelist(self, ctx):
+        if not await self.is_whitelisted(ctx.author.id):
             return await ctx.message.add_reaction("\N{Cross Mark}")
-        if not mode:
-            await ctx.send(
-                embed=discord.Embed(description="choose from add, remove, lock"),
-                delete_after=3,
-            )
+        controller = self.get_controller(ctx)
+        if controller.remote_control:
+            controller.remote_control = False
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+            await asyncio.sleep(1)
             return await ctx.message.delete()
         else:
-            if mode.lower() == "add":
-                with open("whitelist.txt", "r") as f:
-                    content = f.read()
-                with open("whitelist.txt", "w") as f:
-                    if content != "":
-                        f.write(content + f"\n{user.id}")
-                    else:
-                        f.write(content + f"{user.id}")
-                await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                await asyncio.sleep(1)
-                return await ctx.message.delete()
-            if mode.lower() == "delete":
-                with open("whitelist.txt") as f:
-                    lines = f.readlines()
-                with open("whitelist.txt", "w") as f:
-                    f.writelines([item for item in lines[:-1]])
-                await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                await asyncio.sleep(1)
-                return await ctx.message.delete()
-            if mode.lower() == "toggle":
-                controller = self.get_controller(ctx)
-                if controller.remote_control:
-                    controller.remote_control = False
-                    await ctx.message.add_reaction("\N{OK Hand Sign}")
-                    await asyncio.sleep(1)
-                    return await ctx.message.delete()
-                else:
-                    controller.remote_control = True
-                    await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-                    await asyncio.sleep(1)
-                    return await ctx.message.delete()
+            controller.remote_control = True
+            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+            await asyncio.sleep(1)
+            return await ctx.message.delete()
 
     @commands.command(aliases=["back"])
     async def last(self, ctx, num=0):

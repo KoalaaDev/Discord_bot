@@ -14,7 +14,7 @@ from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
 from difflib import get_close_matches
-
+import asyncpg
 intents = discord.Intents.all()
 intents.typing = False
 intents.presences = False
@@ -94,7 +94,10 @@ elif COGS_CONFIG == "disarmed":
     ]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
-
+async def connectDB():
+    client.db = await asyncpg.create_pool(database="Users",host="34.87.22.215", user="postgres", password="doorbanger")
+    print("Connected to Bot database")
+client.loop.create_task(connectDB())
 # Events
 @client.event
 async def on_connect():

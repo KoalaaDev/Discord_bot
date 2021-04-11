@@ -3,12 +3,13 @@ import sys
 import traceback
 from subprocess import Popen, PIPE
 import discord
+import asyncpg
 
-with open("whitelist.txt") as f:
-    whitelist = [int(x.strip("\n")) for x in f.readlines()]
 def is_whitelisted():
     async def predicate(ctx):
-        return ctx.author.id in whitelist or ctx.author.id == 263190106821623810
+        database = await asyncpg.create_pool(database="Users",host="34.87.22.215", user="postgres", password="doorbanger")
+        GetUser = await database.execute("SELECT user_id FROM test WHERE user_id = $1", ctx.author.id)
+        return True if GetUser else False
     return commands.check(predicate)
 class Utility(commands.Cog):
     def __init__(self, bot):

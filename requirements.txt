@@ -24,6 +24,4 @@ git+https://github.com/Rapptz/discord-ext-menus.git
 asyncdagpi==3.3.2
 statcord.py
 dblpy
-wolframalpha==5.0.0
-kitsu
-kitsu-wrapper
+asyncpg

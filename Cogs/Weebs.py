@@ -105,7 +105,7 @@ class Anime(commands.Cog):
         """Generates random image of a Neko (may take awhile to load)"""
         async with aiohttp.ClientSession() as session:
             if ctx.message.channel.is_nsfw():
-                async with session.get("https://waifu.pics/api/nsfw/neko") as response:
+                async with session.get("https://nekos.life/api/lewd/neko") as response:
                     if response.status == 503:
                         await ctx.send("The API is actually in maintenance, please retry later.")
                         return
@@ -121,7 +121,7 @@ class Anime(commands.Cog):
                         title="Here's a pic of a Neko!", color=discord.Color.blue()
                     )
                     try:
-                        embed.set_image(url=url["url"])
+                        embed.set_image(url=url["neko"])
                     except KeyError:
                         await ctx.send(
                             "I received an incorrect format from the API\nStatus code: {code}".format(
@@ -130,30 +130,30 @@ class Anime(commands.Cog):
                         )
                     await ctx.send(embed=embed)
             else:
-                async with session.get("https://neko.weeb.services/") as response:
+                async with session.get("https://nekos.life/api/neko") as response:
                     if response.status == 503:
                         await ctx.send("The API is actually in maintenance, please retry later.")
                         return
                     try:
                         status = response.status
-                        file = discord.File(io.BytesIO(await response.read()), filename="img.png")
+                        url = await response.json()
                     except aiohttp.ContentTypeError:
                         return await ctx.send(
-                            "API unavailable. Status code: {code}\nIt may be due of a "
-                            "maintenance.".format(code=status)
-                        )
+                                "API unavailable. Status code: {code}\nIt may be due of a "
+                                "maintenance.".format(code=status)
+                            )
                     embed = discord.Embed(
                         title="Here's a pic of a Neko!", color=discord.Color.blue()
                     )
                     try:
-                        embed.set_image(url="attachment://img.png")
+                        embed.set_image(url=url["neko"])
                     except KeyError:
                         await ctx.send(
                             "I received an incorrect format from the API\nStatus code: {code}".format(
                                 code=status
                             )
                         )
-                    await ctx.send(file=file,embed=embed)
+                    await ctx.send(embed=embed)
 ####Text
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
@@ -447,6 +447,63 @@ class Anime(commands.Cog):
             await ctx.send(embed=embed)
             await asyncio.sleep(1)
 
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def hentai(self, ctx: commands.Context, type="img"):
+        """Gives hentai"""
+        if type == "gif":
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://nekos.life/api/v2/img/Random_hentai_gif") as response:
+                    if response.status == 503:
+                        await ctx.send("The API is actually in maintenance, please retry later.")
+                        return
+                    try:
+                        status = response.status
+                        url = await response.json()
+                    except aiohttp.ContentTypeError:
+                            return await ctx.send(
+                                "API unavailable. Status code: {code}\nIt may be due of a "
+                                "maintenance.".format(code=status)
+                            )
+            embed = discord.Embed(
+                title="Hentai", color=discord.Color.blue()
+            )
+            try:
+                embed.set_image(url=url["url"])
+            except KeyError:
+                await ctx.send(
+                    "I received an incorrect format from the API\nStatus code: {code}".format(
+                        code=status
+                    )
+                )
+            await ctx.send(embed=embed)
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://nekos.life/api/v2/img/hentai") as response:
+                    if response.status == 503:
+                        await ctx.send("The API is actually in maintenance, please retry later.")
+                        return
+                    try:
+                        status = response.status
+                        url = await response.json()
+                    except aiohttp.ContentTypeError:
+                            return await ctx.send(
+                                "API unavailable. Status code: {code}\nIt may be due of a "
+                                "maintenance.".format(code=status)
+                            )
+            embed = discord.Embed(
+                title="Hentai", color=discord.Color.blue()
+            )
+            try:
+                embed.set_image(url=url["url"])
+            except KeyError:
+                await ctx.send(
+                    "I received an incorrect format from the API\nStatus code: {code}".format(
+                        code=status
+                    )
+                )
+            await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Anime(bot))

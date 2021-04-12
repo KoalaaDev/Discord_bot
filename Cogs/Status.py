@@ -31,7 +31,7 @@ class Status(commands.Cog):
             await self.bot.change_presence(activity=discord.Activity(type=i[0],name=i[1]))
             await asyncio.sleep(60)
     @is_whitelisted()
-    @commands.command()
+    @commands.command(hidden=True)
     async def addstatus(self, ctx, type, *, message):
         if type not in self.activity_types.keys():
             options = "\n".join(self.activity_types.keys())

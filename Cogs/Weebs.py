@@ -10,7 +10,7 @@ from asyncdagpi import Client
 BASE_URL = "https://mikuapi.predeactor.net"
 
 
-class Anime(commands.Cog):
+class anime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")
@@ -65,12 +65,12 @@ class Anime(commands.Cog):
         await ctx.send(embed=embed)
 ####picture
     @commands.command(hidden=True)
-    async def anime(self, ctx, *, command):
+    async def anime(self, ctx, *, command=None):
         """You can either use anime (command) or use the command directly!"""
         cmd = self.bot.get_command(command)
         if not cmd:
             search = self.bot.get_command("anisearch")
-            return await search(ctx, command)
+            return await search(ctx,query=command)
         await cmd(ctx)
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)

@@ -424,7 +424,7 @@ class MusicController:
                     await self.last_songs.put(song)
 
 
-class Music(
+class music(
     commands.Cog,
     wavelink.WavelinkMixin,
     description="Play music on your server!\nYoutube, Spotify, Soundcloud supported!\n Comes with multiple features",

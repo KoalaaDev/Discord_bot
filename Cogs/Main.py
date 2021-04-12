@@ -2,7 +2,7 @@ from discord.ext import commands
 from subprocess import Popen, PIPE
 import discord
 
-class Main(commands.Cog,name="General", description="Basic commands"):
+class main(commands.Cog,name="General", description="Basic commands"):
     def __init__(self, bot):
         self.bot = bot
     @commands.command(hidden=True, description="Delete messages on mass")

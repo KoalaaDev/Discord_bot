@@ -2,12 +2,11 @@ from discord.ext import commands
 import random
 import asyncio
 import discord
-import kitsu
+
 
 class AniSearch(commands.Cog, description="Find yourself an anime to watch"):
     def __init__(self, bot):
         self.bot = bot
-        self.client = kitsu.Client()
     @commands.command()
     async def anisearch(self, ctx, *,query):
         """Anime information Searcher"""

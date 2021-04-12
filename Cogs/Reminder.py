@@ -5,7 +5,7 @@ import discord
 import sys
 import traceback
 
-class Reminder(commands.Cog, description="Never forget anything again!"):
+class reminder(commands.Cog, description="Never forget anything again!"):
     def __init__(self, bot):
         self.bot = bot
     async def cog_command_error(self, ctx, error):

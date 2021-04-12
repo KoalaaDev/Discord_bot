@@ -8,7 +8,7 @@ from discord.ext.commands.cooldowns import BucketType
 from asyncdagpi import Client
 import math
 
-class Fun(
+class fun(
     commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
 ):
     def __init__(self, bot):

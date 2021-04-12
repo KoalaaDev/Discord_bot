@@ -3,7 +3,7 @@ import random
 import asyncio
 import discord
 
-class PasswordGen(commands.Cog, description="Secure yourself today!"):
+class passwordgen(commands.Cog, description="Secure yourself today!"):
     def __init__(self, bot):
         self.bot = bot
     async def cog_command_error(self, ctx, error):

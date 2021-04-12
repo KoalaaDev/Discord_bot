@@ -486,7 +486,7 @@ class Music(
     async def on_track_end(
         self, node: wavelink.node.Node, event: wavelink.events.TrackEnd
     ):
-        controller = self.get_controller(event.player)
+        controller = self.get_controller(event.player.guild_id)
         controller.next.set()
         if controller.now_playing and controller.queue.empty() and not controller.auto_play:
             await controller.now_playing.delete()
@@ -508,8 +508,11 @@ class Music(
         )
         await event.player.change_node()
 
-    def get_controller(self, value: commands.Context):
-        gid = value.guild.id
+    def get_controller(self, value: Union[commands.Context, int]):
+        if isinstance(value, commands.Context):
+            gid = value.guild.id
+        else:
+            gid = value
         try:
             controller = self.controllers[gid]
         except KeyError:

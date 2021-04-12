@@ -133,4 +133,4 @@ class main(commands.Cog,name="General", description="Basic commands"):
         members = {member for member in sorted(set(self.bot.get_all_members()))}
         print(members)
 def setup(bot):
-    bot.add_cog(Main(bot))
+    bot.add_cog(main(bot))

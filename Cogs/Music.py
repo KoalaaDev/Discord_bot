@@ -1457,4 +1457,4 @@ class music(
         process.stdout.close()
 
 def setup(bot):
-    bot.add_cog(Music(bot))
+    bot.add_cog(music(bot))

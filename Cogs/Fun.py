@@ -163,4 +163,4 @@ class fun(
             await ctx.send(embed=embed)
 
 def setup(bot):
-    bot.add_cog(Fun(bot))
+    bot.add_cog(fun(bot))

@@ -29,4 +29,4 @@ class passwordgen(commands.Cog, description="Secure yourself today!"):
 
 
 def setup(bot):
-    bot.add_cog(PasswordGen(bot))
+    bot.add_cog(passwordgen(bot))

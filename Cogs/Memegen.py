@@ -428,4 +428,4 @@ class meme(commands.Cog, description="Generate memes and more!"):
 
 
 def setup(bot):
-    bot.add_cog(Meme(bot))
+    bot.add_cog(meme(bot))

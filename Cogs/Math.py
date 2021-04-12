@@ -125,4 +125,4 @@ class math(commands.Cog, description="Math related commands"):
         print(eqn)
         await ctx.send(eqn)
 def setup(bot):
-    bot.add_cog(Math(bot))
+    bot.add_cog(math(bot))

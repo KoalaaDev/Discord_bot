@@ -52,7 +52,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a picture of Megumin!", color=discord.Color.blue()
+            color=discord.Color.red()
         )
         try:
             embed.set_image(url=url["url"])
@@ -90,7 +90,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a pic of Hatsune Miku!", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -121,7 +121,7 @@ class anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
                     embed = discord.Embed(
-                        title="Here's a pic of a Neko!", color=discord.Color.blue()
+                        color=discord.Color.blue()
                     )
                     try:
                         embed.set_image(url=url["neko"])
@@ -146,7 +146,7 @@ class anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
                     embed = discord.Embed(
-                        title="Here's a pic of a Neko!", color=discord.Color.blue()
+                        color=discord.Color.blue()
                     )
                     try:
                         embed.set_image(url=url["neko"])
@@ -176,7 +176,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a gif of anime girls cuddling!", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -206,7 +206,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a gif of a random anime kissing scene!", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -236,7 +236,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a gif of a random tsundere!", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -266,7 +266,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Here's a gif of a drunk anime character!", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["message"])
@@ -297,7 +297,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Anime fuck", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["gif"])
@@ -328,7 +328,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Anime cum", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -359,7 +359,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="Anime anal", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -389,7 +389,7 @@ class anime(commands.Cog):
                             "maintenance.".format(code=status)
                         )
         embed = discord.Embed(
-            title="trap hentai", color=discord.Color.blue()
+            color=discord.Color.blue()
         )
         try:
             embed.set_image(url=url["url"])
@@ -470,7 +470,7 @@ class anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
             embed = discord.Embed(
-                title="Hentai", color=discord.Color.blue()
+                color=discord.Color.blue()
             )
             try:
                 embed.set_image(url=url["url"])
@@ -496,7 +496,7 @@ class anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
             embed = discord.Embed(
-                title="Hentai", color=discord.Color.blue()
+                color=discord.Color.blue()
             )
             try:
                 embed.set_image(url=url["url"])
@@ -527,7 +527,7 @@ class anime(commands.Cog):
                                 "maintenance.".format(code=status)
                             )
             embed = discord.Embed(
-                title="Fox girl", color=discord.Color.blue()
+                color=discord.Color.blue()
             )
             try:
                 embed.set_image(url=url["url"])

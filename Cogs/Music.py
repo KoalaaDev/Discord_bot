@@ -508,16 +508,12 @@ class Music(
         )
         await event.player.change_node()
 
-    def get_controller(self, value: Union[commands.Context, wavelink.Player]):
-        if isinstance(value, commands.Context):
-            gid = value.guild.id
-        else:
-            gid = value.guild_id
-
+    def get_controller(self, value: commands.Context):
+        gid = value.guild.id
         try:
             controller = self.controllers[gid]
         except KeyError:
-            controller = MusicController(self.bot, gid,value)
+            controller = MusicController(self.bot, gid, value)
             self.controllers[gid] = controller
 
         return controller

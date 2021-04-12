@@ -133,4 +133,4 @@ class utility(commands.Cog, description="Get people's avatar and more utility co
         stdout, stderr = process.communicate()
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
 def setup(bot):
-    bot.add_cog(Utility(bot))
+    bot.add_cog(utility(bot))

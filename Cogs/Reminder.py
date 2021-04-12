@@ -69,7 +69,7 @@ class reminder(commands.Cog, description="Never forget anything again!"):
         await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.mention}!",description=f"{member.mention} {msg.content}"))
 
 def setup(bot):
-    bot.add_cog(Reminder(bot))
+    bot.add_cog(reminder(bot))
 
 
 # Made by DebuggingMySelf

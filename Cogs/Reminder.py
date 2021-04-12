@@ -5,7 +5,7 @@ import discord
 import sys
 import traceback
 
-class reminder(commands.Cog, description="Never forget anything again!"):
+class Reminder(commands.Cog, description="Never forget anything again!"):
     def __init__(self, bot):
         self.bot = bot
     async def cog_command_error(self, ctx, error):
@@ -69,7 +69,7 @@ class reminder(commands.Cog, description="Never forget anything again!"):
         await ctx.send(embed=discord.Embed(title=f"Reminder by {ctx.author.mention}!",description=f"{member.mention} {msg.content}"))
 
 def setup(bot):
-    bot.add_cog(reminder(bot))
+    bot.add_cog(Reminder(bot))
 
 
 # Made by DebuggingMySelf

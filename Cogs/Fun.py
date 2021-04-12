@@ -8,7 +8,7 @@ from discord.ext.commands.cooldowns import BucketType
 from asyncdagpi import Client
 import math
 
-class fun(
+class Fun(
     commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
 ):
     def __init__(self, bot):
@@ -163,4 +163,4 @@ class fun(
             await ctx.send(embed=embed)
 
 def setup(bot):
-    bot.add_cog(fun(bot))
+    bot.add_cog(Fun(bot))

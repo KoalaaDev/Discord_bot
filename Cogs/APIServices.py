@@ -23,7 +23,6 @@ class API(commands.Cog, description="Random generator commands"):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as f:
                 return await f.json()
-
     @commands.command()
     async def cat(self, ctx):
         """Gives a random cat picture"""  # Alvin be like meow meow *while sucking staff*
@@ -42,7 +41,6 @@ class API(commands.Cog, description="Random generator commands"):
             embed.set_image(url=pic["file"])
             embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
-
     @commands.command()
     async def reddit(self, ctx, subreddit):
         """Get a random post from a subreddit"""
@@ -62,7 +60,6 @@ class API(commands.Cog, description="Random generator commands"):
                 await ctx.send(embed=embed)
         else:
             await ctx.send(embed=discord.Embed(description="No posts found!"))
-
     @commands.command()
     async def dog(self, ctx):
         """Gives a random dog picture"""  # lincoln is dog woof woof
@@ -71,7 +68,6 @@ class API(commands.Cog, description="Random generator commands"):
         embed.set_image(url=pic["link"])
         embed.set_footer(text="Animal Img Gen Service")
         await ctx.send(embed=embed)
-        
     @commands.is_nsfw()
     @commands.command()
     async def img(self, ctx, *, query):

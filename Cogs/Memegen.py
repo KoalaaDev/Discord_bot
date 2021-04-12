@@ -9,7 +9,7 @@ import traceback
 from asyncdagpi import Client, ImageFeatures
 
 
-class meme(commands.Cog, description="Generate memes and more!"):
+class Meme(commands.Cog, description="Generate memes and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.api = vacefron.Client()
@@ -428,4 +428,4 @@ class meme(commands.Cog, description="Generate memes and more!"):
 
 
 def setup(bot):
-    bot.add_cog(meme(bot))
+    bot.add_cog(Meme(bot))

@@ -10,7 +10,7 @@ from asyncdagpi import Client
 BASE_URL = "https://mikuapi.predeactor.net"
 
 
-class anime(commands.Cog):
+class Anime(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.dagpi = Client("ta1fnmIgn85mcfz32UG5nKgVeRWikmaZxZa392f0XwWC4yaDCOGUYPWscbZ5ULbk")

@@ -24,7 +24,7 @@ def parse(string: str):
     return string
 
 
-class math(commands.Cog, description="Math related commands"):
+class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
     @commands.command(description="Subtract numbers")
@@ -125,4 +125,4 @@ class math(commands.Cog, description="Math related commands"):
         print(eqn)
         await ctx.send(eqn)
 def setup(bot):
-    bot.add_cog(math(bot))
+    bot.add_cog(Math(bot))

@@ -424,7 +424,7 @@ class MusicController:
                     await self.last_songs.put(song)
 
 
-class music(
+class Music(
     commands.Cog,
     wavelink.WavelinkMixin,
     description="Play music on your server!\nYoutube, Spotify, Soundcloud supported!\n Comes with multiple features",
@@ -1457,4 +1457,4 @@ class music(
         process.stdout.close()
 
 def setup(bot):
-    bot.add_cog(music(bot))
+    bot.add_cog(Music(bot))

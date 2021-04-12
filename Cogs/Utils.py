@@ -11,7 +11,7 @@ def is_whitelisted():
         GetUser = await database.fetchrow("SELECT user_id FROM test WHERE user_id = $1", ctx.author.id)
         return True if GetUser else False
     return commands.check(predicate)
-class utility(commands.Cog, description="Get people's avatar and more utility commands!"):
+class Utility(commands.Cog, description="Get people's avatar and more utility commands!"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -133,4 +133,4 @@ class utility(commands.Cog, description="Get people's avatar and more utility co
         stdout, stderr = process.communicate()
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
 def setup(bot):
-    bot.add_cog(utility(bot))
+    bot.add_cog(Utility(bot))

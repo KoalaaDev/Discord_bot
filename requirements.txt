@@ -16,7 +16,7 @@ rich==9.12.3
 spotify
 pytz
 pycountry
-discord-pretty-help==1.2.3
+git+git://github.com/KoalaaDev/discord-pretty-help
 humanreadable
 async-timeout
 watchgod

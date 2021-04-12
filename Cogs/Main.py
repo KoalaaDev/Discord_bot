@@ -2,7 +2,7 @@ from discord.ext import commands
 from subprocess import Popen, PIPE
 import discord
 
-class main(commands.Cog,name="General", description="Basic commands"):
+class Main(commands.Cog,name="General", description="Basic commands"):
     def __init__(self, bot):
         self.bot = bot
     @commands.command(hidden=True, description="Delete messages on mass")
@@ -133,4 +133,4 @@ class main(commands.Cog,name="General", description="Basic commands"):
         members = {member for member in sorted(set(self.bot.get_all_members()))}
         print(members)
 def setup(bot):
-    bot.add_cog(main(bot))
+    bot.add_cog(Main(bot))

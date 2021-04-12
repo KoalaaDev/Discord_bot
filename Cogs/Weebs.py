@@ -99,7 +99,7 @@ class Anime(commands.Cog):
             )
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=["catgirl"])
     @commands.bot_has_permissions(embed_links=True)
     async def neko(self, ctx: commands.Context):
         """Generates random image of a Neko (may take awhile to load)"""
@@ -503,6 +503,46 @@ class Anime(commands.Cog):
                         code=status
                     )
                 )
+            await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def fox(self, ctx: commands.Context, type="img"):
+        """Gives a random fox picture \n If do ~fox girl will give a anime fox girl"""
+        if type == "girl":
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://nekos.life/api/v2/img/fox_girl") as response:
+                    if response.status == 503:
+                        await ctx.send("The API is actually in maintenance, please retry later.")
+                        return
+                    try:
+                        status = response.status
+                        url = await response.json()
+                    except aiohttp.ContentTypeError:
+                            return await ctx.send(
+                                "API unavailable. Status code: {code}\nIt may be due of a "
+                                "maintenance.".format(code=status)
+                            )
+            embed = discord.Embed(
+                title="Fox girl", color=discord.Color.blue()
+            )
+            try:
+                embed.set_image(url=url["url"])
+            except KeyError:
+                await ctx.send(
+                    "I received an incorrect format from the API\nStatus code: {code}".format(
+                        code=status
+                    )
+                )
+            await ctx.send(embed=embed)
+        else:
+            """Gives a random fox picture"""
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://randomfox.ca/floof/") as f:
+                    pic = await f.json()
+            embed = discord.Embed(title="Random Fox", Colour=discord.Colour.random())
+            embed.set_image(url=pic["image"])
+            embed.set_footer(text="Animal Img Gen Service")
             await ctx.send(embed=embed)
 
 def setup(bot):

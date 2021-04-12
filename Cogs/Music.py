@@ -487,7 +487,10 @@ class Music(
         self, node: wavelink.node.Node, event: wavelink.events.TrackEnd
     ):
         controller = self.get_controller(event.player.guild_id)
-        controller.next.set()
+        try:
+            controller.next.set()
+        except AttributeError:
+            pass
         if controller.now_playing and controller.queue.empty() and not controller.auto_play:
             await controller.now_playing.delete()
             controller.now_playing = None
@@ -495,7 +498,7 @@ class Music(
     async def on_track_stuck(
         self, node: wavelink.node.Node, event: wavelink.events.TrackStuck
     ):
-        controller = self.get_controller(event.player)
+        controller = self.get_controller(event.player.guild_id)
         print(f"Track stuck! Skipping!")
         controller.next.set()
 
@@ -515,11 +518,12 @@ class Music(
             gid = value
         try:
             controller = self.controllers[gid]
+            return controller
         except KeyError:
-            controller = MusicController(self.bot, gid, value)
-            self.controllers[gid] = controller
-
-        return controller
+            if not isinstance(value, int):
+                controller = MusicController(self.bot, gid, value)
+                self.controllers[gid] = controller
+                return controller
 
     # @commands.Cog.listener()
     # async def on_voice_state_update(

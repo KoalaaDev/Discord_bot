@@ -64,10 +64,13 @@ class Anime(commands.Cog):
             )
         await ctx.send(embed=embed)
 ####picture
-    @commands.command()
-    async def anime(self, ctx, command):
+    @commands.command(hidden=True)
+    async def anime(self, ctx, *, command):
         """You can either use anime (command) or use the command directly!"""
         cmd = self.bot.get_command(command)
+        if not cmd:
+            search = self.bot.get_command("anisearch")
+            return await search(ctx, command)
         await cmd(ctx)
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)

@@ -60,7 +60,8 @@ class Economy(commands.Cog):
             await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount[0],ctx.author.id)
             await ctx.send(embed=discord.Embed(title="Thanks for voting on top.gg!",description=f"{ctx.author.mention} received {amount[0]} :money_with_wings: for voting!"))
         else:
-            await ctx.send(embed=discord.Embed(title="You did not vote for us today! :(",description=f"Please vote at (top.gg)[https://top.gg/bot/799134976515375154/vote]"))
+            await ctx.send(embed=discord.Embed(title="You did not vote for us today! :(",description=f"Please vote at [top.gg](https://top.gg/bot/799134976515375154/vote)"))
+            ctx.command.reset_cooldown(ctx)
     @commands.command(aliases=['bal'])
     async def balance(self, ctx):
         await ctx.invoke(self.register)

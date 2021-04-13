@@ -5,6 +5,7 @@ import random
 import aiohttp
 import sys
 import traceback
+from .Utils import is_whitelisted
 TIME_DURATION_UNITS = (
     ('week', 60*60*24*7),
     ('day', 60*60*24),
@@ -41,7 +42,7 @@ class Economy(commands.Cog):
 
     @commands.command()
     async def register(self, ctx):
-        """Register's your user balance!\nDon't fuss if you didn't do this as one will be created for you if you haven't!"""
+        """Register's your user balance!\nDon't fuss if you didn't do this as one will be created for you if you haven't!\nNote: If you already registered this command does nothing"""
         is_registered = await self.bot.db.fetchrow("SELECT user_id FROM userbalance WHERE user_id=$1", ctx.author.id)
         if not is_registered:
             await self.bot.db.execute("INSERT INTO userbalance (user_id, balance) VALUES ($1, $2)", ctx.author.id, 0)
@@ -60,5 +61,19 @@ class Economy(commands.Cog):
             await ctx.send(embed=discord.Embed(title="Thanks for voting on top.gg!",description=f"{ctx.author.mention} received {amount[0]} :money_with_wings: for voting!"))
         else:
             await ctx.send(embed=discord.Embed(title="You did not vote for us today! :(",description=f"Please vote at (top.gg)[https://top.gg/bot/799134976515375154/vote]"))
+    @commands.command(aliases=['bal'])
+    async def balance(self, ctx):
+        await ctx.invoke(self.register)
+        fetch = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
+        row = fetch.values()
+        balance = [x for x in row][1]
+        embed = discord.Embed(title=f"{ctx.author.name}'s balance", description=f"Currently you have {balance} :money_with_wings:")
+    @is_whitelisted()
+    @commands.command(hidden=True)
+    async def addtobalance(self, ctx, amount):
+        await ctx.invoke(self.register)
+        await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.author.id)
+        await ctx.send(embed=discord.Embed(description=f"Added {amount} :money_with_wings:"))
+
 def setup(bot):
     bot.add_cog(Economy(bot))

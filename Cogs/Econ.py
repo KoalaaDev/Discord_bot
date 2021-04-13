@@ -68,6 +68,7 @@ class Economy(commands.Cog):
         row = fetch.values()
         balance = [x for x in row][1]
         embed = discord.Embed(title=f"{ctx.author.name}'s balance", description=f"Currently you have {balance} :money_with_wings:")
+        await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)
     async def addtobalance(self, ctx, amount):

@@ -25,3 +25,5 @@ asyncdagpi==3.3.2
 statcord.py
 dblpy
 asyncpg
+matplotlib
+numpy

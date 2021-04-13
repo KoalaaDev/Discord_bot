@@ -31,7 +31,7 @@ class CoinPrompt(menus.Menu):
     async def prompt(self, ctx):
         await self.start(ctx, wait=True)
         return self.result
-class Gambling(commands.Cog):
+class Gambling(commands.Cog, description="Coin flip and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.heads_emoji = get(self.bot.emojis, name="coinhead")
@@ -45,10 +45,10 @@ class Gambling(commands.Cog):
         await self.bot.db.execute("UPDATE userbalance SET balance=balance-$1 WHERE user_id=$2",amount,ctx.author.id)
     async def add(self, ctx, amount):
         await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.author.id)
+
     @commands.command(aliases=["flip"])
     async def coinflip(self, ctx, amount: int):
         """Does a coinflip for 2x the amount you bet"""
-        print(amount)
         if await self.has_money(ctx, amount):
             embed = discord.Embed(title="Bet which side the coin will land on!", description=f"<:coinhead:831475175329366049> **left:for heads**\n<:tails:831475250716868628> **right:for tails**")
             Prompt = CoinPrompt(embed=embed)
@@ -71,7 +71,7 @@ class Gambling(commands.Cog):
                     await message.edit(embed=embed)
 
             else:
-                if Prompt.result == 2:
+                if Prompt.result == 0:
                     await self.add(ctx, amount*2)
                     embed = discord.Embed(title=":tada: YOU WIN :tada:", description=f"{ctx.author.mention} has gained {amount*2} :money_with_wings:!")
                     embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831462137473007627/tails.png")
@@ -80,7 +80,8 @@ class Gambling(commands.Cog):
                     embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount} :money_with_wings:!")
                     embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831462137473007627/tails.png")
                     await message.edit(embed=embed)
-
+        else:
+            embed= discord.embed(title="Oops! It seems you don't have enough to attempt this!")
 
 
 

@@ -9,7 +9,7 @@ import sys
 import traceback
 from discord.ext import commands
 from discord.utils import get
-from pretty_help import PrettyHelp, Paginator
+from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE
@@ -17,16 +17,6 @@ from difflib import get_close_matches
 import asyncpg
 
 
-class CustomHelp(PrettyHelp):
-    def __init__(self, **options):
-        super().__init__(**options)
-    async def send_cog_help(self, cog: commands.Cog):
-        async with self.get_destination().typing():
-            filtered = await self.filter_commands(
-                cog.get_commands(), sort=self.sort_commands
-            )
-            self.paginator.add_cog(cog, filtered)
-        await self.send_pages()
 
 intents = discord.Intents.all()
 intents.typing = False
@@ -71,7 +61,7 @@ client = commands.Bot(
     description="A bot with no restrictions!",
     case_insensitive=True,
     intents=intents,
-    help_command=CustomHelp(no_category="Main"),
+    help_command=PrettyHelp(no_category="Main"),
     activity=discord.Activity(type=discord.ActivityType.listening, name="help")
 )
 
@@ -119,7 +109,7 @@ async def on_connect():
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        if ctx.guild.id == 336642139381301249:
+        if len(ctx.guild.members) > 40000:
             return
         cmd = ctx.invoked_with
         cmds = [cmd.name for cmd in client.commands]

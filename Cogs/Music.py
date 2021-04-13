@@ -561,7 +561,7 @@ class Music(
     #                 return await player.connect(before.channel.id)
     async def cog_before_invoke(self, ctx: commands.Context):
         controller = self.get_controller(ctx)
-        player = self.bot.wavelink.get_player(controller.guild_id)
+        player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_playing and not controller.queue.empty() and not player.current and player.is_connected:
             message = await ctx.send(embed=discord.Embed(description="Music player got stuck! Attempting to resume!"))
             await ctx.invoke(self.stop)

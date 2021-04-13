@@ -40,7 +40,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
         balance = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
         balance = balance.values()
         money = [x for x in balance][1]
-        return True if money>amount else False
+        return True if money>=amount else False
     async def deduct(self, ctx, amount):
         await self.bot.db.execute("UPDATE userbalance SET balance=balance-$1 WHERE user_id=$2",amount,ctx.author.id)
     async def add(self, ctx, amount):
@@ -82,7 +82,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                     await message.edit(embed=embed)
         else:
             embed= discord.embed(title="Oops! It seems you don't have enough to attempt this!")
-
+            await ctx.send(embed=embed)
 
 
 def setup(bot):

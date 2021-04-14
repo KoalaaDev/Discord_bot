@@ -132,5 +132,12 @@ class Main(commands.Cog,name="General", description="Basic commands"):
         await ctx.send("Getting all members...", delete_after=19)
         members = {member for member in sorted(set(self.bot.get_all_members()))}
         print(members)
+    @commands.command()
+    async def privacy(self, ctx):
+        """Our privacy policy"""
+        embed= discord.Embed(title="Our privacy policy",description="We here at **Doorbanger** take your privacy very seriously!\nWe collect information such as **Member ID**, **Guild ID** and **Anonymous Usage of Commands** in order to further improve our service!")
+        embed.set_footer(text="By using our bot, you agree that we collect data as listed.")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/799211893646295051/831897629708255253/27833342_1.jpg")
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Main(bot))

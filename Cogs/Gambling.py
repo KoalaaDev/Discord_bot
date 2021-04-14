@@ -1,8 +1,7 @@
-from discord.ext import commands
+from discord.ext import commands, menus, tasks
 import discord
 import asyncio
 import asyncpg
-from discord.ext import menus
 import random
 from discord.utils import get
 
@@ -31,11 +30,39 @@ class CoinPrompt(menus.Menu):
     async def prompt(self, ctx):
         await self.start(ctx, wait=True)
         return self.result
+class CrashGUI(menus.Menu):
+    def __init__(self, *, embed:discord.Embed):
+        super().__init__(timeout=30.0, delete_message_after=True)
+        self.embed = embed
+        self.multiplier = 1.0
+        self.max_multiplier = random.uniform()
+        self.result = None
+        self.message = None
+    async def send_initial_message(self, ctx, channel):
+        return self.message = await channel.send(embed=self.embed)
+    @tasks.loop(seconds=2.0)
+    async def game_loop(self, ctx):
+
+    @menus.button(':octagonal_sign:')
+    async def do_deny(self, payload):
+        self.stop()
 class Gambling(commands.Cog, description="Coin flip and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.heads_emoji = get(self.bot.emojis, name="coinhead")
         self.tails_emoji = get(self.bot.emojis, name="tails")
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            try:
+                return await ctx.send(
+                    embed=discord.Embed(description=f"Oops! Missing {error.param.name}, try run help on the command.")
+                )
+            except discord.HTTPException:
+                pass
+        print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
     async def has_money(self, ctx, amount):
         balance = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
         balance = balance.values()
@@ -81,9 +108,12 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                     embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831462137473007627/tails.png")
                     await message.edit(embed=embed)
         else:
-            embed= discord.embed(title="Oops! It seems you don't have enough to attempt this!")
+            embed= discord.embed(title="Oops! It seems you don't have enough to attempt this! Maybe try ~beg?")
             await ctx.send(embed=embed)
 
+    @commands.command()
+    async def crash(self, ctx, amount: int):
+        pass
 
 def setup(bot):
     bot.add_cog(Gambling(bot))

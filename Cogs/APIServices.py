@@ -44,6 +44,7 @@ class API(commands.Cog, description="Random generator commands"):
     @commands.command()
     async def reddit(self, ctx, subreddit):
         """Get a random post from a subreddit"""
+        subreddit = subreddit.strip("r/")
         data = await self.getJSON(f"https://api.iapetus11.me/reddit/gimme/{subreddit}")
         if data.get("success"):
             if data.get("nsfw") and not ctx.message.channel.is_nsfw():

@@ -369,27 +369,28 @@ class MusicController:
                                 await self.now_playing.edit(embed=self.build_embed())
                             list_of_songs = list(self.queue._queue)
                             await self.next.wait()
-                    if self.now_playing:
-                        await self.now_playing.delete()
-                        self.now_playing = None
-                    self.next.clear()
-                    await player.play(song)
-                    MusicEmbed = discord.Embed(
-                        title="Now playing",
-                        colour=discord.Colour.random(),
-                        description=f"[{song}]({self.now_playing_uri}) [{song.requester}]",
-                    )
-                    MusicEmbed.set_footer(
-                        text=f"{self.bot.user.name} | {player.node.region}"
-                    )
-                    if not self.now_playing:
-                        EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
-                        await EmbeddedMessage.start(self.context)
-                        self.now_playing = EmbeddedMessage.message
                     else:
-                        await self.now_playing.edit(embed=self.build_embed())
-                    self.current_track = song
-                    await self.next.wait()
+                        if self.now_playing and not await self.is_position_fresh():
+                            await self.now_playing.delete()
+                            self.now_playing = None
+                        self.next.clear()
+                        await player.play(song)
+                        MusicEmbed = discord.Embed(
+                            title="Now playing",
+                            colour=discord.Colour.random(),
+                            description=f"[{song}]({self.now_playing_uri}) [{song.requester}]",
+                        )
+                        MusicEmbed.set_footer(
+                            text=f"{self.bot.user.name} | {player.node.region}"
+                        )
+                        if not self.now_playing:
+                            EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
+                            await EmbeddedMessage.start(self.context)
+                            self.now_playing = EmbeddedMessage.message
+                        else:
+                            await self.now_playing.edit(embed=self.build_embed())
+                        self.current_track = song
+                        await self.next.wait()
             if (self.auto_play and not self.loop and self.queue.empty() and not self.auto_play_queue.empty()):
                 while (self.auto_play and self.queue.empty() and not self.auto_play_queue.empty()):
                     if self.now_playing and not await self.is_position_fresh():
@@ -491,7 +492,7 @@ class Music(
             controller.next.set()
         except AttributeError:
             pass
-        if controller.now_playing and controller.queue.empty() and not controller.auto_play:
+        if controller.now_playing and controller.queue.empty() and not controller.auto_play and not controller.loop:
             await controller.now_playing.delete()
             controller.now_playing = None
     @wavelink.WavelinkMixin.listener()

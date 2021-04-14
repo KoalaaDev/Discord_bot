@@ -39,10 +39,10 @@ class CrashGUI(menus.Menu):
         self.result = None
         self.message = None
     async def send_initial_message(self, ctx, channel):
-        return self.message = await channel.send(embed=self.embed)
+        return await channel.send(embed=self.embed)
     @tasks.loop(seconds=2.0)
     async def game_loop(self, ctx):
-
+        pass
     @menus.button(':octagonal_sign:')
     async def do_deny(self, payload):
         self.stop()

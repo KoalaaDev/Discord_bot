@@ -135,8 +135,12 @@ class Main(commands.Cog,name="General", description="Basic commands"):
     @commands.command()
     async def privacy(self, ctx):
         """Our privacy policy"""
-        embed= discord.Embed(title="Our privacy policy",description="We here at **Doorbanger** take your privacy very seriously!\nWe collect information such as **Member ID**, **Guild ID** and **Anonymous Usage of Commands** in order to further improve our service!")
-        embed.set_footer(text="By using our bot, you agree that we collect data as listed.")
+        embed= discord.Embed(title="Our privacy policy",description="We here at **Doorbanger** take your privacy very seriously!",url="https://discord.gg/YWb3AdW")
+        embed.add_field(name="What information is stored?", value="We collect information such as:\n:small_blue_diamond:**User ID**\n*To store account balances*\n:small_blue_diamond:**Guild ID**\n*To store playlists related to the server*\n:small_blue_diamond:**Anonymous Usage of Commands**\n*For statistics in order to further improve our usability and service!*")
+        embed.add_field(name="Who gets this data?", value="The data collected is only available to administrators and developers who use it to further improve the bot and make it easier to use!")
+        embed.add_field(name="Third Party Data Sharing",value="Doorbanger shares data with Statcord, a service that publicly provides the bot's usage statistics.\nYou can read Statcord's [Privacy Policy](https://discordlabs.org/privacy)")
+        embed.add_field(name="How to Remove your data?",value="If requested, we will delete any data related to the user by contacting us using ~info or joining our support server by clicking the blue 'Our privacy policy' on top")
+        embed.set_footer(text="By using our bot, you agree that we collect data as listed and we reserve the right to change this without notifying our users.")
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/799211893646295051/831897629708255253/27833342_1.jpg")
         await ctx.send(embed=embed)
 def setup(bot):

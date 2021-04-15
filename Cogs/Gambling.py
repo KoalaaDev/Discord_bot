@@ -32,20 +32,19 @@ class CoinPrompt(menus.Menu):
         return self.result
 class CrashGUI(menus.Menu):
     def __init__(self, *, embed:discord.Embed):
-        super().__init__(timeout=30.0, delete_message_after=True)
+        super().__init__()
         self.embed = embed
-        self.multiplier = 1.0
-        self.max_multiplier = random.uniform()
-        self.result = None
-        self.message = None
+        self.result = False
     async def send_initial_message(self, ctx, channel):
         return await channel.send(embed=self.embed)
-    @tasks.loop(seconds=2.0)
-    async def game_loop(self, ctx):
-        pass
-    @menus.button(':octagonal_sign:')
+
+    @menus.button('🛑')
     async def do_deny(self, payload):
+        self.result = True
         self.stop()
+    async def prompt(self, ctx):
+        await self.start(ctx)
+        return self.result
 class Gambling(commands.Cog, description="Coin flip and more!"):
     def __init__(self, bot):
         self.bot = bot
@@ -67,7 +66,13 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
         balance = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
         balance = balance.values()
         money = [x for x in balance][1]
-        return True if money>=amount else False
+
+        if money>=amount:
+            return True
+        else:
+            embed= discord.Embed(title="Oops! It seems you don't have enough to attempt this! Maybe try ~beg?")
+            await ctx.send(embed=embed)
+            return False
     async def deduct(self, ctx, amount):
         await self.bot.db.execute("UPDATE userbalance SET balance=balance-$1 WHERE user_id=$2",amount,ctx.author.id)
     async def add(self, ctx, amount):
@@ -107,13 +112,40 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                     embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount} :money_with_wings:!")
                     embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831462137473007627/tails.png")
                     await message.edit(embed=embed)
-        else:
-            embed= discord.embed(title="Oops! It seems you don't have enough to attempt this! Maybe try ~beg?")
-            await ctx.send(embed=embed)
+
 
     @commands.command()
     async def crash(self, ctx, amount: int):
-        pass
+        if await self.has_money(ctx, amount):
+            embed = discord.Embed(description="Press the stop button to cash out:")
+            embed.set_author(name="Crash")
+            CrashGame = CrashGUI(embed=embed)
+            await CrashGame.prompt(ctx)
+            CrashPoint = round(999999999 / random.randint(1, 1000000000),1)
+            start = 1.0
+            while not CrashGame.result:
+                start = round(start+0.2,1)
+                profit = round(amount*start-amount,2)
+                embed.description = "Press the stop button to cash out:"+f"\n**Multiplier**:`{start}x`"+f"\n**Profit**:`{profit}` :money_with_wings:"
+                await CrashGame.message.edit(embed=embed)
+                to_continue = random.choices([1,0],weights=[1,2])[0]
 
+                if start>CrashPoint:
+                    if to_continue == 1:
+                        CrashPoint += round(999999999 / random.randint(1, 1000000000),1)
+                    else:
+                        embed = discord.Embed(description=f"Sorry {ctx.author.mention}, but you didnt cash out in time!")
+                        embed.set_author(name="Crashed!")
+                        embed.description += f"\nYou lost **{amount}** :money_with_wings:"
+                        await CrashGame.message.edit(embed=embed)
+                        await self.deduct(ctx, amount)
+                        CrashGame.stop()
+                        break
+                await asyncio.sleep(2)
+            else:
+                embed = discord.Embed(description=f"Congrats {ctx.author.mention}, you cashed out in time!\n**Multiplier**:`{start}x`\n**Crashes at**:`{CrashPoint if CrashPoint%2==0 else CrashPoint-0.1}x`")
+                embed.set_author(name="Cashed out!")
+                await self.add(ctx, profit)
+                await CrashGame.message.edit(embed=embed)
 def setup(bot):
     bot.add_cog(Gambling(bot))

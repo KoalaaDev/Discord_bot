@@ -108,7 +108,7 @@ class Paginator(menus.ListPageSource):
         offset = (menu.current_page * self.per_page) + 1
 
         fields = []
-        table = ("\n".join(f"{num}. {entry}" for num, entry, in enumerate(entries,start=1)))
+        table = ("\n".join(f"**{num}**. {entry}" for num, entry, in enumerate(entries,start=1)))
 
         fields.append((self.title, table))
         return await self.write(menu, offset, fields)

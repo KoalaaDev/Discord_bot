@@ -135,7 +135,7 @@ class Board:
         return "```\n{}```".format(_board)
 
 
-class TicTacToe(commands.Cog):
+class Games(commands.Cog):
     """Pretty self-explanatory"""
 
     boards = {}

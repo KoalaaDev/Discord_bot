@@ -61,7 +61,6 @@ client = commands.Bot(
     description="A bot with no restrictions!",
     case_insensitive=True,
     intents=intents,
-    help_command=PrettyHelp(no_category="Main"),
     activity=discord.Activity(type=discord.ActivityType.listening, name="help")
 )
 
@@ -79,7 +78,7 @@ elif COGS_CONFIG == "normal":
     normal_blacklist = ["Grief", "Test", "Time", "Chess"]
     excluded = len(normal_blacklist)
     Cogs_to_load = [
-        "Cogs." + cog.strip(".py")
+        "Cogs." + cog[:-3]
         for cog in os.listdir("Cogs/")
         if "py" in cog
         and "pycache" not in cog

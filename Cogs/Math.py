@@ -27,9 +27,7 @@ def parse(string: str):
 class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
-    @commands.command(description="Subtract numbers")
-    async def minus(ctx, left: int, right: int):
-        await ctx.send(left - right)
+
     @commands.command()
     async def math(self,ctx, message: str):
         """Does some math for you!"""
@@ -60,12 +58,7 @@ class Math(commands.Cog, description="Math related commands"):
 
         await ctx.send(eqn)
 
-    @commands.command(
-        aliases=[
-            "differentiation",
-            "diff",
-        ]
-    )
+    @commands.command(aliases=["differentiation","diff",])
     async def differentiate(self, ctx, *, equation):
         eqn = diff(parse(equation))
         await ctx.send(eqn)

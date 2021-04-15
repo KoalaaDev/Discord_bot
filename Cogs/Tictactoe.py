@@ -297,7 +297,7 @@ class TicTacToe(commands.Cog):
         # We don't need to do anything weird with assigning x_player to something
         # it is already a member object, just use it
         fmt += (
-            "I have decided at random, and {} is going to be ```x``` this game. It is your turn first! "
+            "I have decided at random, and {} is going to be `x` this game. It is your turn first! "
             "Use the {}tictactoe command, and a position, to choose where you want to play".format(
                 x_player.mention, ctx.prefix
             )

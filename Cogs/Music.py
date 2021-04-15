@@ -60,6 +60,65 @@ class Track(wavelink.Track):
         super().__init__(*args)
 
         self.requester = kwargs.get("requester")
+class Paginator(menus.ListPageSource):
+
+    def __init__(
+            self, ctx, data, name, title, per_page, color=0x3498DB, footer="{total}",
+            clear_reaction_after=False, delete_message_after=False
+    ):
+        """
+        A function to paginate a list and returning embed.
+        :param ctx: Context to do something. [commands.Context]
+        :param data: Data to iterate and turn it to paginator [list]
+        :param name: Name of the object on the data [str]
+        :param title: Title of the embed [str]
+        :param per_page: How many data to display every page on embed [int]
+        :param color: Color of the embed [int / discord.Colour]
+        :param footer: Footer of the embed [str] | default to '{total}' "{total} (1-x of x {name}) "
+        :param clear_reaction_after: Clear the reaction after the paginator stopped [bool] | default to False
+        :param delete_message_after: Delete the messages after the paginator stopped [bool] | default to False
+        """
+        self.title: str = title
+        self.name: str = name
+        self.ctx: Context = ctx
+        self.data: list or tuple = data
+        self.page: int = per_page
+        self.color: Union[discord.Color, int] = color
+        self.footer: str = footer
+        self.clear_reaction: bool = clear_reaction_after
+        self.delete_message: bool = delete_message_after
+
+        super().__init__(data, per_page=self.page)
+
+    # noinspection PyUnusedLocal
+    async def write(self, menu, offset, fields=None):
+        total_data = len(self.entries)
+        total = f"{offset:,} - {min(total_data, offset + self.per_page -1):,} of {total_data:,} {self.name}"
+
+        e = discord.Embed(color=self.color)
+        e.set_footer(text=self.footer.format(total=total))
+
+        for name, value in fields:
+            e.add_field(name=name, value=value, inline=False)
+
+        return e
+
+    # noinspection PyUnresolvedReferences
+    async def format_page(self, menu, entries):
+        offset = (menu.current_page * self.per_page) + 1
+
+        fields = []
+        table = ("\n".join(f"{num}. {entry}" for num, entry, in enumerate(entries,start=1)))
+
+        fields.append((self.title, table))
+        return await self.write(menu, offset, fields)
+
+    async def start(self):
+        page = Paginator(self.ctx, self.data, self.name, self.title, int(self.per_page), self.color, self.footer)
+        menu = MenuPages(
+            source=page, clear_reactions_after=self.clear_reaction, delete_message_after=self.delete_message
+        )
+        await menu.start(self.ctx)
 
 class InteractiveEmbed(menus.Menu):
     """The Players interactive controller menu class."""
@@ -69,6 +128,7 @@ class InteractiveEmbed(menus.Menu):
 
         self.embed = embed
         self.player = player
+        self.loop_settings = itertools.cycle(["q",""])
     def update_context(self, payload: discord.RawReactionActionEvent):
         """Update our context with the user who reacted."""
         ctx = copy.copy(self.ctx)
@@ -120,8 +180,16 @@ class InteractiveEmbed(menus.Menu):
         ctx.command = command
 
         await self.bot.invoke(ctx)
+    @menus.button(emoji='\u23F8')
+    async def pause_command(self, payload: discord.RawReactionActionEvent):
+        """Pause button"""
+        ctx = self.update_context(payload)
 
-    @menus.button(emoji='\u23F9')
+        command = self.bot.get_command('pause')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+    @menus.button(emoji='🛑')
     async def stop_command(self, payload: discord.RawReactionActionEvent):
         """Stop button."""
         ctx = self.update_context(payload)
@@ -488,6 +556,8 @@ class Music(
         self, node: wavelink.node.Node, event: wavelink.events.TrackEnd
     ):
         controller = self.get_controller(event.player.guild_id)
+        if not controller:
+            return
         try:
             controller.next.set()
         except AttributeError:
@@ -934,29 +1004,8 @@ class Music(
         elif not player.is_connected:
             return
         else:
-            if controller.queue.qsize() % 5 == 0:
-                pages = int(controller.queue.qsize() / 5)
-            else:
-                pages = (controller.queue.qsize() // 5) + 1
-            pagenumber = itertools.count(1)
-            embeds = []
-            for x in range(pages + 1):
-                upcoming = list(
-                    itertools.islice(controller.queue._queue, x * 5, x * 5 + 5)
-                )
-                fmt = "\n".join(
-                    f"```{k}. {str(song)}```"
-                    for k, song in enumerate(upcoming, start=x * 5 + 1)
-                )
-                page = discord.Embed(title=f"Queue", colour=discord.Colour.random())
-                page.add_field(name=f"Now playing: `{player.current}`", value=fmt)
-                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
-                embeds.append(page)
-            try:
-                await ctx.send(embed=embeds[pageno - 1])
-            except IndexError:
-                await ctx.send(embed=discord.Embed(description="Could not get page!"))
-
+            pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`[{x.requester}]" for x in list(controller.queue._queue)],"in Queue",f"Now playing {player.current}\nUp next!",5), clear_reactions_after=True)
+            await pages.start(ctx)
     @commands.command(aliases=["aq"])
     async def autoqueue(self, ctx, pageno=1):
         """Retrieve the auto play queue in pages of 5 per page."""
@@ -972,34 +1021,11 @@ class Music(
                 embed=discord.Embed(description="Autoplay queue empty!")
             )
         else:
-            if controller.auto_play_queue.qsize() % 5 == 0:
-                pages = int(controller.queue.qsize() / 5)
+            if controller.queue.empty():
+                pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`" for x in list(controller.auto_play_queue._queue)],"in Autoplay Queue",f"Now playing {player.current}\nUp next!",5), clear_reactions_after=True)
             else:
-                pages = (controller.auto_play_queue.qsize() // 5) + 1
-            pagenumber = itertools.count(1)
-            embeds = []
-            for x in range(pages + 1):
-                upcoming = list(
-                    itertools.islice(
-                        controller.auto_play_queue._queue, x * 5, x * 5 + 5
-                    )
-                )
-                print(upcoming)
-                fmt = "\n".join(
-                    f"```{k}. {str(song)}```"
-                    for k, song in enumerate(upcoming, start=x * 5 + 1)
-                )
-                page = discord.Embed(
-                    title=f"Autoplay Queue", colour=discord.Colour.random()
-                )
-                page.add_field(name=f"Now playing: `{player.current}`", value=fmt)
-                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
-                embeds.append(page)
-            try:
-                await ctx.send(embed=embeds[pageno - 1])
-            except IndexError:
-                await ctx.send(embed=discord.Embed(description="Could not get page!"))
-
+                pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`" for x in list(controller.auto_play_queue._queue)],"in Autoplay Queue",f"Now playing {player.current}",5), clear_reactions_after=True)
+            await pages.start(ctx)
     @commands.command(aliases=["lq"])
     async def lastqueue(self, ctx, pageno=1):
         """Retrieve the song history in pages of 5 per page."""
@@ -1038,7 +1064,8 @@ class Music(
                 await ctx.send(embed=embeds[pageno - 1])
             except IndexError:
                 await ctx.send(embed=discord.Embed(description="Could not get page!"))
-
+            pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`" for x in list(controller.last_songs._queue)],"in History",f"Last played songs",5), clear_reactions_after=True)
+            await pages.start(ctx)
     @commands.command(aliases=["disconnect", "dc"])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""

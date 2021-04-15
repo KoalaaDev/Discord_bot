@@ -107,7 +107,7 @@ class CustomHelp(commands.MinimalHelpCommand):
         if await ctx.bot.is_owner(ctx.author):
             group_commands = [command for command in group.commands]
             if len(group_commands) == 0:
-                return await ctx.send("This group doesn't have any sub command")
+                return await ctx.send(embed=discord.Embed(description="This command is still Work in progress! Check back later!"))
         else:
             group_commands = [
                 command
@@ -131,6 +131,8 @@ class CustomHelp(commands.MinimalHelpCommand):
         ctx = self.context
         """:class:`str`: Returns help command's ending note. This is mainly useful to override for i18n purposes."""
         return f"Thanks for using {ctx.bot.user.name} ❤️ (Total Commands: {len([command for command in ctx.bot.commands if command.hidden == False or command.enabled == True])})"
+    async def send_cog_help(self, cog):
+        pass
 class Help(commands.Cog):
     """Help command cog"""
 

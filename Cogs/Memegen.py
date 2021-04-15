@@ -145,7 +145,7 @@ class Meme(commands.Cog, description="Generate memes and more!"):
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def challenge(self, ctx, *, text:str):
-        img = await self.session("https://api.cool-img-api.ml/challenge",{'text':text})
+        embed, img = await self.session("https://api.cool-img-api.ml/challenge",{'text':text})
         await ctx.send(file=img, embed=embed)
     @commands.command()
     async def clyde(self, ctx, *, text:str):

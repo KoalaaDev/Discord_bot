@@ -321,6 +321,30 @@ class Games(commands.Cog):
         del self.boards[ctx.message.guild.id]
         await ctx.send(embed=discord.Embed(title="I have just stopped the game of TicTacToe, a new should be able to be started now!"))
 
+class Hangman():
+    def __init__(self, userID):
+        self.userID = userID
+        self.token = None
+        self.hangman = None
+    async def start_hangman(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://hangman-api.herokuapp.com/hangman") as response:
+                HangmanGame = await response.json()
+                self.hangman = HangmanGame.get("hangman")
+                token = HangmanGame.get("token")
+                #start hangman game
+    async def guess_hangman(self, letter: str):
+        async with aiohttp.ClientSession() as session:
+            async with session.put("https://hangman-api.herokuapp.com/hangman",params={"token": self.token, "letter": letter}) as response:
+                if respone.status == 304:
+                    return "Already tried that letter"
+                try:
+                    status = response.status
+                    HangmanGame = await response.json()
+                    self.hangman = HangmanGame.get("hangman")
+                    self.token = HangmanGame.get("token")
+                    return True if response.get('correct') else False
+                    #guess the letter in the hangman game
 
 def setup(bot):
     bot.add_cog(Games(bot))

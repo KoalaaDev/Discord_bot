@@ -72,7 +72,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)
-    async def addtobalance(self, ctx, amount):
+    async def addtobalance(self, ctx, amount: int):
         await ctx.invoke(self.register)
         await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.author.id)
         await ctx.send(embed=discord.Embed(description=f"Added {amount} :money_with_wings:"))

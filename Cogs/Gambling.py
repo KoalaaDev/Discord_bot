@@ -128,22 +128,22 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 profit = round(amount*start-amount,2)
                 embed.description = "Press the stop button to cash out:"+f"\n**Multiplier**:`{start}x`"+f"\n**Profit**:`{profit}` :money_with_wings:"
                 await CrashGame.message.edit(embed=embed)
-                to_continue = random.choices([1,0],weights=[1,2])[0]
+                to_continue = random.choices([1,0],weights=[1,4])[0]
 
                 if start>CrashPoint:
                     if to_continue == 1:
                         CrashPoint += round(999999999 / random.randint(1, 1000000000),1)
                     else:
-                        embed = discord.Embed(description=f"Sorry {ctx.author.mention}, but you didnt cash out in time!")
+                        embed = discord.Embed(description=f"Sorry {ctx.author.mention}, but you didnt cash out in time!\n**Crash Multiplier**: `{CrashPoint}x`")
                         embed.set_author(name="Crashed!")
                         embed.description += f"\nYou lost **{amount}** :money_with_wings:"
                         await CrashGame.message.edit(embed=embed)
                         await self.deduct(ctx, amount)
                         CrashGame.stop()
                         break
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
             else:
-                embed = discord.Embed(description=f"Congrats {ctx.author.mention}, you cashed out in time!\n**Multiplier**:`{start}x`\n**Crashes at**:`{CrashPoint if CrashPoint%2==0 else CrashPoint-0.1}x`")
+                embed = discord.Embed(description=f"Congrats {ctx.author.mention}, you cashed out in time!\n**Multiplier**:`{start}x`\n**Crashes at**:`{CrashPoint if CrashPoint%2==0 else CrashPoint-0.1}x`\n**Profit**:`{profit}` :money_with_wings:")
                 embed.set_author(name="Cashed out!")
                 await self.add(ctx, profit)
                 await CrashGame.message.edit(embed=embed)

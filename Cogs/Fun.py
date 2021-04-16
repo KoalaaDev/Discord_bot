@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, menus
 import random
 import discord
 import yaml
@@ -9,7 +9,7 @@ from asyncdagpi import Client
 import math
 from bs4 import BeautifulSoup
 import aiohttp
-
+from Cogs.Music import Paginator
 class Fun(
     commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
 ):
@@ -197,5 +197,27 @@ class Fun(
         )
         em.set_image(url=f"https://www.lovecalculator.com/{result_image}")
         await ctx.send(embed=em)
+    @commands.command()
+    async def penis(self, ctx, *users: discord.Member):
+       """Detects user's penis length
+       This is 100% accurate.
+       Enter multiple users for an accurate comparison!"""
+
+       dongs = {}
+       msg = ""
+       state = random.getstate()
+
+       for user in users:
+           random.seed(user.id)
+           dongs[user] = "8{}D".format("=" * random.randint(0, 30))
+
+       random.setstate(state)
+       dongs = sorted(dongs.items(), key=lambda x: x[1])
+
+       for user, dong in dongs:
+           msg += "**{}'s size:**\n{}\n".format(user.display_name, dong)
+
+       Page = menus.MenuPages(Paginator(ctx, dongs, "Requested PP sizes", "PP size generator", 1), clear_reactions_after=True)
+       await Page.start(ctx)
 def setup(bot):
     bot.add_cog(Fun(bot))

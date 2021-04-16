@@ -1038,35 +1038,6 @@ class Music(
         if controller.last_songs.empty():
             return await ctx.send(embed=discord.Embed(description="Song history empty"))
         else:
-            if not controller.last_songs._queue:
-                return
-            if controller.last_songs.qsize() % 5 == 0:
-                pages = int(controller.last_songs.qsize() / 5)
-            else:
-                pages = (controller.last_songs.qsize() // 5) + 1
-            pagenumber = itertools.count(1)
-            embeds = []
-            for x in range(pages + 1):
-                upcoming = reversed(
-                    list(
-                        itertools.islice(controller.last_songs._queue, x * 5, x * 5 + 5)
-                    )
-                )
-                fmt = "\n".join(
-                    f"{k}. [{str(song)}]({song.uri})"
-                    for k, song in enumerate(upcoming, start=x * 5 + 1)
-                )
-                page = discord.Embed(
-                    title=f"Song history",
-                    description=fmt,
-                    colour=discord.Colour.random(),
-                )
-                page.set_footer(text=f"Page {next(pagenumber)}/{pages}")
-                embeds.append(page)
-            try:
-                await ctx.send(embed=embeds[pageno - 1])
-            except IndexError:
-                await ctx.send(embed=discord.Embed(description="Could not get page!"))
             pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`" for x in list(controller.last_songs._queue)],"in History",f"Last played songs",5), clear_reactions_after=True)
             await pages.start(ctx)
     @commands.command(aliases=["disconnect", "dc"])

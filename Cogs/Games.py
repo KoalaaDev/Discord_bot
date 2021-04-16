@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 
-
+import asyncio
 import re
 import random
 import sys
@@ -134,12 +134,60 @@ class Board:
         )
         return "```\n{}```".format(_board)
 
+class Hangman():
+    def __init__(self, userID):
+        self.userID = userID
+        self.token = None
+        self.hangman = None
+    async def start_hangman(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://hangman-api.herokuapp.com/hangman") as response:
+                HangmanGame = await response.json()
+                self.hangman = HangmanGame.get("hangman")
+                token = HangmanGame.get("token")
+                #start hangman game
+    async def guess_hangman(self, letter: str):
+        async with aiohttp.ClientSession() as session:
+            async with session.put("https://hangman-api.herokuapp.com/hangman",params={"token": self.token, "letter": letter }) as response:
+                if respone.status == 304:
+                    return "Already tried that letter"
+                try:
+                    status = response.status
+                    HangmanGame = await response.json()
+                    self.hangman = HangmanGame.get("hangman")
+                    self.token = HangmanGame.get("token")
+                    return True if response.get('correct') else False
+                    # if False:
+                    #     try:
+                    #         next(stage)
+                    #     except ERROR:
+                    #         return "you die"
+                except AttributeError:
+                    return
+                    #guess the letter in the hangman game
+    async def hint_hangman(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://hangman-api.herokuapp.com/hangman/hint",params={"token": self.token }) as response:
+                HangmanGame = await response.json()
+                HangmanHint = HangmanGame.get("hint")
+                self.token = HangmanGame.get("token")
+                return HangmanHint
+                #give hints
+
+    async def solution_hangman(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://hangman-api.herokuapp.com/hangman",params={"token": self.token }) as response:
+                HangmanGame = await response.json()
+                HangmanSolution = HangmanGame.get("solution")
+                self.token = HangmanGame.get("token")
+                return HangmanSolution
 
 class Games(commands.Cog):
     """Pretty self-explanatory"""
 
     boards = {}
-
+    def __init__(self, bot):
+        self.bot = bot
     def create(self, server_id, player1, player2):
         self.boards[server_id] = Board(player1, player2)
 
@@ -321,30 +369,74 @@ class Games(commands.Cog):
         del self.boards[ctx.message.guild.id]
         await ctx.send(embed=discord.Embed(title="I have just stopped the game of TicTacToe, a new should be able to be started now!"))
 
-class Hangman():
-    def __init__(self, userID):
-        self.userID = userID
-        self.token = None
-        self.hangman = None
-    async def start_hangman(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.post("https://hangman-api.herokuapp.com/hangman") as response:
-                HangmanGame = await response.json()
-                self.hangman = HangmanGame.get("hangman")
-                token = HangmanGame.get("token")
-                #start hangman game
-    async def guess_hangman(self, letter: str):
-        async with aiohttp.ClientSession() as session:
-            async with session.put("https://hangman-api.herokuapp.com/hangman",params={"token": self.token, "letter": letter}) as response:
-                if respone.status == 304:
-                    return "Already tried that letter"
-                try:
-                    status = response.status
-                    HangmanGame = await response.json()
-                    self.hangman = HangmanGame.get("hangman")
-                    self.token = HangmanGame.get("token")
-                    return True if response.get('correct') else False
-                    #guess the letter in the hangman game
-
+    @commands.group()
+    @commands.bot_has_permissions(send_messages=True)
+    async def hangman(self, ctx):
+        Hangman(ctx.author.id)
+        Stages = [
+"""```
+-------------
+|
+|
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|
+|
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|           |
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|          /|
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|          /|\\
+|
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|          /|\\
+|          /
+|
+--------------------------```""",
+"""```
+-------------
+|           |
+|           O
+|          /|\\
+|          / \\
+|
+--------------------------```"""]
+        stages = iter(stages)
 def setup(bot):
     bot.add_cog(Games(bot))

@@ -386,8 +386,11 @@ class MusicController:
         await player.set_volume(self.volume)
         while True:
             if self.now_playing and not await self.is_position_fresh():
-                await self.now_playing.delete()
-                self.now_playing = None
+                try:
+                    await self.now_playing.delete()
+                    self.now_playing = None
+                except AttributeError:
+                    pass
             if self.current_track:
                 self.current_track = None
             self.next.clear()

@@ -7,6 +7,8 @@ import os
 from discord.ext.commands.cooldowns import BucketType
 from asyncdagpi import Client
 import math
+from bs4 import BeautifulSoup
+import aiohttp
 
 class Fun(
     commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
@@ -149,6 +151,51 @@ class Fun(
         yomama = await self.dagpi.yomama()
         embed = discord.Embed(title=yomama)
         await ctx.send(embed=embed)
+    @commands.command(aliases=["lovecalc"])
+    async def lovecalculator(
+        self, ctx: commands.Context, lover: discord.Member, loved: discord.Member
+    ):
+        """Calculate the love percentage!"""
 
+        x = lover.display_name
+        y = loved.display_name
+
+        url = "https://www.lovecalculator.com/love.php?name1={}&name2={}".format(
+            x.replace(" ", "+"), y.replace(" ", "+")
+        )
+        async with aiohttp.ClientSession(headers={"Connection": "keep-alive"}) as session:
+            async with session.get(url, ssl=False) as response:
+                resp = await response.text()
+        print(resp)
+        soup_object = BeautifulSoup(resp, "html.parser")
+
+        description = soup_object.find("div", class_="result__score").get_text()
+
+        if description is None:
+            description = "Dr. Love is busy right now"
+        else:
+            description = description.strip()
+
+        result_image = soup_object.find("img", class_="result__image").get("src")
+
+        result_text = soup_object.find("div", class_="result-text").get_text()
+        result_text = " ".join(result_text.split())
+
+        try:
+            z = description[:2]
+            z = int(z)
+            if z > 50:
+                emoji = "❤"
+            else:
+                emoji = "💔"
+            title = f"Dr. Love says that the love percentage for {x} and {y} is: {emoji} {description} {emoji}"
+        except (TypeError, ValueError):
+            title = "Dr. Love has left a note for you."
+
+        em = discord.Embed(
+            title=title, description=result_text, color=discord.Color.red(), url=url
+        )
+        em.set_image(url=f"https://www.lovecalculator.com/{result_image}")
+        await ctx.send(embed=em)
 def setup(bot):
     bot.add_cog(Fun(bot))

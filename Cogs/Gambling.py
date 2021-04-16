@@ -116,6 +116,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
 
     @commands.command()
     async def crash(self, ctx, amount: int):
+        """Simulates a stock crash game.\n Press the button to withdraw out of the market before it's too late!"""
         if await self.has_money(ctx, amount):
             embed = discord.Embed(description="Press the stop button to cash out:")
             embed.set_author(name="Crash")
@@ -134,7 +135,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                     if to_continue == 1:
                         CrashPoint += round(999999999 / random.randint(1, 1000000000),1)
                     else:
-                        embed = discord.Embed(description=f"Sorry {ctx.author.mention}, but you didnt cash out in time!\n**Crash Multiplier**: `{CrashPoint}x`")
+                        embed = discord.Embed(description=f"Sorry {ctx.author.mention}, but you didnt cash out in time!\n**Crash Multiplier**: `{CrashPoint if CrashPoint%2==0 else CrashPoint-0.1}x`")
                         embed.set_author(name="Crashed!")
                         embed.description += f"\nYou lost **{amount}** :money_with_wings:"
                         await CrashGame.message.edit(embed=embed)

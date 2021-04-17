@@ -718,17 +718,17 @@ class Music(
                 if "?" in id:
                     id = id.split("?")[0]
                 try:
-                    list = await spotify_client.get_playlist(id)
+                    playlist = await spotify_client.get_playlist(id)
                 except spotify.NotFound:
                     return await ctx.send(
                         embed=discord.Embed(description=f"Playlist could not be found")
                     )
                 except spotify.Forbidden:
                     print("spotify rate limited!")
-                song_names = [x["track"]["name"] for x in list["tracks"]["items"]]
-                artistsdata = [
-                    x["track"]["artists"][0]["name"] for x in list["tracks"]["items"]
-                ]
+                song_names = [x["track"]["name"] for x in playlist["tracks"]["items"] if x["track"]]
+                artistsdata = [x["track"]["artists"][0]["name"] for x in playlist["tracks"]["items"] if x["track"]]
+
+
                 to_load = zip(song_names, artistsdata)
                 for x in to_load:
                     tracks = await self.bot.wavelink.get_tracks(
@@ -740,10 +740,10 @@ class Music(
                             Track(track.id, track.info, requester=ctx.author.mention)
                         )
                 else:
-                    print(f"Adding {list['tracks']['total']} to queue")
+                    print(f"Adding {playlist['tracks']['total']} to queue")
                 controller.auto_play_queue._queue.clear()
                 MusicEmbed = discord.Embed(
-                    title=f"Added {list['tracks']['total']} songs from {list['name']}",
+                    title=f"Added {playlist['tracks']['total']} songs from {playlist['name']}",
                     url=query,
                     colour=discord.Colour.random(),
                 )

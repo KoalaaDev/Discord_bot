@@ -10,6 +10,7 @@ import math
 from bs4 import BeautifulSoup
 import aiohttp
 from Cogs.Music import Paginator
+import random
 class Fun(
     commands.Cog, description="Fun commands such as love calculator, 'Guess that pokemon!' and coin flips"
 ):
@@ -219,5 +220,35 @@ class Fun(
 
        Page = menus.MenuPages(Paginator(ctx, dongs, "Requested PP sizes", "PP size generator", 1), clear_reactions_after=True)
        await Page.start(ctx)
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    async def xkcd(self, ctx, *, entry_number=None):
+      """Post a random xkcd comic or post an xkcd with the number provided!"""
+
+      # Creates random number between 0 and 2190 (number of xkcd comics at time of writing) and queries xkcd
+      headers = {"content-type": "application/json"}
+      url = "https://xkcd.com/info.0.json"
+      async with aiohttp.ClientSession() as session:
+          async with session.get(url, headers=headers) as response:
+              xkcd_latest = await response.json()
+              xkcd_max = xkcd_latest.get("num") + 1
+
+      if entry_number is not None and int(entry_number) > 0 and int(entry_number) < xkcd_max:
+          i = int(entry_number)
+      else:
+          i = random.randint(0, xkcd_max)
+      headers = {"content-type": "application/json"}
+      url = "https://xkcd.com/" + str(i) + "/info.0.json"
+      async with aiohttp.ClientSession() as session:
+          async with session.get(url, headers=headers) as response:
+              xkcd = await response.json()
+
+      # Build Embed
+      embed = discord.Embed()
+      embed.title = xkcd["title"] + " (" + xkcd["day"] + "/" + xkcd["month"] + "/" + xkcd["year"] + ")"
+      embed.url = "https://xkcd.com/" + str(i)
+      embed.description = xkcd["alt"]
+      embed.set_image(url=xkcd["img"])
+      await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Fun(bot))

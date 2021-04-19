@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-
+import aiohttp
 import asyncio
 import re
 import random
@@ -135,33 +135,45 @@ class Board:
         return "```\n{}```".format(_board)
 
 class Hangman():
-    def __init__(self, userID):
+    def __init__(self, userID, list):
         self.userID = userID
         self.token = None
         self.hangman = None
+        self.stages = iter(list)
+        self.stage = next(self.stages)
+        self.has_ended = False
+        self.has_won = False
     async def start_hangman(self):
         async with aiohttp.ClientSession() as session:
             async with session.post("https://hangman-api.herokuapp.com/hangman") as response:
                 HangmanGame = await response.json()
                 self.hangman = HangmanGame.get("hangman")
-                token = HangmanGame.get("token")
+                self.token = HangmanGame.get("token")
                 #start hangman game
     async def guess_hangman(self, letter: str):
         async with aiohttp.ClientSession() as session:
             async with session.put("https://hangman-api.herokuapp.com/hangman",params={"token": self.token, "letter": letter }) as response:
-                if respone.status == 304:
+                if response.status == 304:
                     return "Already tried that letter"
                 try:
                     status = response.status
                     HangmanGame = await response.json()
                     self.hangman = HangmanGame.get("hangman")
                     self.token = HangmanGame.get("token")
-                    return True if response.get('correct') else False
-                    # if False:
-                    #     try:
-                    #         next(stage)
-                    #     except ERROR:
-                    #         return "you die"
+                    if response.get('correct'):
+                        if self.has_won():
+                            self.has_won = True
+                            self.has_ended = True
+                            return True
+                        else:
+                            return True
+                    else:
+                        try:
+                            self.stage = next(self.stages)
+                            return False
+                        except StopIteration:
+                            self.has_ended = True
+                            return False
                 except AttributeError:
                     return
                     #guess the letter in the hangman game
@@ -181,13 +193,18 @@ class Hangman():
                 HangmanSolution = HangmanGame.get("solution")
                 self.token = HangmanGame.get("token")
                 return HangmanSolution
-
+    async def has_won(self):
+        if self.has_won and self.hangman_game == await solution_hangman():
+            return True
+        else:
+            return False
 class Games(commands.Cog):
     """Pretty self-explanatory"""
 
     boards = {}
     def __init__(self, bot):
         self.bot = bot
+        self.hangman_games = {}
     def create(self, server_id, player1, player2):
         self.boards[server_id] = Board(player1, player2)
 
@@ -327,7 +344,7 @@ class Games(commands.Cog):
             await ctx.send(embed=discord.Embed(title="Sorry but only one Tic-Tac-Toe game can be running per server!"))
             return
         # Make sure we're not being challenged, I always win anyway
-        if player2 == ctx.message.guild.me:
+        if player2 == ctx.message.guild.m:
             await ctx.send(embed=discord.Embed(title="You want to play? Alright lets play.\n\nI win, so quick you didn't even notice it."))
             return
         if player2 == player1:
@@ -372,7 +389,6 @@ class Games(commands.Cog):
     @commands.group()
     @commands.bot_has_permissions(send_messages=True)
     async def hangman(self, ctx):
-        Hangman(ctx.author.id)
         Stages = [
 """```
 -------------
@@ -437,6 +453,64 @@ class Games(commands.Cog):
 |          / \\
 |
 --------------------------```"""]
-        stages = iter(stages)
+        if not self.hangman_games.get(ctx.author.id):
+            self.hangman_games[ctx.author.id] = Hangman(ctx.author.id,Stages)
+
+    @hangman.command()
+    @commands.bot_has_permissions(send_messages=True)
+    async def start(self, ctx):
+        hangman_game = self.hangman_games.get(ctx.author.id)
+        await hangman_game.start_hangman()
+        e = discord.Embed(title=hangman_game.hangman,description=hangman_game.stage)
+        await ctx.send(embed=e)
+
+    @hangman.command()
+    @commands.bot_has_permissions(send_messages=True)
+    async def guess(self, ctx, *, letter):
+        hangman_game = self.hangman_games.get(ctx.author.id)
+        x = len(letter)
+        if x != 1:
+            return await ctx.send("Please enter only 1 letter")
+        guess = await hangman_game.guess_hangman(letter)
+        if guess == "Already tried that letter":
+            return await ctx.send("Already tried that!")
+        if not guess:
+            if hangman_game.has_ended:
+                del self.hangman_games[ctx.author.id]
+                embed = discord.Embed(description=hangman_game.stage)
+                embed.set_author(name=hangman_game.hangman)
+                await ctx.send(embed=embed)
+            else:
+                embed = discord.Embed(description=hangman_game.stage)
+                embed.set_author(name=hangman_game.hangman)
+                embed.set_footer(text="Wrong guess!")
+                await ctx.send(embed=embed)
+        else:
+            if hangman_game.has_ended:
+                del self.hangman_games[ctx.author.id]
+                if hangman_game.has_won:
+                    await ctx.send("You Win!")
+                    embed = discord.Embed(description=hangman_game.stage)
+                    embed.set_author(name=hangman_game.hangman)
+                    await ctx.send(embed=embed)
+
+            else:
+                embed = discord.Embed(description=hangman_game.stage)
+                embed.set_author(name=hangman_game.hangman)
+                embed.set_footer(text="Correct guess!")
+                await ctx.send(embed=embed)
+
+    @hangman.command()
+    async def hint(self, ctx):
+        hangman_game = self.hangman_games.get(ctx.author.id)
+        hint = await hangman_game.hint_hangman()
+        await ctx.send(hint)
+
+    @hangman.command()
+    async def solution(self, ctx):
+        hangman_game = self.hangman_games.get(ctx.author.id)
+        solution = await hangman_game.solution_hangman()
+        await ctx.send(solution)
+        del self.hangman_games[ctx.author.id]
 def setup(bot):
     bot.add_cog(Games(bot))

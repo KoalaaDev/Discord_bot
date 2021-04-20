@@ -9,7 +9,6 @@ import sys
 import traceback
 from discord.ext import commands
 from discord.utils import get
-from pretty_help import PrettyHelp
 from pyfiglet import Figlet
 from cogwatch import Watcher
 from subprocess import Popen, PIPE

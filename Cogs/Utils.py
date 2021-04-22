@@ -4,6 +4,7 @@ import traceback
 from subprocess import Popen, PIPE
 import discord
 import asyncpg
+import subprocess
 
 def is_whitelisted():
     async def predicate(ctx):
@@ -132,5 +133,14 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
         process = Popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
+    @is_whitelisted()
+    @commands.command(hidden=True)
+    async def pip(self, ctx, *, args):
+        command = [sys.executable, "-m", "pip"] + args.split(" ")
+        try:
+            process = subprocess.check_call(command, stdout=PIPE, stderr=PIPE)
+            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        except subprocess.CalledProcessError:
+            await ctx.message.add_reaction("\N{Cross Mark}")
 def setup(bot):
     bot.add_cog(Utility(bot))

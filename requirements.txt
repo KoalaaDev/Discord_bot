@@ -24,3 +24,4 @@ asyncpg
 matplotlib
 numpy
 aiocache
+six==1.11.0 

@@ -17,7 +17,7 @@ import asyncpg
 
 
 
-intents = discord.Intents.all()
+intents = discord.Intents.default()
 intents.typing = False
 intents.presences = False
 with open("apiconfig.yml", "r") as f:

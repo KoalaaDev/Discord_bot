@@ -34,7 +34,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
             f"Support: Koalaa#6001 or skot#6579\n"
         )
         embed = discord.Embed(description=fmt)
-        embed.set_footer("Doorbanger logo by Gariss@Shutterstock")
+        embed.set_footer(text="Doorbanger logo by Gariss@Shutterstock")
         await ctx.send(embed=embed)
         process.stdout.close()
     @commands.command(description="Invite link of bot")
@@ -126,13 +126,6 @@ class Main(commands.Cog,name="General", description="Basic commands"):
         """Adds clapping emojis to text"""
         await ctx.send(f":clap: {message} :clap:")
 
-
-    @commands.command(hidden=True)
-    async def allmembers(self, ctx):
-        await ctx.message.delete()
-        await ctx.send("Getting all members...", delete_after=19)
-        members = {member for member in sorted(set(self.bot.get_all_members()))}
-        print(members)
     @commands.command()
     async def privacy(self, ctx):
         """Our privacy policy"""

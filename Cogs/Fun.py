@@ -219,6 +219,9 @@ class Fun(
 
        Page = menus.MenuPages(Paginator(ctx, dongs, "Requested PP sizes", "PP size generator", 1), clear_reactions_after=True)
        await Page.start(ctx)
+    @commands.command(hidden=True)
+    async def kushal(self, ctx):
+        await ctx.send("🗑️")
     @commands.command()
     @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     async def xkcd(self, ctx, *, entry_number=None):

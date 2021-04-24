@@ -167,7 +167,6 @@ class Fun(
         async with aiohttp.ClientSession(headers={"Connection": "keep-alive"}) as session:
             async with session.get(url, ssl=False) as response:
                 resp = await response.text()
-        print(resp)
         soup_object = BeautifulSoup(resp, "html.parser")
 
         description = soup_object.find("div", class_="result__score").get_text()

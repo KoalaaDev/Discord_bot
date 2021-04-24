@@ -34,6 +34,7 @@ class Main(commands.Cog,name="General", description="Basic commands"):
             f"Support: Koalaa#6001 or skot#6579\n"
         )
         embed = discord.Embed(description=fmt)
+        embed.set_footer("Doorbanger logo by Gariss@Shutterstock")
         await ctx.send(embed=embed)
         process.stdout.close()
     @commands.command(description="Invite link of bot")

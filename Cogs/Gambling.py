@@ -25,7 +25,7 @@ class CoinPrompt(menus.Menu):
         self.stop()
     @menus.button('\N{CROSS MARK}')
     async def do_deny(self, payload):
-        self.result = False
+        self.result = "Cancelled"
         self.stop()
     async def prompt(self, ctx):
         await self.start(ctx, wait=True)
@@ -85,8 +85,8 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             embed = discord.Embed(title="Bet which side the coin will land on!", description=f"<:coinhead:831475175329366049> **left:for heads**\n<:tails:831475250716868628> **right:for tails**")
             Prompt = CoinPrompt(embed=embed)
             await Prompt.prompt(ctx)
-            if not Prompt.result:
-                return
+            if Prompt.result=="Cancelled":
+                return print("HMMM")
             embed = discord.Embed(title="Flipping...")
             embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831460897691533312/coinflip.gif")
             message = await ctx.send(embed=embed)

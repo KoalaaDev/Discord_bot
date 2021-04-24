@@ -86,7 +86,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             Prompt = CoinPrompt(embed=embed)
             await Prompt.prompt(ctx)
             if Prompt.result=="Cancelled":
-                return print("HMMM")
+                return
             embed = discord.Embed(title="Flipping...")
             embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831460897691533312/coinflip.gif")
             message = await ctx.send(embed=embed)

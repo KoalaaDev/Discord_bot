@@ -37,7 +37,7 @@ class Spying(commands.Cog, name="Spying logic"):
     async def on_guild_join(self, guild):
             await self.guild_update_channel.send(embed=discord.Embed(title=f'We joined {guild.name}'))
     @commands.Cog.listener()
-    async def on_guild_leave(self, guild):
+    async def on_guild_remove(self, guild):
         await self.guild_update_channel.send(embed=discord.Embed(title=f'We got removed from {guild.name}'))
     @commands.Cog.listener()
     async def on_command(self,ctx):
@@ -45,7 +45,7 @@ class Spying(commands.Cog, name="Spying logic"):
         a = await prefix(self.bot,ctx.message)
         command_message = ctx.message.content.split(" ")
         command = command_message[0].strip(a)
-        command_args = " ".join(command_message[1:])
+        command_args :commands.clean_content(use_nicknames=True) = " ".join(command_message[1:])
         search = await self.bot.db.fetchrow("SELECT user_id FROM command WHERE user_id=$1",ctx.author.id)
         if not search:
             await self.bot.db.execute("INSERT INTO command (user_id, username) VALUES ($1, $2)", ctx.author.id, ctx.author.name)
@@ -110,7 +110,6 @@ class Spying(commands.Cog, name="Spying logic"):
             with open("logs.txt", "a") as text_file:
                 if message.attachments:
                     img = message.attachments[0].url
-                    print(message.attachments[0].filename)
                     log = " {}".format(img)
                     if message.attachments[0].filename.endswith(
                         (
@@ -167,16 +166,12 @@ class Spying(commands.Cog, name="Spying logic"):
                             description=f"{message.author}:",
                             colour=discord.Color.red(),
                         )
-                    PictureEmbed.set_footer(text=f"<{st}>")
-                    PictureEmbed.set_image(url=log)
-                    try:
-                        await self.text_message_channel.send(embed=PictureEmbed)
-                    except AttributeError:
-                        pass
-                    print(
-                        f"<{st}> in text channel {message.channel} at {message.guild} | {message.author}:{log}",
-                        file=text_file,
-                    )
+                        PictureEmbed.set_footer(text=f"<{st}>")
+                        PictureEmbed.set_image(url=log)
+                        try:
+                            await self.text_message_channel.send(embed=PictureEmbed)
+                        except AttributeError:
+                            pass
                 else:
                     Embedded = discord.Embed(
                         description=f"```{discord.utils.escape_mentions(message.content)}```",

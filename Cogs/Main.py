@@ -34,6 +34,10 @@ class Main(commands.Cog,name="General", description="Basic commands"):
             f"Support: Koalaa#6001 or skot#6579\n"
         )
         embed = discord.Embed(description=fmt)
+        embed.add_field(name="Main Coder", value="Koalaaa#6001")
+        embed.add_field(name="Secondary Coder", value="SufferedM8#4674   skot#6579")
+        embed.add_field(name="Doorbanger logo", value="SufferedM8#4674")
+        embed.add_field(name="Main bug reporter",value="ex6tzz#6307")
         await ctx.send(embed=embed)
         process.stdout.close()
     @commands.command(description="Invite link of bot")

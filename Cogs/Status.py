@@ -25,7 +25,7 @@ class Status(commands.Cog):
     @tasks.loop()
     async def Animated_Status(self):
         users, servers = await self.GetStats()
-        self.messages[1] = [discord.ActivityType.listening, f"{servers} Guilds | {users} Members"]
+        self.messages[1] = [discord.ActivityType.watching, f"{servers} Guilds | {users} Members"]
         self.members = len(set(self.bot.get_all_members()))
         for i in self.messages:
             await self.bot.change_presence(activity=discord.Activity(type=i[0],name=i[1]))

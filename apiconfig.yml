@@ -17,19 +17,33 @@ music:
     ClientSecret: "014bfc9a11aa4a5eae8dfcaee5acfac4"
   nodes:
     main:
+      host: "139.177.185.11"
+      port: 8080
+      rest_uri: 'http://139.177.185.11:8080/'
+      password: 'youshallnotpass'
+      identifier: 'Main-linode-ipv6'
+      region: "singapore"
+    node2:
+      host: "34.96.225.168"
+      port: 8080
+      rest_uri: 'http://34.96.225.168:8080/'
+      password: 'youshallnotpass'
+      identifier: 'Koalaa-server-4'
+      region: "hongkong"
+    node3:
+      host: "192.53.117.55"
+      port: 8080
+      rest_uri: 'http://192.53.117.55:8080/'
+      password: 'youshallnotpass'
+      identifier: 'Linode-ipv6-1'
+      region: "singapore"
+    node4:
       host: "34.126.126.36"
       port: 8080
       rest_uri: 'http://34.126.126.36:8080/'
       password: 'youshallnotpass'
       identifier: 'Koalaa-server-3'
       region: "singapore"
-    node2:
-      host: "34.92.156.143"
-      port: 8080
-      rest_uri: 'http://34.92.156.143:8080/'
-      password: 'youshallnotpass'
-      identifier: 'Koalaa-server-4'
-      region: "hongkong"
     # local:
     #   host: "192.168.2.196"
     #   port: 8080

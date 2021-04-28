@@ -45,6 +45,7 @@ class CrashGUI(menus.Menu):
     async def prompt(self, ctx):
         await self.start(ctx)
         return self.result
+
 class Gambling(commands.Cog, description="Coin flip and more!"):
     def __init__(self, bot):
         self.bot = bot
@@ -115,7 +116,6 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                     embed.set_image(url="https://cdn.discordapp.com/attachments/273360137022996482/831462137473007627/tails.png")
                     await message.edit(embed=embed)
 
-
     @commands.command()
     async def crash(self, ctx, amount: int):
         """Simulates a stock crash game.\n Press the button to withdraw out of the market before it's too late!"""
@@ -150,5 +150,33 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 embed.set_author(name="Cashed out!")
                 await self.add(ctx, profit)
                 await CrashGame.message.edit(embed=embed)
+
+    @commands.command()
+    async def dice(self, ctx, amount: int):
+        if await self.has_money(ctx, amount):
+            embed = discord.Embed(title="Lets roll a dice!", description="Rolling...")
+            embed.set_image(url="https://media.discordapp.net/attachments/748419224082317326/836856916235911239/0fbae2bd3a0bd45b0d6a25f6459d95a3.gif?width=200&height=200")
+            image = await ctx.send(embed=embed)
+            dicenum = [0, 1, 2, 3, 4, 5]
+            dicepiclist = ["https://cdn.discordapp.com/attachments/830740652647776257/836895755335499776/1194685-200.png","https://cdn.discordapp.com/attachments/830740652647776257/836895884570263582/1194688-200.png","https://cdn.discordapp.com/attachments/830740652647776257/836895915478220810/1194684-200.png","https://cdn.discordapp.com/attachments/830740652647776257/836895958527770634/1194689-200.png","https://cdn.discordapp.com/attachments/830740652647776257/836896011901337620/1194690-200.png","https://cdn.discordapp.com/attachments/830740652647776257/836896043538710558/1194691-200.png"]
+            dice1 = random.choice(dicenum)
+            dice2 = random.choice(dicenum)
+            dicepic1 = dicepiclist[dice1]
+            dicepic2 = dicepiclist[dice2]
+            await asyncio.sleep(3)
+            if dice1 == dice2:
+                await image.delete
+                embed = discord.Embed(title="YOU WIN :tada:", description=f"{ctx.author.mention} has gained {amount*4} :money_with_wings:!")
+                embed.set_image(url=dicepic1)
+                embed.set_thumbnail(url=dicepic2)
+                await self.add(ctx, amount*4)
+                await ctx.send(embed=embed)
+            else:
+                embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount*2} :money_with_wings:!")
+                embed.set_image(url=dicepic1)
+                embed.set_thumbnail(url=dicepic2)
+                await self.deduct(ctx, amount*2)
+                await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Gambling(bot))

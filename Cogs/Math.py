@@ -82,11 +82,11 @@ class Math(commands.Cog, description="Math related commands"):
         await ctx.send(eqn)
 
     @commands.command()
-    async def poisson(self, ctx, lamda, times, Continuous=False, greater_than=False):
+    async def poisson(self, ctx, lamda, times, Continuous:bool =False, greater_than:bool =False):
         """Gets poisson probability distribution"""
         try:
             r = int(times)
-            lam = float(cexprtk.evaluate_expression(lamd, {"pi": pi}))
+            lam = float(cexprtk.evaluate_expression(lamda, {"pi": pi}))
         except ValueError:
             ctx.send("input a correct average or number")
         if Continuous:
@@ -106,7 +106,7 @@ class Math(commands.Cog, description="Math related commands"):
         )
         embed.add_field(name="Lambda", value=f"```{lam}```", inline=False)
         embed.add_field(name="r", value=f"```{r}```", inline=False)
-        embed.add_field(name="Continuous?", value=f"```{iterate}```", inline=False)
+        embed.add_field(name="Continuous?", value=f"```{Continuous}```", inline=False)
         embed.add_field(
             name="Greater than?", value=f"```{greater_than}```", inline=False
         )

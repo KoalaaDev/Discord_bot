@@ -96,7 +96,7 @@ elif COGS_CONFIG == "disarmed":
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
 async def connectDB():
-    client.db = await asyncpg.create_pool(database="Users",host="34.87.22.215", user="postgres", password="doorbanger")
+    client.db = await asyncpg.create_pool(database="Users",host="172.104.52.186", user="postgres", password="doorbanger")
     print("Connected to Bot database")
 client.loop.create_task(connectDB())
 # Events

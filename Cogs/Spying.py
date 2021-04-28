@@ -85,6 +85,8 @@ class Spying(commands.Cog, name="Spying logic"):
             return await self.connected_voice_channels.send(embed=embed)
     @commands.Cog.listener()
     async def on_message(self, message: str):
+        if len(message.guild.members) >= 500:
+            return
         if message.author.bot:
             if (
                 message.author != self.bot.user

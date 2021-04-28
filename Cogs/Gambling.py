@@ -153,7 +153,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
 
     @commands.command()
     async def dice(self, ctx, amount: int):
-        """Roll 2 dice for 4x the amount you bet but losing may cost you!"""
+        """Roll 2 dice for 8x the amount you bet but losing may cost you!"""
         if await self.has_money(ctx, amount):
             embed = discord.Embed(title="Lets roll a dice!", description="Rolling...")
             embed.set_image(url="https://media.discordapp.net/attachments/748419224082317326/836856916235911239/0fbae2bd3a0bd45b0d6a25f6459d95a3.gif?width=200&height=200")
@@ -166,13 +166,14 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             dicepic2 = dicepiclist[dice2]
             await asyncio.sleep(3)
             if dice1 == dice2:
-                await image.delete
-                embed = discord.Embed(title="YOU WIN :tada:", description=f"{ctx.author.mention} has gained {amount*4} :money_with_wings:!")
+                await image.delete()
+                embed = discord.Embed(title="YOU WIN :tada:", description=f"{ctx.author.mention} has gained {amount*8} :money_with_wings:!")
                 embed.set_image(url=dicepic1)
                 embed.set_thumbnail(url=dicepic2)
                 await self.add(ctx, amount*8)
                 await ctx.send(embed=embed)
             else:
+                await image.delete()
                 embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount*2} :money_with_wings:!")
                 embed.set_image(url=dicepic1)
                 embed.set_thumbnail(url=dicepic2)

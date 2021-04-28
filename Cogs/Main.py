@@ -140,5 +140,14 @@ class Main(commands.Cog,name="General", description="Basic commands"):
         embed.set_footer(text="By using our bot, you agree that we collect data as listed and we reserve the right to change this without notifying our users.")
         embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/799211893646295051/831897629708255253/27833342_1.jpg")
         await ctx.send(embed=embed)
+    @commands.command()
+    async def prefix(self, ctx, prefix):
+        """Change your prefix!\nYou can also change it through tagging the bot."""
+        await ctx.send(embed=discord.Embed(title=f"Changed prefix to {prefix}"))
+        with open("prefixes.yaml", "r") as f:
+            prefixes = yaml.safe_load(f)
+        prefixes[message.guild.id] = prefix
+        with open("prefixes.yaml", "w") as f:
+            yaml.dump(prefixes, f)
 def setup(bot):
     bot.add_cog(Main(bot))

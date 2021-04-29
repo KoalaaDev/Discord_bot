@@ -275,19 +275,26 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             a = random.choice(emojis)
             b = random.choice(emojis)
             c = random.choice(emojis)
+            d = random.choice(emojis)
+            e = random.choice(emojis)
+            f = random.choice(emojis)
             await self.deduct(ctx, amount)
-            slotmachine = f"**[ {a} {b} {c} ]**,"
+            slotmachine = f"**[ {a} {b} {c} {d} {e} {f}]**"
 
-            if a == b == c:
-                embed = discord.Embed(title=f"{slotmachine} All matching, Jackpot!",description=f"{ctx.author.name} has gained {amount*3} :money_with_wings:")
+            if a == b == c == d == e == f:
+                embed = discord.Embed(title=f"{slotmachine}",description=f"\nAll matching, Jackpot! {ctx.author.name} has gained {amount*4} :money_with_wings:")
                 jackpot = await ctx.send(embed=embed)
+                await self.add(amount*4)
+            elif (a == b == c) or (b == c == d) or (c == d == e):
+                embed = discord.Embed(title=f"{slotmachine}",description=f"\n 3 in a row {ctx.author.name} has gained {amount*3} :money_with_wings:")
+                ThreeInaRow = await ctx.send(embed=embed)
                 await self.add(amount*3)
-            elif (a == b and b == d) or (a == c and c == d) or (b == c):
-                embed = discord.Embed(title=f"{slotmachine} 2 in a row",description=f"{ctx.author.name} has gained {amount*2} :money_with_wings:")
+            elif (a == b) or (b == c) or (c == d) or (d == e) or (e == f):
+                embed = discord.Embed(title=f"{slotmachine}",description=f"\n 2 in a row {ctx.author.name} has gained {amount*2} :money_with_wings:")
                 TwoInaRow = await ctx.send(embed=embed)
-                await self.add(amount*3)
+                await self.add(amount*2)
             else:
-                embed = discord.Embed(title=f"{slotmachine}",description=f"No match {ctx.author.mention} lost {amount} :money_with_wings:")
+                embed = discord.Embed(title=f"{slotmachine}",description=f"\nNo match {ctx.author.mention} lost {amount} :money_with_wings:")
                 lost = await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Gambling(bot))

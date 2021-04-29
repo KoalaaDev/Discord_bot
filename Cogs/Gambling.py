@@ -267,5 +267,24 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 await self.deduct(ctx, amount)
                 lose = await ctx.send(embed=embed)
 
+    @commands.command()
+    async def slot(self, ctx, amount: int):
+        if await self.has_money(ctx, amount):
+            """ Roll the slot machine """
+            emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
+            a = random.choice(emojis)
+            b = random.choice(emojis)
+            c = random.choice(emojis)
+            await self.deduct(ctx, amount)
+            slotmachine = f"**[ {a} {b} {c} ]\n{ctx.author.name}**,"
+
+            if a == b == c:
+                await ctx.send(f"{slotmachine} All matching, Jackpot! ,\n {ctx.author.name} has gained {amount*3} :money_with_wings:")
+                await self.add(amount*3)
+            elif (a == b and b == d) or (a == c and c == d) or (b == c):
+                await ctx.send(f"{slotmachine} 2 in a row,\n {ctx.author.name} has gained {amount*2} :money_with_wings:")
+                await self.add(amount*3)
+            else:
+                await ctx.send(f"{slotmachine} No match, you lost 😢")
 def setup(bot):
     bot.add_cog(Gambling(bot))

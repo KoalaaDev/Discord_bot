@@ -89,26 +89,6 @@ class Main(commands.Cog,name="General", description="Basic commands"):
 
 
     @commands.command(hidden=True)
-    async def slot(self, ctx):
-        """ Roll the slot machine """
-        emojis = "🍎🍊🍐🍋🍉🍇🍓🍒💲"
-        a = random.choice(emojis)
-        b = random.choice(emojis)
-        c = random.choice(emojis)
-        d = random.choice(emojis)
-        e = random.choice(emojis)
-        f = random.choice(emojis)
-        slotmachine = f"**[ {a} {b} {c} {d} {e} {f}]\n{ctx.author.name}**,"
-
-        if a == b == c == d == e == f:
-            await ctx.send(f"{slotmachine} All matching, Jackpot! 🎉")
-        elif (a == b and b == d) or (a == c and c == d) or (b == c):
-            await ctx.send(f"{slotmachine} 2 in a row, you won! 🎉")
-        else:
-            await ctx.send(f"{slotmachine} No match, you lost 😢")
-
-
-    @commands.command(hidden=True)
     async def reversecard(self, ctx, *, text: str):
         """!poow ,ffuts esreveR
         Everything you type after reverse will of course, be reversed

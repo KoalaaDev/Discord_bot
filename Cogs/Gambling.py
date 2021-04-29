@@ -46,11 +46,62 @@ class CrashGUI(menus.Menu):
         await self.start(ctx)
         return self.result
 
+class ColorPrompt(menus.Menu):
+    def __init__(self, *, embed:discord.Embed):
+        super().__init__(timeout=30.0, delete_message_after=True)
+        self.embed = embed
+        self.result = None
+
+    async def send_initial_message(self, ctx, channel):
+        return await channel.send(embed=self.embed)
+
+    @menus.button('🟥')
+    async def red(self, payload):
+        self.result = 0
+        self.stop()
+
+    @menus.button('🟦')
+    async def blue(self, payload):
+        self.result = 1
+        self.stop()
+    @menus.button('🟨')
+    async def green(self, payload):
+        self.result = 2
+        self.stop()
+    @menus.button('🟩')
+    async def yellow(self, payload):
+        self.result = 3
+        self.stop()
+    # @menus.button("<:purple_squre:>")
+    # async def purple(self, payload):
+    #     self.result = 4
+    #     self.stop()
+    # @menus.button("<:orange_squre:>")
+    # async def purple(self, payload):
+    #     self.result = 5
+    #     self.stop()
+    # @menus.button("<:black_squre:>")
+    # async def purple(self, payload):
+    #     self.result = 6
+    #     self.stop()
+    # @menus.button("<:brown_squre:>")
+    # async def purple(self, payload):
+    #     self.result = 7
+    #     self.stop()
+    @menus.button('\N{CROSS MARK}')
+    async def do_deny(self, payload):
+        self.result = "Cancelled"
+        self.stop()
+    async def prompt(self, ctx):
+        await self.start(ctx, wait=True)
+        return self.result
+
 class Gambling(commands.Cog, description="Coin flip and more!"):
     def __init__(self, bot):
         self.bot = bot
         self.heads_emoji = get(self.bot.emojis, name="coinhead")
         self.tails_emoji = get(self.bot.emojis, name="tails")
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             try:
@@ -179,6 +230,41 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 embed.set_thumbnail(url=dicepic2)
                 await self.deduct(ctx, amount*2)
                 await ctx.send(embed=embed)
+
+    @commands.command()
+    async def spin(self, ctx, amount: int):
+        # """Choose a color and hope for the best!"""
+        if await self.has_money(ctx, amount):
+            color = [0,1,2,3]
+            ChosenColor = random.choice(color)
+            print(ChosenColor)
+            embed = discord.Embed(title="Pick a color!", description=f" 1). Red\n 2). Blue\n 3). Yellow\n 4). Green")
+            CPrompt = ColorPrompt(embed=embed)
+            await CPrompt.prompt(ctx)
+            colorpic = ["https://cdn.discordapp.com/attachments/822865028335272017/837147968926777464/square_PNG75.png","https://cdn.discordapp.com/attachments/822865028335272017/837145168527228928/ContactBlueSquare200x200.png","https://cdn.discordapp.com/attachments/822865028335272017/837145225381019702/01.png","https://cdn.discordapp.com/attachments/822865028335272017/837145225381019702/01.png"]
+            if CPrompt.result=="Cancelled":
+                return
+            await self.deduct(ctx, amount)
+            if CPrompt.result == ChosenColor:
+                await self.add(ctx, amount*4)
+                embed = discord.Embed(title="YOU WIN :tada:", description=f"{ctx.author.mention} has gained {amount*4} :money_with_wings:!")
+                win = await ctx.send(embed=embed)
+                if CPrompt.result == "0":
+                    embed.set_image(url=(colorpic[0]))
+                    c0 = await ctx.send(embed = embed)
+                elif CPrompt.result == "1":
+                    embed.set_image(url=colorpic[1])
+                    c1 = await ctx.send(embed = embed)
+                elif CPrompt.result == "2":
+                    embed.set_image(url=colorpic[2])
+                    c2 = await ctx.send(embed = embed)
+                elif CPrompt.result == "3":
+                    embed.set_image(url=colorpic[3])
+                    c3 = await ctx.send(embed = embed)
+            else:
+                embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount} :money_with_wings:!\n The correct choice is...")
+                embed.set_image(url=colorpic[ChosenColor])
+                lose = await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Gambling(bot))

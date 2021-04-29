@@ -233,7 +233,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
 
     @commands.command()
     async def spin(self, ctx, amount: int):
-        # """Choose a color and hope for the best!"""
+        """Choose a color and hope for the best!"""
         if await self.has_money(ctx, amount):
             color = [0,1,2,3]
             ChosenColor = random.choice(color)
@@ -276,15 +276,18 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             b = random.choice(emojis)
             c = random.choice(emojis)
             await self.deduct(ctx, amount)
-            slotmachine = f"**[ {a} {b} {c} ]\n{ctx.author.name}**,"
+            slotmachine = f"**[ {a} {b} {c} ]**,"
 
             if a == b == c:
-                await ctx.send(f"{slotmachine} All matching, Jackpot! ,\n {ctx.author.name} has gained {amount*3} :money_with_wings:")
+                embed = discord.Embed(title=f"{slotmachine} All matching, Jackpot!",description=f"{ctx.author.name} has gained {amount*3} :money_with_wings:")
+                jackpot = await ctx.send(embed=embed)
                 await self.add(amount*3)
             elif (a == b and b == d) or (a == c and c == d) or (b == c):
-                await ctx.send(f"{slotmachine} 2 in a row,\n {ctx.author.name} has gained {amount*2} :money_with_wings:")
+                embed = discord.Embed(title=f"{slotmachine} 2 in a row",description=f"{ctx.author.name} has gained {amount*2} :money_with_wings:")
+                TwoInaRow = await ctx.send(embed=embed)
                 await self.add(amount*3)
             else:
-                await ctx.send(f"{slotmachine} No match, you lost 😢")
+                embed = discord.Embed(title=f"{slotmachine}",description=f"No match {ctx.author.mention} lost {amount} :money_with_wings:")
+                lost = await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Gambling(bot))

@@ -225,10 +225,10 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 await ctx.send(embed=embed)
             else:
                 await image.delete()
-                embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount*2} :money_with_wings:!")
+                embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount} :money_with_wings:!")
                 embed.set_image(url=dicepic1)
                 embed.set_thumbnail(url=dicepic2)
-                await self.deduct(ctx, amount*2)
+                await self.deduct(ctx, amount)
                 await ctx.send(embed=embed)
 
     @commands.command()
@@ -264,6 +264,7 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
             else:
                 embed = discord.Embed(title="You lost! <:icri:742346196990951505>", description=f"{ctx.author.mention} has lost {amount} :money_with_wings:!\n The correct choice is...")
                 embed.set_image(url=colorpic[ChosenColor])
+                await self.deduct(ctx, amount)
                 lose = await ctx.send(embed=embed)
 
 def setup(bot):

@@ -110,7 +110,7 @@ async def on_command_error(ctx, error):
         if len(ctx.guild.members) > 500:
             return
         cmd = ctx.invoked_with
-        cmds = [cmd.name for cmd in client.commands]
+        cmds = [cmd.name for cmd in client.commands if not cmd.hidden]
         # cmds = [cmd.name for cmd in bot.commands if not cmd.hidden] # use this to stop showing hidden commands as suggestions
         matches = get_close_matches(cmd, cmds)
         if len(matches) > 0:

@@ -34,23 +34,48 @@ class Economy(commands.Cog):
                 resp = await resp.json()
         return resp.get("didVote")
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            embed= discord.Embed(title=random.choice(["Slow down there!","Chill down"]), description=f"Please wait {human_time_duration(round(error.retry_after))}")
+
+
+    async def has_money(self, ctx, amount):
+        balance = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
+        balance = balance.values()
+        money = [x for x in balance][1]
+
+        if money>=amount:
+            return True
+        else:
+            embed= discord.Embed(title="Oops! It seems you don't have enough to attempt this! Maybe try ~beg?")
             await ctx.send(embed=embed)
-
-
+            return False
+    async def deduct(self, ctx, amount):
+        if isinstance(ctx, discord.Member):
+            await self.bot.db.execute("UPDATE userbalance SET balance=balance-$1 WHERE user_id=$2",amount,ctx.id)
+        else:
+            await self.bot.db.execute("UPDATE userbalance SET balance=balance-$1 WHERE user_id=$2",amount,ctx.author.id)
+    async def add(self, ctx, amount):
+        if isinstance(ctx, discord.Member):
+            await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.id)
+        else:
+            await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.author.id)
     @commands.command()
-    async def register(self, ctx):
+    async def register(self, ctx, member: discord.Member=None):
         """Register's your user balance!\nDon't fuss if you didn't do this as one will be created for you if you haven't!\nNote: If you already registered this command does nothing"""
-        is_registered = await self.bot.db.fetchrow("SELECT user_id FROM userbalance WHERE user_id=$1", ctx.author.id)
-        if not is_registered:
-            await self.bot.db.execute("INSERT INTO userbalance (user_id, balance) VALUES ($1, $2)", ctx.author.id, 0)
-            embed = discord.Embed(title="It seems your new!",description=f"Registering account for {ctx.author.mention}")
-            embed.set_footer(text="This message will only appear once!")
-            await ctx.send(embed=embed, delete_after=10)
+        if not member:
+            is_registered = await self.bot.db.fetchrow("SELECT user_id FROM userbalance WHERE user_id=$1", ctx.author.id)
+            if not is_registered:
+                await self.bot.db.execute("INSERT INTO userbalance (user_id, balance) VALUES ($1, $2)", ctx.author.id, 0)
+                embed = discord.Embed(title="It seems your new!",description=f"Registering account for {ctx.author.mention}")
+                embed.set_footer(text="This message will only appear once!")
+                await ctx.send(embed=embed, delete_after=10)
+        else:
+            is_registered = await self.bot.db.fetchrow("SELECT user_id FROM userbalance WHERE user_id=$1", member.id)
+            if not is_registered:
+                await self.bot.db.execute("INSERT INTO userbalance (user_id, balance) VALUES ($1, $2)", member.id, 0)
+                embed = discord.Embed(title="It seems your new!",description=f"Registering account for {member.mention}")
+                embed.set_footer(text="This message will only appear once!")
+                await ctx.send(embed=embed, delete_after=10)
 
-    @commands.cooldown(1,86400,commands.BucketType.user)
+    @commands.cooldown(1,43200,commands.BucketType.user)
     @commands.command()
     async def beg(self, ctx):
         """Get up to 1000 :money_with_wings: for voting us on top.gg"""
@@ -63,19 +88,41 @@ class Economy(commands.Cog):
             await ctx.send(embed=discord.Embed(title="You did not vote for us today! :(",description=f"Please vote at [top.gg](https://top.gg/bot/799134976515375154/vote)"))
             ctx.command.reset_cooldown(ctx)
     @commands.command(aliases=['bal'])
-    async def balance(self, ctx):
+    async def balance(self, ctx, member: discord.Member = None):
+        """Shows your balance or someone's balance"""
         await ctx.invoke(self.register)
-        fetch = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
+        if not member:
+            fetch = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",ctx.author.id)
+        else:
+            fetch = await self.bot.db.fetchrow("SELECT * FROM userbalance WHERE user_id=$1",member.id)
         row = fetch.values()
         balance = [x for x in row][1]
-        embed = discord.Embed(title=f"{ctx.author.name}'s balance", description=f"Currently you have {balance} :money_with_wings:")
+        if not member:
+            embed = discord.Embed(title=f"{ctx.author.name}'s balance", description=f"Currently you have {balance} :money_with_wings:")
+        else:
+            embed = discord.Embed(title=f"{member.name}'s balance", description=f"Currently {member.mention} has {balance} :money_with_wings:")
         await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)
     async def addtobalance(self, ctx, amount: int):
+        """Adds balance to someone"""
         await ctx.invoke(self.register)
         await self.bot.db.execute("UPDATE userbalance SET balance=balance+$1 WHERE user_id=$2",amount,ctx.author.id)
         await ctx.send(embed=discord.Embed(description=f"Added {amount} :money_with_wings:"))
-
+    @is_whitelisted()
+    @commands.command(hidden=True)
+    async def clearbalance(self, ctx, member: discord.Member):
+        """Clears someone balance"""
+        await ctx.invoke(self.register)
+        await self.bot.db.execute("UPDATE userbalance SET balance=0 WHERE user_id=$1",member.id)
+        await ctx.send(embed=discord.Embed(description=f"Made {member.mention} broke!"))
+    @commands.command(aliases=['transfer'])
+    async def pay(self, ctx, user:discord.Member, amount: int):
+        """Gives someone your hard earned cash!"""
+        if await self.has_money(ctx, amount):
+            await ctx.invoke(self.register, member=user)
+            await self.deduct(ctx, amount)
+            await self.add(user, amount)
+            await ctx.send(embed=discord.Embed(description=f"You paid {user.mention}: {amount} :money_with_wings:"))
 def setup(bot):
     bot.add_cog(Economy(bot))

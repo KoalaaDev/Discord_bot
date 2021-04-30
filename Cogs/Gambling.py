@@ -289,10 +289,10 @@ class Gambling(commands.Cog, description="Coin flip and more!"):
                 embed = discord.Embed(title=f"{slotmachine}",description=f"\n 3 in a row {ctx.author.name} has gained {amount*3} :money_with_wings:")
                 ThreeInaRow = await ctx.send(embed=embed)
                 await self.add(amount*3)
-            elif (a == b) or (b == c) or (c == d) or (d == e) or (e == f):
-                embed = discord.Embed(title=f"{slotmachine}",description=f"\n 2 in a row {ctx.author.name} has gained {amount*2} :money_with_wings:")
-                TwoInaRow = await ctx.send(embed=embed)
-                await self.add(amount*2)
+            # elif (a == b) or (b == c) or (c == d) or (d == e) or (e == f):
+            #     embed = discord.Embed(title=f"{slotmachine}",description=f"\n 2 in a row {ctx.author.name} has gained {amount*2} :money_with_wings:")
+            #     TwoInaRow = await ctx.send(embed=embed)
+            #     await self.add(amount*2)
             else:
                 embed = discord.Embed(title=f"{slotmachine}",description=f"\nNo match {ctx.author.mention} lost {amount} :money_with_wings:")
                 lost = await ctx.send(embed=embed)

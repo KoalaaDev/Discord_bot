@@ -36,13 +36,7 @@ music:
     #   password: "youshallnotpass"
     #   identifier: "local"
     #   region: "singapore"
-    node5:
-      host: "172.105.209.143"
-      port: 8080
-      rest_uri: "http://172.105.209.143:8080/"
-      password: "youshallnotpass"
-      identifier: "linode-ipv6-japan"
-      region: "japan"
+
 spying:
   text_spying_channel: 697347420123561995
   bot_text_spying_channel: 698536354468069427

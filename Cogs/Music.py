@@ -343,15 +343,16 @@ class MusicController:
                     tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
                 try:
                     track = tracks[0]
-                    if (
-                        track.length <= 480000
-                        and not track.title.startswith(self.current_track.title)
-                        and track.title not in [x.title for x in self.last_songs._queue]
-                    ):
-                        self.now_playing_id = track.ytid
-                        await self.auto_play_queue.put(
-                            Track(track.id, track.info, requester=self.requester)
-                        )
+                    if self.current_track:
+                        if (
+                            track.length <= 480000
+                            and not track.title.startswith(self.current_track.title)
+                            and track.title not in [x.title for x in self.last_songs._queue]
+                        ):
+                            self.now_playing_id = track.ytid
+                            await self.auto_play_queue.put(
+                                Track(track.id, track.info, requester=self.requester)
+                            )
                 except TypeError:
                     print(self.guild_id, "Could not play", video)
             else:
@@ -1327,6 +1328,9 @@ class Music(
                 if description == "":
                     description = "No description provided!"
                 name = playlist["name"]
+            elif RURL.match(query) and "playlist" in query:
+                data = await self.bot.wavelink.get_tracks(f"{query}")
+                print(data.data)
             else:
                 search_results = await spotify_client.search(query, "playlist")
                 url = search_results["playlists"]["items"][0]["external_urls"]["spotify"]

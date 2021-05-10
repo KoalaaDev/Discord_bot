@@ -1435,7 +1435,19 @@ class Music(
                 else:
                     await player.stop()
                     await asyncio.sleep(1)
+    @commands.command(aliases=['boost','bassboost'])
+    async def bass(self, ctx, amount:int):
+        """Bass boost the song by any amount of percentage!\n do eq command to reset"""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        amount = 1+amount/100
+        levels = [(0, -0.075*amount), (1, .125*amount), (2, .125*amount), (3, .1*amount), (4, .1*amount),
+                  (5, .05*amount), (6, 0.075*amount), (7, .0), (8, .0), (9, .0),
+                  (10, .0), (11, .0), (12, .125), (13, .15), (14, .05)]
 
+        await ctx.send(
+            f"Successfully changed bass boost to {amount}x", delete_after=15
+        )
+        await player.set_eq(wavelink.Equalizer.build(levels=levels))
     @commands.command(hidden=True)
     async def information(self, ctx):
         """Retrieve various Node/Server/Player information."""

@@ -155,7 +155,7 @@ class Fun(
         await ctx.send(embed=embed)
     @commands.command(aliases=["lovecalc"])
     async def lovecalculator(
-        self, ctx: commands.Context, lover: Union[discord.Member,str], *, loved: Union[discord.Member,str]
+        self, ctx: commands.Context, lover: Union[discord.Member,str], loved: Union[discord.Member,str]
     ):
         """Calculate the love percentage!"""
         if isinstance(lover, discord.Member):

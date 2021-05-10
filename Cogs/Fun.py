@@ -8,6 +8,7 @@ from discord.ext.commands.cooldowns import BucketType
 from asyncdagpi import Client
 import math
 from bs4 import BeautifulSoup
+from typing import Union
 import aiohttp
 from Cogs.Music import Paginator
 import random
@@ -154,13 +155,17 @@ class Fun(
         await ctx.send(embed=embed)
     @commands.command(aliases=["lovecalc"])
     async def lovecalculator(
-        self, ctx: commands.Context, lover: discord.Member, loved: discord.Member
+        self, ctx: commands.Context, lover: Union[discord.Member,str], *, loved: Union[discord.Member,str]
     ):
         """Calculate the love percentage!"""
-
-        x = lover.display_name
-        y = loved.display_name
-
+        if isinstance(lover, discord.Member):
+            x = lover.display_name
+        else:
+            x = lover
+        if isinstance(loved, discord.Member):
+            y = loved.display_name
+        else:
+            y = loved
         url = "https://www.lovecalculator.com/love.php?name1={}&name2={}".format(
             x.replace(" ", "+"), y.replace(" ", "+")
         )

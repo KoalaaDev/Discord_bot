@@ -1,5 +1,6 @@
 from typing import Literal
 import aiohttp
+import random
 import discord
 from discord.ext import commands
 import sys
@@ -386,6 +387,126 @@ class Anime(commands.Cog):
             embed.set_image(url=pic["image"])
             embed.set_footer(text="Animal Img Gen Service")
             await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def ass(self, ctx: commands.Context):
+        """Anime ass very nice"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"ass"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def bdsm(self, ctx: commands.Context):
+        """If you don't know what it is, search it up"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"bdsm"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def cum(self, ctx: commands.Context):
+        """Sticky white stuff"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"cum"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def femdom(self, ctx: commands.Context):
+        """Femdom"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"femdom"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def orgy(self, ctx: commands.Context):
+        """Group Lewd Acts"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"orgy"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def blowjob(self, ctx: commands.Context):
+        """You know what this is"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"blowjob"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def foot(self, ctx: commands.Context):
+        """Feet"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"foot"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def ahegao(self, ctx: commands.Context):
+        """Happy faces"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"ahegao"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def uniform(self, ctx: commands.Context):
+        """School Uniforms"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"uniform"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def gangbang(self, ctx: commands.Context):
+        """The people in the picture is more social than you"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        choice = random.choice(["v1","v2"])
+        embed.set_image(url=hmtai.useHM(choice,"gangbang"))
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Anime(bot))

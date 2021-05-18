@@ -1,0 +1,19 @@
+111111111111:
+  example: DDDDDD
+811822383563407402:
+  active:
+  - - 844206784506757130
+    - 844206787653926973
+  - - 844206812214984764
+    - 844206814731304981
+  channel: 844186564690051102
+  closed:
+  - - 844208419497312256
+    - 844208461482950687
+  closed_category: 844186561696104478
+  current_ticket: 5
+  message: "Your ticket has been created. You can add information by typing in this\
+    \ channel. \n\nA member of the ticket-handling-team will be with you as soon as\
+    \ they can."
+  open_category: 844186558810816512
+  role: 844186555991064626

@@ -35,7 +35,8 @@ class Fun(
     async def hotcalc(self, ctx, *, user: discord.Member = None):
         """ Returns a random percent for how hot is a discord user """
         user = user or ctx.author
-
+        if user.id == 801271445304246323:
+            return await ctx.send(f"**{user.name}** is **100%** hot 💞")
         random.seed(user.id)
         r = random.randint(1, 100)
         hot = r / 1.17

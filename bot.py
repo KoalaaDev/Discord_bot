@@ -194,20 +194,6 @@ async def on_resumed():
     print("\u001b[33m Connected back to discord! \u001b[0m")
 
 
-# sorta good purpose
-@client.command(hidden=True)
-async def kick(ctx, member: discord.Member, days: int = 1, reason="ur smol hs"):
-    await member.kick()
-    await ctx.send(f"Kicked {member.name}")
-    print(f"{member.name} has been kicked from \u001b[33m {ctx.guild.name} \u001b[0m")
-
-
-@client.command(hidden=True)
-async def ban(ctx, member: discord.Member, days: int = 1, reason="ur big hs"):
-    await member.ban(delete_message_days=days)
-    await ctx.send("Banned {}".format(ctx.member))
-    print(f"{member.name} has been banned from \u001b[33m {ctx.guild.name} \u001b[0m")
-
 client.run(API_KEY)
 # if not input("Use jojo account?"):
 #     client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k")  # Popekanga account

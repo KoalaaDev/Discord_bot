@@ -1347,7 +1347,10 @@ class Music(
                 ID = query.split("list=")[1]
                 info = await controller.playlistparse(ID)
                 url = query
-                description = info['description'][:25]
+                if info['description']:
+                    description = info['description'][:25]
+                else:
+                    description = "No description provided!"
                 name = info['title']
             else:
                 search_results = await spotify_client.search(query, "playlist")

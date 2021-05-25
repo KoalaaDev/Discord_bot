@@ -1046,7 +1046,7 @@ class Music(
         else:
             pages = menus.MenuPages(source=Paginator(ctx,[f"`{x.title}`" for x in list(controller.last_songs._queue)],"in History",f"Last played songs",5), clear_reactions_after=True)
             await pages.start(ctx)
-    @commands.command(aliases=["disconnect", "dc"])
+    @commands.command(aliases=["disconnect", "dc","leave"])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)

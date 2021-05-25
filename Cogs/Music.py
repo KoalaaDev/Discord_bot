@@ -1492,12 +1492,13 @@ class Music(
             identifier = f"{self.bot.user.name}-{region}-{next(idgenerator)}"
             await self.bot.wavelink.initiate_node(host=host,
                                                      port=port,
-                                                     rest_uri=rest_uri,
+                                                     rest_uri=f"http://{rest_uri}",
                                                      password='youshallnotpass',
                                                      identifier=identifier,
                                                      region=region)
             return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-        except Exception:
+        except Exception as e:
+            print(e)
             return await ctx.message.add_reaction("\N{Cross Mark}")
 
     @commands.command(hidden=True)
@@ -1508,5 +1509,14 @@ class Music(
         for y,x in enumerate(self.bot.wavelink.nodes.keys(),start=1):
             embed.add_field(name=y,value=x)
         await ctx.send(embed=embed)
+    @commands.command(hidden=True)
+    async def destroynode(self, ctx, identifier: str):
+        if not await self.is_whitelisted(ctx.author.id):
+            return await ctx.message.add_reaction("\N{Cross Mark}")
+        try:
+            await self.bot.wavelink.destroy_node(identifier=identifier)
+            return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        except Exception:
+            return await ctx.message.add_reaction("\N{Cross Mark}")
 def setup(bot):
     bot.add_cog(Music(bot))

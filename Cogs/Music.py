@@ -326,7 +326,17 @@ class MusicController:
                     return list(set(["https://www.youtube.com/watch?v=" + x["id"]["videoId"] for x in Videos["items"]]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
-
+    async def playlistparse(self, id):
+        key = next(self.YoutubeAPIKEY)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"https://www.googleapis.com/youtube/v3/playlists?part=snippet&id={id}&key={key}"
+            ) as video:
+                dictionary = await video.json()
+                try:
+                    return dictionary["items"][0]['snippet']
+                except KeyError:
+                    print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
     @tasks.loop(hours=1)
     async def update_playlist(self):
         spotify_playlists = await spotify_client.featured_playlists(country=self.spotify_region)
@@ -517,7 +527,10 @@ class Music(
             self.nodes = config["music"]["nodes"]
             self.spotify = config["music"]["Spotify"]
         self.bot.loop.create_task(self.start_nodes())
-        self.check_controllers.start()
+        try:
+            self.check_controllers.start()
+        except Exception:
+            pass
     async def destroy_nodes(self):
         for n in self.nodes.values():
             await self.bot.wavelink.destroy_node(n['identifier'])
@@ -547,9 +560,6 @@ class Music(
                 members = [x for x in channel.members if x.bot == False]
             else:
                 members = None
-            if not player.is_playing and not player.is_connected and controller.queue.empty():
-                print(f"stopping controller for {controller.guild_id}")
-                Deletion_list.append(controller)
             if player.is_connected and not members:
                 print(f"There is noone in the channel! Stopping controller for {controller.guild_id}")
                 Deletion_list.append(controller)
@@ -1333,9 +1343,12 @@ class Music(
                 if description == "":
                     description = "No description provided!"
                 name = playlist["name"]
-            elif RURL.match(query) and "playlist" in query:
-                data = await self.bot.wavelink.get_tracks(f"{query}")
-                print(data.data)
+            elif RURL.match(query) and "list" in query:
+                ID = query.split("list=")[1]
+                info = await controller.playlistparse(ID)
+                url = query
+                description = info['description'][:25]
+                name = info['title']
             else:
                 search_results = await spotify_client.search(query, "playlist")
                 url = search_results["playlists"]["items"][0]["external_urls"]["spotify"]

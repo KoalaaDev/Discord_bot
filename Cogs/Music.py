@@ -22,8 +22,13 @@ import async_timeout
 from lyricsgenius import Genius
 from subprocess import Popen, PIPE
 import copy
-
-
+from Cogs.Utils import is_whitelisted
+def uniqueid():
+    seed = random.getrandbits(32)
+    while True:
+       yield seed
+       seed += 1
+idgenerator = uniqueid()
 RURL = re.compile("https?:\/\/(?:www\.)?.+")
 spotify_countries = ['AD','AE','AG','AL','AM','AR','AT','AU','AZ','BA','BB','BD','BE','BF',
  'BG','BH','BI','BN','BO','BR','BS','BT','BW','BY','BZ','CA','CH','CL','CM','CO',
@@ -518,7 +523,7 @@ class Music(
             await self.bot.wavelink.destroy_node(n['identifier'])
 
     async def is_whitelisted(self, userID):
-        GetUser = await self.bot.db.fetchrow("SELECT user_id FROM test WHERE user_id = $1", userID)
+        GetUser = await self.bot.db.fetchrow("SELECT user_id FROM admin WHERE user_id = $1", userID)
         return True if GetUser else False
     async def start_nodes(self):
         await self.bot.wait_until_ready()
@@ -1477,5 +1482,31 @@ class Music(
         await ctx.send(fmt)
         process.stdout.close()
 
+
+    @commands.command(hidden=True)
+    async def addnode(self, ctx, rest_uri, region):
+        if not await self.is_whitelisted(ctx.author.id):
+            return await ctx.message.add_reaction("\N{Cross Mark}")
+        try:
+            host,port = rest_uri.split(":")
+            identifier = f"{self.bot.user.name}-{region}-{next(idgenerator)}"
+            await self.bot.wavelink.initiate_node(host=host,
+                                                     port=port,
+                                                     rest_uri=rest_uri,
+                                                     password='youshallnotpass',
+                                                     identifier=identifier,
+                                                     region=region)
+            return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+        except Exception:
+            return await ctx.message.add_reaction("\N{Cross Mark}")
+
+    @commands.command(hidden=True)
+    async def listnode(self, ctx):
+        if not await self.is_whitelisted(ctx.author.id):
+            return await ctx.message.add_reaction("\N{Cross Mark}")
+        embed = discord.Embed(title="All servers")
+        for y,x in enumerate(self.bot.wavelink.nodes.keys(),start=1):
+            embed.add_field(name=y,value=x)
+        await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Music(bot))

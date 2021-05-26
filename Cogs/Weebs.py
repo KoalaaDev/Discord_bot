@@ -428,7 +428,7 @@ class Anime(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True)
     async def femdom(self, ctx: commands.Context):
-        """Femdom"""
+        """Female Domination?"""
         embed = discord.Embed(
             color=discord.Color.blue()
         )
@@ -504,8 +504,63 @@ class Anime(commands.Cog):
         embed = discord.Embed(
             color=discord.Color.blue()
         )
+        embed.set_image(url=hmtai.useHM("v1","gangbang"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def ero(self, ctx: commands.Context):
+        """eros, ero Uniforms, etc, you know what eros are :3"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
         choice = random.choice(["v1","v2"])
-        embed.set_image(url=hmtai.useHM(choice,"gangbang"))
+        embed.set_image(url=hmtai.useHM(choice,"ero"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def glasses(self, ctx: commands.Context):
+        """Girls that wear glasses"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=hmtai.useHM("v2","glasses"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def tentacles(self, ctx: commands.Context):
+        """Very nice"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=hmtai.useHM("v2","tentacles"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def thighs(self, ctx: commands.Context):
+        """Oh, i so like it, it's best of the best, like a religion <3"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=hmtai.useHM("v2","thighs"))
+        await ctx.send(embed=embed)
+
+    @commands.is_nsfw()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True)
+    async def cuckold(self, ctx: commands.Context):
+        """Wow, I won't even question your fetishes"""
+        embed = discord.Embed(
+            color=discord.Color.blue()
+        )
+        embed.set_image(url=hmtai.useHM("v2","cuckold"))
         await ctx.send(embed=embed)
 
 def setup(bot):

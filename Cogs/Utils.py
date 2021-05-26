@@ -142,5 +142,25 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
             await ctx.message.add_reaction("\N{White Heavy Check Mark}")
         except subprocess.CalledProcessError:
             await ctx.message.add_reaction("\N{Cross Mark}")
+    @is_whitelisted()
+    @commands.command(hidden=True)
+    async def get_guild_owner(self, ctx):
+        guilds = self.bot.guilds
+        if len(guilds)<26:
+            embed = discord.Embed(title='Server owners')
+            for guild in self.bot.guilds:
+                embed.add_field(name=guild.name,value=f"{guild.owner.name}({guild.owner.id})")
+            await ctx.send(embed=embed)
+        else:
+            embeds = []
+            for x in range(len(guilds)):
+                if x%25 == 0 or x==0:
+                    embed = discord.Embed(title="Server owners")
+                guild = guilds[x]
+                embed.add_field(name=guild.name,value=f"{guild.owner.name}({guild.owner.id})")
+                if x%25 == 0 or x==0:
+                    embeds.append(embed)
+            for embed in embeds:
+                await ctx.send(embed=embed)
 def setup(bot):
     bot.add_cog(Utility(bot))

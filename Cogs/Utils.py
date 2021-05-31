@@ -173,7 +173,7 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
                 await ctx.send(embed=embed)
     @is_whitelisted()
     @commands.command(hidden=True)
-    async def leave_guild(self, ctx, id):
+    async def leave_guild(self, ctx, id: int):
         server = self.bot.get_guild(id)
         await server.leave()
 

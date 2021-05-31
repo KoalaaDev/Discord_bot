@@ -1,4 +1,4 @@
-from discord.ext  import commands
+from discord.ext import commands
 import sys
 import traceback
 from subprocess import Popen, PIPE
@@ -6,12 +6,15 @@ import discord
 import asyncpg
 import subprocess
 
+
 def is_whitelisted():
     async def predicate(ctx):
-        database = await asyncpg.create_pool(database="Users",host="172.104.52.186", user="postgres", password="doorbanger")
+        database = await asyncpg.create_pool(database="Users", host="172.104.52.186", user="postgres", password="doorbanger")
         GetUser = await database.fetchrow("SELECT user_id FROM admin WHERE user_id = $1", ctx.author.id)
         return True if GetUser else False
     return commands.check(predicate)
+
+
 class Utility(commands.Cog, description="Get people's avatar and more utility commands!"):
     def __init__(self, bot):
         self.bot = bot
@@ -35,6 +38,7 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
         traceback.print_exception(
             type(error), error, error.__traceback__, file=sys.stderr
         )
+
     @is_whitelisted()
     @commands.dm_only()
     @commands.command(hidden=True)
@@ -55,6 +59,7 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
     async def offline(self, ctx):
         await self.bot.change_presence(status=discord.Status.invisible)
         await ctx.send("[bot going offline] Going under!")
+
     @is_whitelisted()
     @commands.dm_only()
     @commands.command(hidden=True)
@@ -86,7 +91,7 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
                 except discord.errors.NotFound:
                     print(f"Could not find invite for {guild}")
                 if invitelinknew:
-                        break
+                    break
             await ctx.send(invitelinknew)
 
     @is_whitelisted()
@@ -94,22 +99,23 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
     @commands.command(hidden=True)
     async def allguilds(self, ctx):
         guilds = self.bot.guilds
-        if len(guilds)<26:
+        if len(guilds) < 26:
             embed = discord.Embed(title="Guilds")
             for x in guilds:
-                embed.add_field(name=x.name,value=x.id)
+                embed.add_field(name=x.name, value=x.id)
             return await ctx.send(embed=embed)
         else:
             embeds = []
             for x in range(len(guilds)):
-                if x%25 == 0 or x==0:
+                if x % 25 == 0 or x == 0:
                     embed = discord.Embed(title="Guilds")
                 guild = guilds[x]
-                embed.add_field(name=guild.name,value=guild.id)
-                if x%25 == 0 or x==0:
+                embed.add_field(name=guild.name, value=guild.id)
+                if x % 25 == 0 or x == 0:
                     embeds.append(embed)
             for embed in embeds:
                 await ctx.send(embed=embed)
+
     @is_whitelisted()
     @commands.command(aliases=['shell'], hidden=True)
     async def cmd(self, ctx, *, args):
@@ -126,6 +132,7 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
         embed = discord.Embed(title=member.name)
         embed.set_thumbnail(url=member.avatar_url)
         await ctx.send(embed=embed)
+
     @is_whitelisted()
     @commands.command(hidden=True)
     async def git(self, ctx, *, args):
@@ -133,34 +140,42 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
         process = Popen(command, stdout=PIPE, stderr=PIPE)
         stdout, stderr = process.communicate()
         await ctx.send(embed=discord.Embed(description=f"```{stdout.decode('utf8')}```"))
+
     @is_whitelisted()
     @commands.command(hidden=True)
     async def pip(self, ctx, *, args):
         command = [sys.executable, "-m", "pip"] + args.split(" ")
         try:
-            process = subprocess.check_call(command, stdout=PIPE, stderr=PIPE)
+            subprocess.check_call(command, stdout=PIPE, stderr=PIPE)
             await ctx.message.add_reaction("\N{White Heavy Check Mark}")
         except subprocess.CalledProcessError:
             await ctx.message.add_reaction("\N{Cross Mark}")
+
     @is_whitelisted()
     @commands.command(hidden=True)
     async def get_guild_owner(self, ctx):
         guilds = self.bot.guilds
-        if len(guilds)<26:
+        if len(guilds) < 26:
             embed = discord.Embed(title='Server owners')
             for guild in self.bot.guilds:
-                embed.add_field(name=guild.name,value=f"{guild.owner.name}({guild.owner.id})")
+                embed.add_field(name=guild.name, value=f"{guild.owner.name}({guild.owner.id})")
             await ctx.send(embed=embed)
         else:
             embeds = []
             for x in range(len(guilds)):
-                if x%25 == 0 or x==0:
+                if x % 25 == 0 or x == 0:
                     embed = discord.Embed(title="Server owners")
                 guild = guilds[x]
-                embed.add_field(name=guild.name,value=f"{guild.owner.name}({guild.owner.id})")
-                if x%25 == 0 or x==0:
+                embed.add_field(name=guild.name, value=f"{guild.owner.name}({guild.owner.id})")
+                if x % 25 == 0 or x == 0:
                     embeds.append(embed)
             for embed in embeds:
                 await ctx.send(embed=embed)
+    @is_whitelisted()
+    @commands.command(hidden=True)
+    async def leave_guild(self, ctx, id):
+        server = self.bot.get_guild(id)
+        await server.leave()
+
 def setup(bot):
     bot.add_cog(Utility(bot))

@@ -1522,8 +1522,8 @@ class Music(
         if not await self.is_whitelisted(ctx.author.id):
             return await ctx.message.add_reaction("\N{Cross Mark}")
         embed = discord.Embed(title="All servers")
-        for y,x in enumerate(self.bot.wavelink.nodes.keys(),start=1):
-            embed.add_field(name=y,value=x)
+        for y, x in self.bot.wavelink.nodes.items():
+            embed.add_field(name=y, value=x)
         await ctx.send(embed=embed)
     @commands.command(hidden=True)
     async def destroynode(self, ctx, identifier: str):

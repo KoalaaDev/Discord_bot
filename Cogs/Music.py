@@ -1532,7 +1532,8 @@ class Music(
         try:
             await self.bot.wavelink.destroy_node(identifier=identifier)
             return await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-        except Exception:
+        except Exception as e:
+            await ctx.send(e)
             return await ctx.message.add_reaction("\N{Cross Mark}")
 def setup(bot):
     bot.add_cog(Music(bot))

@@ -1523,7 +1523,7 @@ class Music(
             return await ctx.message.add_reaction("\N{Cross Mark}")
         embed = discord.Embed(title="All servers")
         for y, x in self.bot.wavelink.nodes.items():
-            embed.add_field(name=y, value=x)
+            embed.add_field(name=y, value=x.host)
         await ctx.send(embed=embed)
     @commands.command(hidden=True)
     async def destroynode(self, ctx, identifier: str):

@@ -2,7 +2,6 @@ sympy==1.6.2
 wavelink==0.9.9
 pyfiglet==0.8.post1
 lyricsgenius==1.4.0
-python_chess==0.31.4
 vacefron.py==1.6.1
 cexprtk==0.3.4
 humanize==0.5.1

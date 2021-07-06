@@ -1,20 +1,16 @@
 import asyncio
 import os
 import random
-import urllib.parse
 from datetime import datetime
 import yaml
 import discord
 import sys
 import traceback
 from discord.ext import commands
-from discord.utils import get
 from pyfiglet import Figlet
 from cogwatch import Watcher
-from subprocess import Popen, PIPE
 from difflib import get_close_matches
 import asyncpg
-
 
 
 intents = discord.Intents.all()
@@ -24,7 +20,10 @@ with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
     API_KEY = config["bot"]["API_KEY"]
     COGS_CONFIG = config["bot"]["LOAD_COGS"]
-
+    pre_config = config['bot']['preload']
+print("Opening prerequisites...")
+for x in pre_config.values():
+    os.system(f"start cmd /k {x}")
 intents.guilds = True
 fonts = [
     "1943____",
@@ -95,14 +94,18 @@ elif COGS_CONFIG == "disarmed":
     ]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
 
+
 async def connectDB():
-    client.db = await asyncpg.create_pool(database="Users",host="172.104.52.186", user="postgres", password="doorbanger")
+    client.db = await asyncpg.create_pool(database="Users", host="172.104.52.186", user="postgres", password="doorbanger")
     print("Connected to Bot database")
 client.loop.create_task(connectDB())
 # Events
+
+
 @client.event
 async def on_connect():
     print("\u001b[32m Successfully connected to discord! \u001b[0m")
+
 
 @client.event
 async def on_command_error(ctx, error):
@@ -111,14 +114,15 @@ async def on_command_error(ctx, error):
             return
         cmd = ctx.invoked_with
         cmds = [cmd.name for cmd in client.commands if not cmd.hidden]
-        # cmds = [cmd.name for cmd in bot.commands if not cmd.hidden] # use this to stop showing hidden commands as suggestions
-        matches = get_close_matches(cmd, cmds)
+        matches = get_close_matches(cmd, cmds, 1)
         if len(matches) > 0:
             return await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
     print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
     traceback.print_exception(
         type(error), error, error.__traceback__, file=sys.stderr
     )
+
+
 @client.event
 async def on_ready():
     COGS_FAILED = 0

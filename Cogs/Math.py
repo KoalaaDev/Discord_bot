@@ -2,7 +2,6 @@ from __future__ import division
 import string
 from math import *
 import discord
-import cexprtk
 from discord.ext import commands
 from sympy import *
 import re
@@ -27,19 +26,6 @@ def parse(string: str):
 class Math(commands.Cog, description="Math related commands"):
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command()
-    async def math(self,ctx, message: str):
-        """Does some math for you!"""
-        try:
-            x = cexprtk.evaluate_expression(message, {"pi": pi})
-            await ctx.message.add_reaction("\N{White Heavy Check Mark}")
-            await ctx.send(x)
-        except Exception:
-            await ctx.message.add_reaction("\N{Cross Mark}")
-            print(
-                f"[MATH COG] Encountered exception with {message.content}: {Exception}"
-            )
 
 
     @commands.command()

@@ -46,13 +46,6 @@ class Spying(commands.Cog, name="Spying logic"):
         command_message = ctx.message.content.split(" ")
         command = command_message[0].strip(a)
         command_args :commands.clean_content(use_nicknames=True) = " ".join(command_message[1:])
-        search = await self.bot.db.fetchrow("SELECT user_id FROM command WHERE user_id=$1",ctx.author.id)
-        if not search:
-            await self.bot.db.execute("INSERT INTO command (user_id, username) VALUES ($1, $2)", ctx.author.id, ctx.author.name)
-
-        await self.bot.db.execute(f"ALTER TABLE command ADD COLUMN IF NOT EXISTS {command} INTEGER")
-        await self.bot.db.execute(f"UPDATE command SET {command} = 1 WHERE user_id={ctx.author.id} AND {command} is null")
-        await self.bot.db.execute(f"UPDATE command SET {command} = {command}+1 WHERE user_id={ctx.author.id} and {command}>=1")
         if command_args:
             embed = discord.Embed(title=f"Invoked command {command}",description=f"```{command_args}```")
         else:

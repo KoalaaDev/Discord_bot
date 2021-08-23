@@ -11,7 +11,7 @@ from pyfiglet import Figlet
 from cogwatch import Watcher
 from difflib import get_close_matches
 import asyncpg
-
+from discord_components import ComponentsBot
 
 intents = discord.Intents.all()
 intents.typing = False
@@ -21,9 +21,10 @@ with open("apiconfig.yml", "r") as f:
     API_KEY = config["bot"]["API_KEY"]
     COGS_CONFIG = config["bot"]["LOAD_COGS"]
     pre_config = config['bot']['preload']
-print("Opening prerequisites...")
-for x in pre_config.values():
-    os.system(f"start cmd /k {x}")
+if pre_config:
+    print("Opening prerequisites...")
+    for x in pre_config.values():
+        os.system(f"start cmd /k {x}")
 intents.guilds = True
 fonts = [
     "1943____",
@@ -54,7 +55,7 @@ async def get_prefix(bot, message):
         return server_prefixes.get(message.guild.id, "~")
 
 
-client = commands.Bot(
+client = ComponentsBot(
     command_prefix=get_prefix,
     description="A bot with no restrictions!",
     case_insensitive=True,
@@ -67,8 +68,9 @@ today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
 print(f"\u001b[36m Starting HS Bot v3 at {d1} \u001b[0m")
 if COGS_CONFIG == "all":
+    excluded = 0
     Cogs_to_load = [
-        "Cogs." + cog.strip(".py")
+        "Cogs." + cog[:-3]
         for cog in os.listdir("Cogs/")
         if "py" in cog and "pycache" not in cog
     ]
@@ -86,19 +88,13 @@ elif COGS_CONFIG == "disarmed":
     disarmed_blacklist = ["Grief", "Test", "Spying", "Time"]
     excluded = len(disarmed_blacklist)
     Cogs_to_load = [
-        "Cogs." + cog.strip(".py")
+        "Cogs." + cog[:-3]
         for cog in os.listdir("Cogs/")
         if "py" in cog
         and "pycache" not in cog
         and cog.strip(".py") not in disarmed_blacklist
     ]
 print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
-
-
-async def connectDB():
-    client.db = await asyncpg.create_pool(database="Users", host="172.104.52.186", user="postgres", password="doorbanger")
-    print("Connected to Bot database")
-client.loop.create_task(connectDB())
 # Events
 
 

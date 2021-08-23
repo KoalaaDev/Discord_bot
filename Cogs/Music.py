@@ -23,6 +23,8 @@ from lyricsgenius import Genius
 from subprocess import Popen, PIPE
 import copy
 from Cogs.Utils import is_whitelisted
+from discord_components import DiscordComponents, Button, Select, SelectOption
+
 def uniqueid():
     seed = random.getrandbits(32)
     while True:
@@ -275,6 +277,7 @@ class MusicController:
         self.queue = asyncio.Queue()
         self.auto_play_queue = asyncio.Queue()
         self.auto_play = False
+        self.auto_play_mode = "Mix"
         self.volume = 50
         self.requester = None
         self.now_playing = None
@@ -312,9 +315,14 @@ class MusicController:
         embed.add_field(name='Volume', value=f'**`{player.volume}%`**')
         embed.add_field(name='Requested By', value=track.requester)
         if self.auto_play:
+            if self.auto_play_mode == 'Mix':
+                embed.add_field(name='Autoplay Mode', value='**`Youtube Mix`**')
+            if self.auto_play_mode == 'API':
+                embed.add_field(name='Autoplay Mode', value='**`Youtube Suggestions`**')
             embed.add_field(name='Autoplay', value=f'**`{self.auto_play}`**')
         embed.set_footer(text=f"{player.node.region}")
         return embed
+
     async def YoutubeSuggestion(self):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
@@ -326,6 +334,13 @@ class MusicController:
                     return list(set(["https://www.youtube.com/watch?v=" + x["id"]["videoId"] for x in Videos["items"]]))
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
+
+    async def YoutubeMixer(self):
+        tracks = await self.bot.wavelink.get_tracks(f"https://www.youtube.com/watch?v={self.now_playing_id}&list=RD{self.now_playing_id}")
+        suggestions = tracks.tracks
+        suggestions.pop(0) #removes initial song as it played lmao
+        return suggestions
+
     async def playlistparse(self, id):
         key = next(self.YoutubeAPIKEY)
         async with aiohttp.ClientSession() as session:
@@ -337,6 +352,7 @@ class MusicController:
                     return dictionary["items"][0]['snippet']
                 except KeyError:
                     print(f"Being Rate limited on \u001b[43m {key} \u001b[0m")
+
     @tasks.loop(hours=1)
     async def update_playlist(self):
         spotify_playlists = await spotify_client.featured_playlists(country=self.spotify_region)
@@ -349,34 +365,40 @@ class MusicController:
     @tasks.loop(seconds=2.0)
     async def check_autoplay_queue(self):
         if self.auto_play_queue.empty() and self.now_playing_id and self.auto_play:
-            videolist = await self.YoutubeSuggestion()
-            if not videolist:
-                return
-            for video in videolist:
-                tracks = await self.bot.wavelink.get_tracks(video)
-                if not tracks:
-                    tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
-                try:
-                    track = tracks[0]
-                    if self.current_track:
-                        if (
-                            track.length <= 480000
-                            and not track.title.startswith(self.current_track.title)
-                            and track.title not in [x.title for x in self.last_songs._queue]
-                        ):
-                            self.now_playing_id = track.ytid
-                            await self.auto_play_queue.put(
-                                Track(track.id, track.info, requester=self.requester)
-                            )
-                except TypeError:
-                    print(self.guild_id, "Could not play", video)
-            else:
-                print(
-                    self.guild_id,
-                    "has generated ",
-                    [x.title for x in self.auto_play_queue._queue],
-                )
-
+            if self.auto_play_mode == 'API':
+                videolist = await self.YoutubeSuggestion()
+                if not videolist:
+                    return
+                for video in videolist:
+                    tracks = await self.bot.wavelink.get_tracks(video)
+                    if not tracks:
+                        tracks = await self.bot.wavelink.get_tracks(f"ytsearch:{video}")
+                    try:
+                        track = tracks[0]
+                        if self.current_track:
+                            if (
+                                track.length <= 480000
+                                and not track.title.startswith(self.current_track.title)
+                                and track.title not in [x.title for x in self.last_songs._queue]
+                            ):
+                                self.now_playing_id = track.ytid
+                                await self.auto_play_queue.put(
+                                    Track(track.id, track.info, requester=self.requester)
+                                )
+                    except TypeError:
+                        print(self.guild_id, "Could not play", video)
+                else:
+                    print(
+                        self.guild_id,
+                        "has generated ",
+                        [x.title for x in self.auto_play_queue._queue],
+                    )
+            elif self.auto_play_mode == 'Mix':
+                SuggestedTracks = await self.YoutubeMixer()
+                for video in SuggestedTracks:
+                    await self.auto_play_queue.put(
+                        Track(video.id, video.info, requester=self.requester)
+                    )
     @tasks.loop(seconds=5.0)
     async def check_last_songs(self):
         if self.last_songs.full():
@@ -1144,14 +1166,18 @@ class Music(
         if controller.remote_control:
             if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
-        if controller.auto_play is True:
-            controller.auto_play = False
+        initialmsg = await ctx.send("Choose Mode:",components = [Select(placeholder = "Select a mode!",options = [SelectOption(label = "Youtube Mix", value = "Mix"),SelectOption(label = "Youtube Suggestions", value = "API"),SelectOption(label = "Disabled", value = "disabled")])])
+        interaction = await self.bot.wait_for("select_option")
+        await interaction.send(content = f"{interaction.values[0]} selected!")
+        if interaction.values[0] in ['Mix','API']:
+            controller.auto_play = True
             controller.auto_play_queue._queue.clear()
+            controller.auto_play_mode = interaction.values[0]
             await controller.now_playing.edit(embed=controller.build_embed())
         else:
-            controller.auto_play = True
+            controller.auto_play = False
             await controller.now_playing.edit(embed=controller.build_embed())
-
+        await initialmsg.delete()
     @commands.command(aliases=["mix"])
     async def shuffle(self, ctx):
         """Shuffles the queue"""

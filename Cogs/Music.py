@@ -225,6 +225,16 @@ class InteractiveEmbed(menus.Menu):
 
         await self.bot.invoke(ctx)
 
+    @menus.button(emoji='🔁')
+    async def shuffle_command(self, payload: discord.RawReactionActionEvent):
+        """Shuffle button."""
+        ctx = self.update_context(payload)
+
+        command = self.bot.get_command('loop')
+        ctx.command = command
+
+        await self.bot.invoke(ctx)
+
     @menus.button(emoji='\u2795')
     async def volup_command(self, payload: discord.RawReactionActionEvent):
         """Volume up button"""
@@ -1130,33 +1140,44 @@ class Music(
         await player.set_eq(eq)
 
     @commands.command()
-    async def loop(self, ctx, mode="track"):
+    async def loop(self, ctx):
         """Loop current playing song"""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         controller = self.get_controller(ctx)
         if controller.remote_control:
             if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
-        if controller.loop is True:
+        initialmsg = await ctx.send("Choose Loop Mode:",components = [Select(placeholder = "Select a mode!",options = [SelectOption(label = "Loop Track", value = "loop"),SelectOption(label = "Loop Queue", value = "q"),SelectOption(label = "Disabled", value = "disabled")])])
+        interaction = await self.bot.wait_for("select_option")
+        await interaction.send(content = f"{interaction.values[0]} selected!")
+        if interaction.values[0] == 'q':
+            controller.loop = True
+            controller.loop_queue = True
+        elif interaction.values[0] == 'loop':
+            controller.loop = True
+            controller.loop_queue = False
+        elif interaction.values[0] == 'disabled':
             controller.loop = False
-            await ctx.send("Loop disabled!")
-        else:
-            if "q" in mode.lower():
-                if controller.loop_queue is False:
-                    controller.loop = True
-                    controller.loop_queue = True
-                    await ctx.message.add_reaction(
-                        "\N{Clockwise Rightwards and Leftwards Open Circle Arrows}"
-                    )
-                else:
-                    controller.loop = False
-                    controller.loop_queue = False
-                    await ctx.send("loop track disabled!")
-            else:
-                controller.loop = True
-                await ctx.message.add_reaction(
-                    "\N{Clockwise Rightwards and Leftwards Open Circle Arrows}"
-                )
+            controller.loop_queue = False
+        # if interaction.values[0] == 'disabled':
+        #     controller.loop = False
+        # else:
+        #     if interaction.values[0] == 'q':
+        #         if controller.loop_queue is False:
+        #             controller.loop = True
+        #             controller.loop_queue = True
+        #             await ctx.message.add_reaction(
+        #                 "\N{Clockwise Rightwards and Leftwards Open Circle Arrows}"
+        #             )
+        #         else:
+        #             controller.loop = False
+        #             controller.loop_queue = False
+        #             await ctx.send("loop track disabled!")
+        #     else:
+        #         controller.loop = True
+        #         await ctx.message.add_reaction(
+        #             "\N{Clockwise Rightwards and Leftwards Open Circle Arrows}"
+        #         )
 
     @commands.command(aliases=["ap"])
     async def autoplay(self, ctx):
@@ -1166,7 +1187,7 @@ class Music(
         if controller.remote_control:
             if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
-        initialmsg = await ctx.send("Choose Mode:",components = [Select(placeholder = "Select a mode!",options = [SelectOption(label = "Youtube Mix", value = "Mix"),SelectOption(label = "Youtube Suggestions", value = "API"),SelectOption(label = "Disabled", value = "disabled")])])
+        initialmsg = await ctx.send("Choose Autoplay Mode:",components = [Select(placeholder = "Select a mode!",options = [SelectOption(label = "Youtube Mix", value = "Mix"),SelectOption(label = "Youtube Suggestions", value = "API"),SelectOption(label = "Disabled", value = "disabled")])])
         interaction = await self.bot.wait_for("select_option")
         await interaction.send(content = f"{interaction.values[0]} selected!")
         if interaction.values[0] in ['Mix','API']:

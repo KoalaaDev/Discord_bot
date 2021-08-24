@@ -1159,6 +1159,7 @@ class Music(
         elif interaction.values[0] == 'disabled':
             controller.loop = False
             controller.loop_queue = False
+        await initialmsg.delete()
         # if interaction.values[0] == 'disabled':
         #     controller.loop = False
         # else:

@@ -130,13 +130,12 @@ class Paginator(menus.ListPageSource):
 class InteractiveEmbed():
     """The Players interactive controller menu class."""
 
-    def __init__(self, *, player: wavelink.Player, controller):
+    def __init__(self, *, embed: discord.Embed, player: wavelink.Player):
 
-        self.embed = controller.build_embed()
+        self.embed = embed
         self.player = player
         self.bot = self.player.bot
         self.message = None
-        self.controller = controller
     def button_check(self, message: discord.Message):
 
         if not message.member:
@@ -156,14 +155,14 @@ class InteractiveEmbed():
             command = self.bot.get_command('resume')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.edit_origin(embed=self.embed, components = [[Button(emoji='\u23F8', custom_id="2"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
-    Button(emoji='\U0001F500', custom_id='5'), Button(emoji='🅰️', custom_id='10')]])
+            await self.message.edit(embed=self.embed, components = [[Button(emoji='\u23F8', custom_id="2"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
+    Button(emoji='\U0001F500', custom_id='5')]])
         elif interaction.custom_id == '2':
             command = self.bot.get_command('pause')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.edit_origin(embed=self.embed, components = [[Button(emoji='\u25B6', custom_id="1"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
-    Button(emoji='\U0001F500', custom_id='5'), Button(emoji='🅰️', custom_id='10')]])
+            await self.message.edit(embed=self.embed, components = [[Button(emoji='\u25B6', custom_id="1"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
+    Button(emoji='\U0001F500', custom_id='5')]])
         elif interaction.custom_id == '3':
             command = self.bot.get_command('stop')
             ctx.command = command
@@ -172,19 +171,14 @@ class InteractiveEmbed():
             command = self.bot.get_command('skip')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.send('Skipped!')
-
         elif interaction.custom_id == '5':
             command = self.bot.get_command('shuffle')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.send('Shuffled!')
-
         elif interaction.custom_id == '6':
             command = self.bot.get_command('loop')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.edit_origin(embed=controller.build_embed())
         elif interaction.custom_id == '7':
             command = self.bot.get_command('vol_up')
             ctx.command = command
@@ -201,11 +195,10 @@ class InteractiveEmbed():
             command = self.bot.get_command('autoplay')
             ctx.command = command
             await self.bot.invoke(ctx)
-            await interaction.edit_origin(embed=controller.build_embed())
         await interaction.respond(type=6)
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel) -> discord.Message:
         return await channel.send(embed=self.embed, components = [[Button(emoji='\u23F8', custom_id="2"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
-        Button(emoji='\U0001F500', custom_id='5'), Button(emoji='🅰️', custom_id='10')]])
+        Button(emoji='\U0001F500', custom_id='5')]])
 
   
 class MusicController:
@@ -392,7 +385,7 @@ class MusicController:
             )
             MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
             if not self.now_playing:
-                EmbeddedMessage = InteractiveEmbed(player=player, controller=self)
+                EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
                 await EmbeddedMessage.start(self.context)
                 self.now_playing = EmbeddedMessage.message
             else:
@@ -415,7 +408,7 @@ class MusicController:
                             MusicEmbed = discord.Embed(title="Now playing",colour=discord.Colour.random(),description=f"[{x}]({x.ytid}) [{x.requester}]",)
                             MusicEmbed.set_footer(text=f"{self.bot.user.name} | {player.node.region}")
                             if not self.now_playing:
-                                EmbeddedMessage = InteractiveEmbed(player=player, controller=self)
+                                EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
                                 await EmbeddedMessage.start(self.context)
                                 self.now_playing = EmbeddedMessage.message
                             else:
@@ -437,7 +430,7 @@ class MusicController:
                             text=f"{self.bot.user.name} | {player.node.region}"
                         )
                         if not self.now_playing:
-                            EmbeddedMessage = InteractiveEmbed(player=player, controller=self)
+                            EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
                             await EmbeddedMessage.start(self.context)
                             self.now_playing = EmbeddedMessage.message
                         else:
@@ -467,7 +460,7 @@ class MusicController:
                         text=f"{self.bot.user.name} | {player.node.region}"
                     )
                     if not self.now_playing:
-                        EmbeddedMessage = InteractiveEmbed(player=player, controller=self)
+                        EmbeddedMessage = InteractiveEmbed(embed=self.build_embed(), player=player)
                         await EmbeddedMessage.start(self.context)
                         self.now_playing = EmbeddedMessage.message
                     else:

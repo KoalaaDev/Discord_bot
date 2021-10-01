@@ -195,7 +195,3 @@ async def on_resumed():
 
 
 client.run(API_KEY)
-# if not input("Use jojo account?"):
-#     client.run("NjU0NTgxMjczMDI4ODUzNzcw.XfHoUQ.AYl_OYnkThODtoXePBOXqwDCo4k")  # Popekanga account
-# else:
-#     client.run("Nzk5MTM0OTc2NTE1Mzc1MTU0.X__KcQ.Xwz2VzbVPu2fnQxjsTs7dVHH-Ww")

@@ -87,7 +87,7 @@ class Paginator(menus.ListPageSource):
         """
         self.title: str = title
         self.name: str = name
-        self.ctx: Context = ctx
+        self.ctx = ctx
         self.data: list or tuple = data
         self.page: int = per_page
         self.color: Union[discord.Color, int] = color
@@ -127,153 +127,80 @@ class Paginator(menus.ListPageSource):
         )
         await menu.start(self.ctx)
 
-class InteractiveEmbed(menus.Menu):
+class InteractiveEmbed():
     """The Players interactive controller menu class."""
 
     def __init__(self, *, embed: discord.Embed, player: wavelink.Player):
-        super().__init__(timeout=None)
 
         self.embed = embed
         self.player = player
-        self.loop_settings = itertools.cycle(["q",""])
-    def update_context(self, payload: discord.RawReactionActionEvent):
-        """Update our context with the user who reacted."""
-        ctx = copy.copy(self.ctx)
-        ctx.author = payload.member
+        self.bot = self.player.bot
+        self.message = None
+    def button_check(self, message: discord.Message):
 
-        return ctx
-    async def update(self, payload):
-        if self._can_remove_reactions:
-            if payload.event_type == 'REACTION_ADD':
-                message = self.bot.get_channel(payload.channel_id).get_partial_message(payload.message_id)
-                await message.remove_reaction(payload.emoji, payload.member)
-            elif payload.event_type == 'REACTION_REMOVE':
-                return
-        await super().update(payload)
-    def reaction_check(self, payload: discord.RawReactionActionEvent):
-        if payload.event_type == 'REACTION_REMOVE':
+        if not message.member:
+            return False
+        if message.member.bot:
+            return False
+        if message.id != self.message.id:
+            return False
+        if message.member not in self.bot.get_channel(int(self.player.channel_id)).members:
             return False
 
-        if not payload.member:
-            return False
-        if payload.member.bot:
-            return False
-        if payload.message_id != self.message.id:
-            return False
-        if payload.member not in self.bot.get_channel(int(self.player.channel_id)).members:
-            return False
-
-        return payload.emoji in self.buttons
-
+        return True
+    async def start(self, ctx):
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+        interaction = await self.bot.wait_for("button_click")
+        if interaction.custom_id == '1':
+            command = self.bot.get_command('resume')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+            await self.message.edit(embed=self.embed, components = [[Button(emoji='\u23F8', custom_id="2"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
+    Button(emoji='\U0001F500', custom_id='5')]])
+        elif interaction.custom_id == '2':
+            command = self.bot.get_command('pause')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+            await self.message.edit(embed=self.embed, components = [[Button(emoji='\u25B6', custom_id="1"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
+    Button(emoji='\U0001F500', custom_id='5')]])
+        elif interaction.custom_id == '3':
+            command = self.bot.get_command('stop')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '4':
+            command = self.bot.get_command('skip')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '5':
+            command = self.bot.get_command('shuffle')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '6':
+            command = self.bot.get_command('loop')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '7':
+            command = self.bot.get_command('vol_up')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '8':
+            command = self.bot.get_command('vol_down')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '9':
+            command = self.bot.get_command('queue')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        elif interaction.custom_id == '10':
+            command = self.bot.get_command('autoplay')
+            ctx.command = command
+            await self.bot.invoke(ctx)
+        await interaction.respond(type=6)
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel) -> discord.Message:
-        return await channel.send(embed=self.embed)
+        return await channel.send(embed=self.embed, components = [[Button(emoji='\u23F8', custom_id="2"), Button(emoji='🛑', style='4', custom_id='3'), Button(emoji='\u23ED', custom_id='4'),
+        Button(emoji='\U0001F500', custom_id='5'), Button(emoji='🅰️', custom_id='10')]])
 
-    @menus.button(emoji='\u25B6')
-    async def resume_command(self, payload: discord.RawReactionActionEvent):
-        """Resume button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('resume')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u23F8')
-    async def pause_command(self, payload: discord.RawReactionActionEvent):
-        """Pause button"""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('pause')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-    @menus.button(emoji='\u23F8')
-    async def pause_command(self, payload: discord.RawReactionActionEvent):
-        """Pause button"""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('pause')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-    @menus.button(emoji='🛑')
-    async def stop_command(self, payload: discord.RawReactionActionEvent):
-        """Stop button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('stop')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-        await self.message.delete()
-    @menus.button(emoji='\u23ED')
-    async def skip_command(self, payload: discord.RawReactionActionEvent):
-        """Skip button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('skip')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-    @menus.button(emoji='\U0001F500')
-    async def shuffle_command(self, payload: discord.RawReactionActionEvent):
-        """Shuffle button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('shuffle')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='🔁')
-    async def shuffle_command(self, payload: discord.RawReactionActionEvent):
-        """Shuffle button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('loop')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u2795')
-    async def volup_command(self, payload: discord.RawReactionActionEvent):
-        """Volume up button"""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('vol_up')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u2796')
-    async def voldown_command(self, payload: discord.RawReactionActionEvent):
-        """Volume down button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('vol_down')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\U0001F1F6')
-    async def queue_command(self, payload: discord.RawReactionActionEvent):
-        """Player queue button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('queue')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-    @menus.button(emoji='🅰️')
-    async def autoplay_command(self, payload: discord.RawReactionActionEvent):
-        """Player queue button."""
-        ctx = self.update_context(payload)
-
-        command = self.bot.get_command('autoplay')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
+  
 class MusicController:
     def __init__(self, bot, guild_id,context: commands.Context):
         self.bot = bot
@@ -1348,7 +1275,7 @@ class Music(
             controller.update_playlist.restart()
             await ctx.message.add_reaction("\N{White Heavy Check Mark}")
         except Exception as e:
-            await message.add_reaction("\N{Cross Mark}")
+            await ctx.message.add_reaction("\N{Cross Mark}")
     @playlist.command()
     async def region(self, ctx, *, query):
         """Change spotify region for different regional featured playlists"""
@@ -1473,10 +1400,7 @@ class Music(
         if controller.remote_control:
             channel = self.bot.get_channel(player.channel_id)
             members = [x.id for x in channel.members if x.bot is False]
-            if (
-                any([x in whitelist for x in members])
-                and ctx.message.author.id not in whitelist
-            ):
+            if not await self.is_whitelisted(ctx.author.id):
                 return await ctx.message.add_reaction("\N{Cross Mark}")
         if controller.last_songs.qsize() < 1:
             return

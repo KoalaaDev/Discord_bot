@@ -17,7 +17,7 @@ class Test(commands.Cog):
         embed = discord.Embed(title="Surpirse!", colour=discord.Colour.blue())
         embed.set_image(url=random.choice([embed1, embed2, embed3]))
         await ctx.send(embed=embed, delete_after=5,components = [
-            Button(label = "Like what you see?", custom_id = "button1")
+            Button(emoji='\u23ED',style=1, custom_id = "button1")
         ])
         interaction = await self.bot.wait_for("button_click", check = lambda i: i.custom_id == "button1")
         await interaction.send(content = "Me too!")

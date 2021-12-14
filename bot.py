@@ -21,10 +21,7 @@ with open("apiconfig.yml", "r") as f:
     API_KEY = config["bot"]["API_KEY"]
     COGS_CONFIG = config["bot"]["LOAD_COGS"]
     pre_config = config['bot']['preload']
-if pre_config:
-    print("Opening prerequisites...")
-    for x in pre_config.values():
-        os.system(f"start cmd /k {x}")
+
 intents.guilds = True
 fonts = [
     "1943____",

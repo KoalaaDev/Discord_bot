@@ -262,6 +262,7 @@ class MusicV2(commands.Cog):
         if not player.is_connected:
             return
         await player.queue.clear()
+        player.loop = player.loopq = player.autoplay = False
         await player.stop()
 
     @commands.command(aliases=['l'])

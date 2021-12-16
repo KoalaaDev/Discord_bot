@@ -1,4 +1,5 @@
 from asyncio import Queue
+from asyncio import queues
 from pomice.objects import Track 
 from typing import (
     AsyncIterator,
@@ -200,7 +201,7 @@ class MusicQueue(Queue):
         Raises QueueEmpty if no items in queue.
         """
         if self.is_empty:
-            raise "No items in the queue."
+            raise queues.QueueEmpty
 
         return self._get()
 
@@ -209,7 +210,7 @@ class MusicQueue(Queue):
         Raises QueueEmpty if no items in queue.
         """
         if self.is_empty:
-            raise "No items in the queue."
+            raise queues.QueueEmpty
 
         return self._queue.pop()
 
@@ -222,15 +223,11 @@ class MusicQueue(Queue):
     async def put(self, item: Track) -> None:
         """Put the given item into the back of the queue."""
         return self._put(self._check_playable(item))
+    
+    def put_at_back(self, item: Track) -> None:
+        """Put the given item at the back of the queue"""
+        return self.put_at_index(-1, item)
 
-    async def put_at_index(self, index: int, item: Track) -> None:
-        """Put the given item into the queue at the specified index."""
-
-        return self._insert(index, self._check_playable(item))
-
-    async def put_at_front(self, item: Track) -> None:
-        """Put the given item into the front of the queue."""
-        return self.put_at_index(0, item)
     def copy(self) -> Queue:
         """Create a copy of the current queue including it's members."""
         new_queue = self.__class__(max_size=self.maxsize)

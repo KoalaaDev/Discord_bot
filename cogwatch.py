@@ -7,8 +7,6 @@ from pathlib import Path
 import yaml
 from discord.ext import commands
 from watchgod import Change, awatch
-normal_blacklist = ["Grief", "Test", "Time", "Chess"]
-disarmed_blacklist = ["Grief", "Test", "Spying", "Time"]
 
 class Watcher:
     """The core cogwatch class -- responsible for starting up watchers and managing cogs.
@@ -37,9 +35,6 @@ class Watcher:
         self.loop = loop
         self.default_logger = default_logger
         self.preload = preload
-        with open("apiconfig.yml", "r") as f:
-            config = yaml.safe_load(f)
-        self.mode = config["bot"]["LOAD_COGS"]
         if default_logger:
             _default = logging.getLogger(__name__)
             _default.setLevel(logging.INFO)
@@ -82,12 +77,6 @@ class Watcher:
                         change_path = change[1]
 
                         filename = self.get_cog_name(change_path)
-                        if self.mode == 'normal':
-                            if filename in normal_blacklist:
-                                continue
-                        elif self.mode == "disarmed":
-                            if filename in disarmed_blacklist:
-                                continue
                         new_dir = self.get_dotted_cog_path(change_path)
                         cog_dir = f"{new_dir}.{filename}" if new_dir else f"{self.path}.{filename}"
 

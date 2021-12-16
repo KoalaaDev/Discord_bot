@@ -1,13 +1,15 @@
 import discord
-from discord.ext.commands.core import command
 import pomice
 import datetime
 import typing
+import random
+from pomice.objects import Track
 from .ext.music import MusicQueue, HistoryQueue
 from discord.ext import commands
 import asyncio
 import yaml
 import os
+from discord_components import DiscordComponents, Select, SelectOption
 
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "apiconfig.yml")
 
@@ -16,22 +18,32 @@ class Player(pomice.Player):
         super().__init__(*args, **kwargs)
         self.queue = MusicQueue()
         self.history = HistoryQueue()
-        self.autoplay = self.loop = False
+        self.auto_play = self.loop = self.loopq = False
         self.context: commands.Context = None
         self.now_playing: discord.Message = None
+        self.current_track: Track = None
+
+    def build_stream_embed(self) -> typing.Optional[discord.Embed]:
+        """Build the player Livestream embed"""
+        track = self.current_track
+        channel = self.bot.get_channel(int(self.channel.id))
+        embed = discord.Embed(title=f":red_circle: **LIVE** on {self.bot.user.name} | {channel.name}", colour=0xebb145)
+        embed.description = f'Now Playing:\n[{track.title}]({track.uri})\n\n'
+        embed.set_thumbnail(url=track.thumbnail)
+        embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
+        embed.add_field(name='Requested By', value=track.requester)
+        embed.set_footer(text="Youtube Live/Twitch")
+        return embed
 
     def build_embed(self) -> typing.Optional[discord.Embed]:
         """Method which builds our players controller embed."""
-        track = self.current
+        track = self.current_track
         channel = self.bot.get_channel(int(self.channel.id))
         qsize = len(self.queue)
         track_type = "Spotify" if track.spotify else "Youtube"
-        if track.is_stream:
-            embed = discord.Embed(title=f":red_circle: **LIVE** on {self.bot.user.name} | {channel.name}", colour=0xebb145)
-        else:
-            embed = discord.Embed(title=f'Interactive {self.bot.user.name} | {channel.name}', colour=0xebb145)
+        embed = discord.Embed(title=f':musical_note: {self.bot.user.name} Music | {channel.name}', colour=0xebb145)
         embed.description = f'Now Playing:\n[{track.title}]({track.uri})\n\n'
-        embed.set_thumbnail(url=track.thumb)
+        embed.set_thumbnail(url=track.thumbnail)
 
         embed.add_field(name='Duration', value=str(datetime.timedelta(milliseconds=int(track.length))))
         embed.add_field(name='Queue Length', value=str(qsize))
@@ -39,20 +51,58 @@ class Player(pomice.Player):
         embed.add_field(name='Requested By', value=track.requester)
         if self.auto_play:
             embed.add_field(name='Autoplay', value=f'**`{self.auto_play}`**')
+        if self.loop:
+            embed.add_field(name='Loop', value=f'**`{self.loop}`**')
+        if self.loopq:
+            embed.add_field(name='Loop', value='**`Queue`**')
         embed.set_footer(text=f"{track_type}")
         return embed
 
-    def YoutubeDJ(self) -> typing.List:
-        pass
-    async def next(self) -> None:
-        if self.now_playing and len(self.queue)>1:
-            await self.now_playing.edit(embed=self.build_embed())
+    async def is_position_fresh(self) -> bool:
+        """Method which checks whether the player controller should be remade or updated."""
         try:
-            track: pomice.Track = self.queue.get_nowait()
-        except asyncio.queues.QueueEmpty:  
-            return await self.teardown()
+            async for message in self.context.channel.history(limit=5):
+                if message.id == self.now_playing.id:
+                    return True
+        except (discord.HTTPException, AttributeError, discord.Forbidden):
+            return False
+
+        return False
+                
+    async def next(self) -> None:
+        """Gets next song from queue and play it"""
+        try:
+            track: pomice.Track = await self.queue.get()
+        except asyncio.queues.QueueEmpty:
+            return
+        self.current_track = track
         await self.play(track)
-        self.now_playing = await self.context.send(embed=self.build_embed())
+        if self.now_playing and await self.is_position_fresh():
+            if self.current_track.is_stream:
+                return await self.now_playing.edit(embed=self.build_stream_embed())
+            return await self.now_playing.edit(embed=self.build_embed())
+        if self.now_playing:
+            await self.now_playing.delete()
+        if self.current_track.is_stream:
+            self.now_playing = await self.context.send(embed=self.build_stream_embed())
+        else:
+            self.now_playing = await self.context.send(embed=self.build_embed())
+        await self.history.put(track)
+    async def loop_next(self) -> None:
+        await self.play(self.current_track)
+        return await self.now_playing.edit(embed=self.build_embed())
+
+    async def loopq_next(self) -> None:
+        await self.queue.put(self.current_track)
+        await self.next()
+
+    async def autoplay_next(self) -> None:
+        if self.queue.is_empty:
+            ytid = self.current_track.uri.strip("https://www.youtube.com/watch?v=")
+            mix = await self.get_tracks(f"https://www.youtube.com/watch?v={ytid}&list=RD{ytid}", ctx=self.context)
+            for track in mix.tracks[1:]:
+                await self.queue.put(track)
+        await self.next()
 
     async def teardown(self):
         await self.destroy()
@@ -62,7 +112,6 @@ class Player(pomice.Player):
     def set_context(self, ctx: commands.Context):
         self.context = ctx
 
-        
 class MusicV2(commands.Cog):
     def __init__(self, bot: commands.bot) -> None:
         self.bot = bot
@@ -75,10 +124,21 @@ class MusicV2(commands.Cog):
 
     async def start_nodes(self):
         for n in self.nodes.values():
-            await self.pomice.create_node(bot=self.bot, spotify_client_id=self.spotify['ClientID'], spotify_client_secret=self.spotify['ClientSecret'],**n)
+            try:
+                await self.pomice.create_node(bot=self.bot, spotify_client_id=self.spotify['ClientID'], spotify_client_secret=self.spotify['ClientSecret'],**n)
+            except pomice.exceptions.NodeCreationError:
+                pass
+
     @commands.Cog.listener()
     async def on_pomice_track_end(self, player: Player, track, _):
-        await player.next()
+        if player.loop:
+            await player.loop_next()
+        elif player.loopq:
+            await player.loopq_next()
+        elif player.auto_play:
+            await player.autoplay_next()
+        else:
+            await player.next()
 
     @commands.Cog.listener()
     async def on_pomice_track_stuck(self, player: Player, track, _):
@@ -87,14 +147,13 @@ class MusicV2(commands.Cog):
     @commands.Cog.listener()
     async def on_pomice_track_exception(self, player: Player, track, _):
         await player.next()
-        
+
     @commands.command(aliases=['summon'])
     async def connect(self, ctx: commands.Context, *, channel: discord.VoiceChannel = None) -> None:
         if not channel:
             channel = getattr(ctx.author.voice, "channel", None)
             if not channel:
                 return await ctx.send("You must be in a voice channel in order to use this command!")
-
         # With the release of discord.py 1.7, you can now add a compatible
         # VoiceProtocol class as an argument in VoiceChannel.connect().
         # This library takes advantage of that and is how you initialize a player.
@@ -103,7 +162,6 @@ class MusicV2(commands.Cog):
     
         # Set the player context so we can use it so send messages
         player.set_context(ctx=ctx)
-        await ctx.send(f"Joined the voice channel `{channel.name}`")
 
     @commands.command(aliases=['disconnect', 'dc', 'disc', 'lv', 'fuckoff'])
     async def leave(self, ctx: commands.Context):
@@ -133,26 +191,134 @@ class MusicV2(commands.Cog):
             track_type = "Spotify" if results.spotify else "Youtube"
             for track in results.tracks:
                 await player.queue.put(track)
-            MusicEmbed = discord.Embed(
-                title=f"Added {results.track_count} songs from {results.name}",
-                colour=discord.Colour.random(),
-                url=results.uri,
-            )
-            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {track_type}")
-            await ctx.send(embed=MusicEmbed)
+            if player.current_track:
+                MusicEmbed = discord.Embed(
+                    title=f"Added {results.track_count} songs from {results.name}",
+                    colour=discord.Colour.random()
+                )
+                MusicEmbed.set_footer(text=f"{self.bot.user.name} | {track_type}")
+                await ctx.send(embed=MusicEmbed)
         else:
             track = results[0]
             track_type = "Spotify" if track.spotify else "Youtube"
             await player.queue.put(track)
-            MusicEmbed = discord.Embed(
-                    title="Queued",
-                    colour=discord.Colour.random(),
-                    description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]",
-                )
-            MusicEmbed.set_footer(text=f"{self.bot.user.name} | {track_type}")
-            await ctx.send(embed=MusicEmbed)
+            if player.current_track:
+                MusicEmbed = discord.Embed(
+                        title="Queued",
+                        colour=discord.Colour.random(),
+                        description=f"[{track.title}]({track.uri}) [{ctx.author.mention}]",
+                    )
+                MusicEmbed.set_footer(text=f"{self.bot.user.name} | {track_type}")
+                await ctx.send(embed=MusicEmbed)
         if not player.is_playing:
             await player.next()
 
+    @commands.command(aliases=['n', 's', 'next'])
+    async def skip(self, ctx: commands.Context):
+        """Skip the currently playing song."""
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if player.loop:
+            player.loop = False
+            await player.stop()
+            player.loop = True
+            return await ctx.message.add_reaction("\N{OK Hand Sign}")
+        await player.stop()
+        try:
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+        except:
+            await ctx.send("OK")
+    
+    @commands.command(aliases=["vol"])
+    async def volume(self, ctx, *, vol: int):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return    
+        await ctx.send(embed=discord.Embed(description=f"Setting the player volume to `{vol}`"),delete_after=2)
+        await player.set_volume(vol)
+
+    @commands.command(aliases=['mix', 'shuf'])
+    async def shuffle(self, ctx: commands.Context):
+        """Shuffle the players queue."""
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if len(player.queue)<1:
+            return await ctx.send('The queue is empty. Add some songs to shuffle the queue.', delete_after=15)
+        random.shuffle(player.queue._queue)
+        try:
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+        except:
+            await ctx.send("OK")
+
+    @commands.command()
+    async def stop(self, ctx: commands.Context):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        await player.queue.clear()
+        await player.stop()
+
+    @commands.command(aliases=['l'])
+    async def loop(self, ctx: commands.Context):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        player.loop = True if not player.loop else False
+        try:
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+        except:
+            await ctx.send(f"OK loop {player.loop}")
+        # initialmsg = await ctx.send("Choose Loop Mode:",components = [Select(placeholder = "Select a mode!",options = [SelectOption(label = "Loop Track", value = "loop"),SelectOption(label = "Loop Queue", value = "q"), SelectOption(label = "Disabled", value = "disabled")])])
+        # interaction = await self.bot.wait_for("select_option")
+        # await interaction.send(f"{interaction.values[0]} selected!")
+        # if interaction.values[0] == 'q':
+        #     player.loopq = True
+        # elif interaction.values[0] == 'loop':
+        #     player.loop = True
+        # elif interaction.values[0] == 'disabled':
+        #     player.loop = False
+        #     player.loop_queue = False
+        # await initialmsg.delete()
+        
+    @commands.command(aliases=['lq'])
+    async def loopq(self, ctx: commands.Context):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        player.loopq = True if not player.loopq else False
+        try:
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+        except:
+            await ctx.send(f"OK loop Queue {player.loopq}")
+    
+    @commands.command(aliases=['ap'])
+    async def autoplay(self, ctx: commands.Context):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        player.auto_play = True if not player.auto_play else False
+        try:
+            await ctx.message.add_reaction("\N{OK Hand Sign}")
+        except:
+            await ctx.send(f"OK autoplay {player.auto_play}")
+
+    @commands.command()
+    async def history(self, ctx):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        songs = '\n'.join(player.history)
+        await ctx.send(songs)
+        
 def setup(bot: commands.Bot):
     bot.add_cog(MusicV2(bot))

@@ -14,61 +14,61 @@ from typing import (
 )
 from copy import copy
 
-class HistoryQueue(Queue):
-    def __str__(self) -> str:
-        """String showing all Playable objects appearing as a list."""
-        return str(list(f"'{t}'" for t in self))
+# class HistoryQueue(Queue):
+#     def __str__(self) -> str:
+#         """String showing all Playable objects appearing as a list."""
+#         return str(list(f"'{t}'" for t in self))
 
-    def __repr__(self) -> str:
-        """Official representation with max_size and member count."""
-        return (
-            f"<{self.__class__.__name__} max_size={self.maxsize} members={self.count}>"
-        )
+#     def __repr__(self) -> str:
+#         """Official representation with max_size and member count."""
+#         return (
+#             f"<{self.__class__.__name__} max_size={self.maxsize} members={self.count}>"
+#         )
 
-    def __bool__(self) -> bool:
-        """Treats the queue as a bool, with it evaluating True when it contains members."""
-        return bool(self.count)
+#     def __bool__(self) -> bool:
+#         """Treats the queue as a bool, with it evaluating True when it contains members."""
+#         return bool(self.count)
 
-    def __call__(self, item: Track) -> None:
-        """Allows the queue instance to be called directly in order to add a member."""
-        self.put(item)
+#     def __call__(self, item: Track) -> None:
+#         """Allows the queue instance to be called directly in order to add a member."""
+#         self.put(item)
 
-    def __len__(self) -> int:
-        """Return the number of members in the queue."""
-        return self.count
+#     def __len__(self) -> int:
+#         """Return the number of members in the queue."""
+#         return self.count
 
-    def __getitem__(self, index: int) -> Track:
-        """Returns a member at the given position.
-        Does not remove item from queue.
-        """
-        if not isinstance(index, int):
-            raise ValueError("'int' type required.'")
+#     def __getitem__(self, index: int) -> Track:
+#         """Returns a member at the given position.
+#         Does not remove item from queue.
+#         """
+#         if not isinstance(index, int):
+#             raise ValueError("'int' type required.'")
 
-        return self._queue[index]
+#         return self._queue[index]
 
-    def __setitem__(self, index: int, item: Track):
-        """Inserts an item at given position."""
-        if not isinstance(index, int):
-            raise ValueError("'int' type required.'")
+#     def __setitem__(self, index: int, item: Track):
+#         """Inserts an item at given position."""
+#         if not isinstance(index, int):
+#             raise ValueError("'int' type required.'")
 
-        self.put_at_index(index, item)
+#         self.put_at_index(index, item)
 
-    def __delitem__(self, index: int) -> None:
-        """Delete item at given position."""
-        self._queue.__delitem__(index)
+#     def __delitem__(self, index: int) -> None:
+#         """Delete item at given position."""
+#         self._queue.__delitem__(index)
 
-    def __iter__(self) -> Iterator[Track]:
-        """Iterate over members in the queue.
-        Does not remove items when iterating.
-        """
-        return self._queue.__iter__()
+#     def __iter__(self) -> Iterator[Track]:
+#         """Iterate over members in the queue.
+#         Does not remove items when iterating.
+#         """
+#         return self._queue.__iter__()
 
-    def __reversed__(self) -> Iterator[Track]:
-        """Iterate over members in reverse order."""
-        return self._queue.__reversed__()
+#     def __reversed__(self) -> Iterator[Track]:
+#         """Iterate over members in reverse order."""
+#         return self._queue.__reversed__()
 
-    def __contains__(self, item: Track) -> bool:
-        """Check if an item is a member of the queue."""
+#     def __contains__(self, item: Track) -> bool:
+#         """Check if an item is a member of the queue."""
        
 class MusicQueue(Queue):
     
@@ -187,6 +187,10 @@ class MusicQueue(Queue):
         return len(self._queue)
 
     @property
+    def upcoming(self) -> List:
+        return list(track for track in self)[1:]
+
+    @property
     def is_empty(self) -> bool:
         """Returns True if queue has no members."""
         return not bool(self.count)
@@ -224,9 +228,13 @@ class MusicQueue(Queue):
         """Put the given item into the back of the queue."""
         return self._put(self._check_playable(item))
     
-    def put_at_back(self, item: Track) -> None:
-        """Put the given item at the back of the queue"""
-        return self.put_at_index(-1, item)
+    def put_at_front(self, item: Track) -> None:
+        """Put the given item into the front of the queue."""
+        return self.put_at_index(0, item)
+
+    def put_at_index(self, index: int, item: Track) -> None:
+        """Put the given item into the queue at the specified index."""
+        return self._insert(index, self._check_playable(item))
 
     def copy(self) -> Queue:
         """Create a copy of the current queue including it's members."""

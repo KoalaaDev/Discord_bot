@@ -4,7 +4,7 @@ import datetime
 import typing
 import random
 from pomice.objects import Track
-from .ext.music import MusicQueue, HistoryQueue
+from .ext.music import MusicQueue
 from discord.ext import commands
 import asyncio
 import yaml
@@ -17,7 +17,6 @@ class Player(pomice.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queue = MusicQueue()
-        self.history = HistoryQueue()
         self.auto_play = self.loop = self.loopq = False
         self.context: commands.Context = None
         self.now_playing: discord.Message = None
@@ -87,7 +86,6 @@ class Player(pomice.Player):
             self.now_playing = await self.context.send(embed=self.build_stream_embed())
         else:
             self.now_playing = await self.context.send(embed=self.build_embed())
-        await self.history.put(track)
     async def loop_next(self) -> None:
         await self.play(self.current_track)
         return await self.now_playing.edit(embed=self.build_embed())
@@ -98,8 +96,12 @@ class Player(pomice.Player):
 
     async def autoplay_next(self) -> None:
         if self.queue.is_empty:
-            ytid = self.current_track.uri.strip("https://www.youtube.com/watch?v=")
-            mix = await self.get_tracks(f"https://www.youtube.com/watch?v={ytid}&list=RD{ytid}", ctx=self.context)
+            ytid = self.current_track.uri.split("https://www.youtube.com/watch?v=")[1]
+            for attempt in range(5):
+                mix = await self.get_tracks(f"https://www.youtube.com/watch?v={ytid}&list=RD{ytid}", ctx=self.context)
+                if mix:
+                    break
+                print("\u001b[91m [AP] Retrying to load Mix \u001b[0m")
             for track in mix.tracks[1:]:
                 await self.queue.put(track)
         await self.next()
@@ -163,7 +165,7 @@ class MusicV2(commands.Cog):
         # Set the player context so we can use it so send messages
         player.set_context(ctx=ctx)
 
-    @commands.command(aliases=['disconnect', 'dc', 'disc', 'lv', 'fuckoff'])
+    @commands.command(aliases=['disconnect', 'dc', 'disc', 'lv', 'fuckoff', 'stop'])
     async def leave(self, ctx: commands.Context):
         if not (player := ctx.voice_client):
             return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
@@ -251,12 +253,12 @@ class MusicV2(commands.Cog):
             return await ctx.send('The queue is empty. Add some songs to shuffle the queue.', delete_after=15)
         random.shuffle(player.queue._queue)
         try:
-            await ctx.message.add_reaction("\N{OK Hand Sign}")
+            await ctx.message.add_reaction("\N{Twisted Rightwards Arrows}")
         except:
             await ctx.send("OK")
 
     @commands.command()
-    async def stop(self, ctx: commands.Context):
+    async def clear(self, ctx: commands.Context):
         if not (player := ctx.voice_client):
             return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
         if not player.is_connected:
@@ -266,6 +268,7 @@ class MusicV2(commands.Cog):
         player.loopq = False
         player.auto_play = False
         await player.stop()
+        await ctx.message.add_reaction("\N{Octagonal Sign}")
 
     @commands.command(aliases=['l'])
     async def loop(self, ctx: commands.Context):
@@ -322,6 +325,36 @@ class MusicV2(commands.Cog):
             return
         songs = '\n'.join(player.history)
         await ctx.send(songs)
-        
+    
+    @commands.command(aliases=['q'])
+    async def queue(self, ctx, show: int = 10):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        embed = discord.Embed(
+            title="Queue",
+            description=f"Showing up to next {show} tracks",
+        )
+        embed.add_field(name="Currently playing", value=getattr(player.current_track, "title", "No tracks currently playing."), inline=False)
+        if upcoming := player.queue.upcoming :
+            embed.add_field(
+                name="Next up",
+                value="\n".join(f'**{n}.** `{t.title}`' for n, t in enumerate(upcoming[:show], start=1)),
+                inline=False
+            )
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def move(self, ctx, pos1: int, pos2: int):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        track = player.queue[pos1]
+        del player.queue[pos1]
+        player.queue.put_at_index(pos2, track)
+        await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+
 def setup(bot: commands.Bot):
     bot.add_cog(MusicV2(bot))

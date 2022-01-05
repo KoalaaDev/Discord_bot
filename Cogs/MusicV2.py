@@ -144,10 +144,12 @@ class MusicV2(commands.Cog):
 
     @commands.Cog.listener()
     async def on_pomice_track_stuck(self, player: Player, track, _):
+        print(f"\u001b[36m Track stuck after {_}ms reached! Skipping! \u001b[0m")
         await player.next()
 
     @commands.Cog.listener()
     async def on_pomice_track_exception(self, player: Player, track, _):
+        print(f"\u001b[91m A track exception occured, Skipping! Exception:\n{_} \u001b[0m")
         await player.next()
 
     @commands.command(aliases=['summon'])
@@ -355,6 +357,70 @@ class MusicV2(commands.Cog):
         del player.queue[pos1]
         player.queue.put_at_index(pos2, track)
         await ctx.message.add_reaction("\N{White Heavy Check Mark}")
+
+    @commands.command(name='8d')
+    async def _8d(self, ctx):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if player._filter:
+            await player.reset_filter()
+            await ctx.send("Filter Reset")
+        else:
+            await player.set_filter(pomice.filters.Rotation(rotation_hertz=0.2))
+            try:
+                await ctx.message.add_reaction("\N{OK Hand Sign}")
+            except:
+                await ctx.send(f"8D effect enabled!")
+    
+    @commands.command()
+    async def nightcore(self, ctx):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if player._filter:
+            await player.reset_filter()
+            await ctx.send("Filter Reset")
+        else:
+            await player.set_filter(pomice.filters.Timescale(speed=1.19, pitch=1.2))
+            try:
+                await ctx.message.add_reaction("\N{OK Hand Sign}")
+            except:
+                await ctx.send(f"nightcore effect enabled!")
+    
+    @commands.command()
+    async def karaoke(self, ctx):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if player._filter:
+            await player.reset_filter()
+            await ctx.send("Filter Reset")
+        else:
+            await player.set_filter(pomice.filters.Karaoke())
+            try:
+                await ctx.message.add_reaction("\N{OK Hand Sign}")
+            except:
+                await ctx.send(f"karaoke effect enabled!")
+
+    @commands.command()
+    async def speed(self, ctx, speed):
+        if not (player := ctx.voice_client):
+            return await ctx.send("You must have the bot in a channel in order to use this command", delete_after=7)
+        if not player.is_connected:
+            return
+        if player._filter:
+            await player.reset_filter()
+            await ctx.send("Filter Reset")
+        else:
+            await player.set_filter(pomice.filters.Timescale(speed=speed))
+            try:
+                await ctx.message.add_reaction("\N{OK Hand Sign}")
+            except:
+                await ctx.send(f"{speed}x speed effect enabled!")
 
 def setup(bot: commands.Bot):
     bot.add_cog(MusicV2(bot))

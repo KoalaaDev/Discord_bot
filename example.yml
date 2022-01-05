@@ -1,5 +1,6 @@
 bot:
   API_KEY: ""
+  command_autocorrect: 'yes'
 music:
   Spotify:
     ClientID: ""

@@ -16,6 +16,7 @@ intents.presences = False
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
     API_KEY = config["bot"]["API_KEY"]
+    invoke_suggestions = config['bot']['command_autocorrect']
 
 intents.guilds = True
 
@@ -63,6 +64,13 @@ async def on_command_error(ctx, error):
         cmds = [cmd.name for cmd in client.commands if not cmd.hidden]
         matches = get_close_matches(cmd, cmds, 1)
         if len(matches) > 0:
+            if invoke_suggestions:
+                if matches[0] == 'play':
+                    embed = discord.Embed(description=f'Command "{cmd}" not found, Assuming you meant "{matches[0]}"')
+                    embed.set_footer(text="Note: this can be turned off in config")
+                    await ctx.send(embed=embed)
+                    return await ctx.invoke(client.get_command(matches[0]), search=ctx.message.content.split(cmd)[1])
+                return await ctx.invoke(client.get_command(matches[0]))
             return await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
     print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
     traceback.print_exception(

@@ -87,14 +87,17 @@ class Player(pomice.Player):
         else:
             self.now_playing = await self.context.send(embed=self.build_embed())
     async def loop_next(self) -> None:
+        """Gets the current song being played and plays it again"""
         await self.play(self.current_track)
         return await self.now_playing.edit(embed=self.build_embed())
 
     async def loopq_next(self) -> None:
+        """Get the next song and puts the last song played back into the queue"""
         await self.queue.put(self.current_track)
         await self.next()
 
     async def autoplay_next(self) -> None:
+        """Uses the Youtube Mix to generate songs after the queue becomes empty"""
         if self.queue.is_empty:
             ytid = self.current_track.uri.split("https://www.youtube.com/watch?v=")[1]
             for attempt in range(5):
@@ -107,11 +110,13 @@ class Player(pomice.Player):
         await self.next()
 
     async def teardown(self):
+        """Kills the player"""
         await self.destroy()
         if self.now_playing:
             await self.now_playing.delete()
     
     def set_context(self, ctx: commands.Context):
+        """Gets the Context"""
         self.context = ctx
 
 class MusicV2(commands.Cog):

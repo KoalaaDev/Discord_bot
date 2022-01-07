@@ -1,0 +1,13 @@
+bot:
+  API_KEY: ""
+  command_autocorrect: 'yes'
+music:
+  Spotify:
+    ClientID: ""
+    ClientSecret: ""
+  nodes:
+    local:
+      host: "localhost"
+      port: 8080
+      password: "youshallnotpass"
+      identifier: "local"

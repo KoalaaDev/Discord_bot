@@ -3,9 +3,9 @@ import sys
 import traceback
 from subprocess import Popen, PIPE
 import discord
-import asyncpg
 import subprocess
 
+OwnerID = [263189425167663105, 263190106821623810]
 
 def is_whitelisted():
     async def predicate(ctx):

@@ -1,16 +1,13 @@
 import asyncio
 import os
-import random
 from datetime import datetime
 import yaml
 import discord
 import sys
 import traceback
 from discord.ext import commands
-from pyfiglet import Figlet
 from cogwatch import Watcher
 from difflib import get_close_matches
-import asyncpg
 from discord_components import ComponentsBot
 
 intents = discord.Intents.all()
@@ -19,33 +16,9 @@ intents.presences = False
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
     API_KEY = config["bot"]["API_KEY"]
-    COGS_CONFIG = config["bot"]["LOAD_COGS"]
-    pre_config = config['bot']['preload']
-if pre_config:
-    print("Opening prerequisites...")
-    for x in pre_config.values():
-        os.system(f"start cmd /k {x}")
-intents.guilds = True
-fonts = [
-    "1943____",
-    "starwars",
-    "graffiti",
-    "zone7___",
-    "zig_zag_",
-]
-custom2_fig = Figlet(font=random.choice(fonts))
-custom_fig = Figlet(font="starwars")
-sponsor = [
-    "No u",
-    "Oh You're approaching me?",
-    "#CommitHS",
-    "Illusion 100",
-    "FBI",
-    "Notch",
-]
-print(custom2_fig.renderText("Message of the day:"))
-print(custom_fig.renderText(random.choice(sponsor)))
+    invoke_suggestions = config['bot']['command_autocorrect']
 
+intents.guilds = True
 
 async def get_prefix(bot, message):
     with open("prefixes.yaml") as f:
@@ -66,35 +39,14 @@ client = ComponentsBot(
 
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
-print(f"\u001b[36m Starting HS Bot v3 at {d1} \u001b[0m")
-if COGS_CONFIG == "all":
-    excluded = 0
-    Cogs_to_load = [
+print(f"\u001b[36m Starting Music Bot v2 at {d1} \u001b[0m")
+Cogs_to_load = [
         "Cogs." + cog[:-3]
         for cog in os.listdir("Cogs/")
         if "py" in cog and "pycache" not in cog
     ]
-elif COGS_CONFIG == "normal":
-    normal_blacklist = ["Grief", "Test", "Time", "Chess"]
-    excluded = len(normal_blacklist)
-    Cogs_to_load = [
-        "Cogs." + cog[:-3]
-        for cog in os.listdir("Cogs/")
-        if "py" in cog
-        and "pycache" not in cog
-        and cog.strip(".py") not in normal_blacklist
-    ]
-elif COGS_CONFIG == "disarmed":
-    disarmed_blacklist = ["Grief", "Test", "Spying", "Time"]
-    excluded = len(disarmed_blacklist)
-    Cogs_to_load = [
-        "Cogs." + cog[:-3]
-        for cog in os.listdir("Cogs/")
-        if "py" in cog
-        and "pycache" not in cog
-        and cog.strip(".py") not in disarmed_blacklist
-    ]
-print(f"Detected {COGS_CONFIG.upper()} Cogs: ", ", ".join([*Cogs_to_load]))
+
+print(f"Detected Cogs: ", ", ".join([*Cogs_to_load]))
 # Events
 
 
@@ -112,6 +64,13 @@ async def on_command_error(ctx, error):
         cmds = [cmd.name for cmd in client.commands if not cmd.hidden]
         matches = get_close_matches(cmd, cmds, 1)
         if len(matches) > 0:
+            if invoke_suggestions:
+                if matches[0] == 'play':
+                    embed = discord.Embed(description=f'Command "{cmd}" not found, Assuming you meant "{matches[0]}"')
+                    embed.set_footer(text="Note: this can be turned off in config")
+                    await ctx.send(embed=embed)
+                    return await ctx.invoke(client.get_command(matches[0]), search=ctx.message.content.split(cmd)[1])
+                return await ctx.invoke(client.get_command(matches[0]))
             return await ctx.send(embed=discord.Embed(description=f'Command "{cmd}" not found, maybe you meant "{matches[0]}"?'))
     print("Ignoring exception in command {}:".format(ctx.command), file=sys.stderr)
     traceback.print_exception(
@@ -132,10 +91,11 @@ async def on_ready():
             COGS_FAILED += 1
     else:
         print(
-            f"\n\n \u001b[92m {len(client.cogs)} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED | \u001b[90m {excluded} \u001b[0m EXCLUDED"
+            f"\n\n \u001b[92m {len(client.cogs)} \u001b[0m LOADED | \u001b[91m {COGS_FAILED} \u001b[0m FAILED"
         )
     watcher = Watcher(client, path='Cogs', debug=False)
     await watcher.start()
+    print("\u001b[33m COGWATCH STARTED... \u001b[0m")
     print("\u001b[33m Logged in as {0} ({0.id}) \u001b[0m".format(client.user))
     print(
         "\u001b[36m Connected to "

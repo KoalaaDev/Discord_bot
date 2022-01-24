@@ -25,7 +25,7 @@ class Player(pomice.Player):
     def build_stream_embed(self) -> typing.Optional[discord.Embed]:
         """Build the player Livestream embed"""
         track = self.current_track
-        channel = self.bot.get_channel(int(self.channel.id))
+        channel = self.channel
         embed = discord.Embed(title=f":red_circle: **LIVE** on {self.bot.user.name} | {channel.name}", colour=0xebb145)
         embed.description = f'Now Playing:\n[{track.title}]({track.uri})\n\n'
         embed.set_thumbnail(url=track.thumbnail)
@@ -37,7 +37,7 @@ class Player(pomice.Player):
     def build_embed(self) -> typing.Optional[discord.Embed]:
         """Method which builds our players controller embed."""
         track = self.current_track
-        channel = self.bot.get_channel(int(self.channel.id))
+        channel = self.channel
         qsize = len(self.queue)
         track_type = "Spotify" if track.spotify else "Youtube"
         embed = discord.Embed(title=f':musical_note: {self.bot.user.name} Music | {channel.name}', colour=0xebb145)

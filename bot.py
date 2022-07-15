@@ -8,7 +8,6 @@ import traceback
 from discord.ext import commands
 from cogwatch import Watcher
 from difflib import get_close_matches
-from discord_components import ComponentsBot
 
 intents = discord.Intents.all()
 intents.typing = False
@@ -16,7 +15,6 @@ intents.presences = False
 with open("apiconfig.yml", "r") as f:
     config = yaml.safe_load(f)
     API_KEY = config["bot"]["API_KEY"]
-    invoke_suggestions = config['bot']['command_autocorrect']
 
 intents.guilds = True
 
@@ -28,7 +26,7 @@ async def get_prefix(bot, message):
         return server_prefixes.get(message.guild.id, "~")
 
 
-client = ComponentsBot(
+client = commands.Bot(
     command_prefix=get_prefix,
     description="A bot with no restrictions!",
     case_insensitive=True,
@@ -39,7 +37,7 @@ client = ComponentsBot(
 
 today = datetime.now()
 d1 = today.strftime("%B %d, %Y %H:%M:%S")
-print(f"\u001b[36m Starting Music Bot v2 at {d1} \u001b[0m")
+print(f"\u001b[36m Starting AnimeSongBot at {d1} \u001b[0m")
 Cogs_to_load = [
         "Cogs." + cog[:-3]
         for cog in os.listdir("Cogs/")
@@ -83,7 +81,7 @@ async def on_ready():
     COGS_FAILED = 0
     for cogger in Cogs_to_load:
         try:
-            client.load_extension(cogger)
+            await client.load_extension(cogger)
             cogger = cogger.replace("Cogs.", "")
             print(f"Cog \u001b[102m {cogger} \u001b[0m loaded")
         except Exception as e:

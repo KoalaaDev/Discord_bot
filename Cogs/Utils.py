@@ -176,5 +176,5 @@ class Utility(commands.Cog, description="Get people's avatar and more utility co
         server = self.bot.get_guild(id)
         await server.leave()
 
-def setup(bot):
-    bot.add_cog(Utility(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Utility(bot))

@@ -129,5 +129,5 @@ class Main(commands.Cog,name="General", description="Basic commands"):
         prefixes[message.guild.id] = prefix
         with open("prefixes.yaml", "w") as f:
             yaml.dump(prefixes, f)
-def setup(bot):
-    bot.add_cog(Main(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Main(bot))

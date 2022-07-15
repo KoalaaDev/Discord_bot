@@ -133,7 +133,7 @@ class Watcher:
     async def load(self, cog_dir: str):
         """Loads a cog file into the client."""
         try:
-            self.client.load_extension(cog_dir)
+            await self.client.load_extension(cog_dir)
         except commands.ExtensionAlreadyLoaded:
             return
         except Exception as exc:
@@ -144,7 +144,7 @@ class Watcher:
     async def unload(self, cog_dir: str):
         """Unloads a cog file into the client."""
         try:
-            self.client.unload_extension(cog_dir)
+            await self.client.unload_extension(cog_dir)
         except Exception as exc:
             self.cog_error(exc)
         else:
@@ -153,7 +153,7 @@ class Watcher:
     async def reload(self, cog_dir: str):
         """Attempts to atomically reload the file into the client."""
         try:
-            self.client.reload_extension(cog_dir)
+            await self.client.reload_extension(cog_dir)
         except Exception as exc:
             self.cog_error(exc)
         else:

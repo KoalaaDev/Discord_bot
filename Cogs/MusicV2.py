@@ -9,7 +9,6 @@ from discord.ext import commands
 import asyncio
 import yaml
 import os
-from discord_components import DiscordComponents, Select, SelectOption
 
 config_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "apiconfig.yml")
 
@@ -427,5 +426,5 @@ class MusicV2(commands.Cog):
             except:
                 await ctx.send(f"{speed}x speed effect enabled!")
 
-def setup(bot: commands.Bot):
-    bot.add_cog(MusicV2(bot))
+async def setup(bot: commands.Bot):
+   await bot.add_cog(MusicV2(bot))

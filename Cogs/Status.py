@@ -34,5 +34,5 @@ class Status(commands.Cog):
         await ctx.send("OK")
 
 
-def setup(bot):
-    bot.add_cog(Status(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Status(bot))
